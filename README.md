@@ -18,16 +18,24 @@ lex -> parse -> semantic analyze -> code generation
 
 *也许可以实现更简单的 pascal 语法，咱们量力而行*
 
+### pascal rules
+
+我们需要实现哪些语法规则呢？
+
+建议去除 goto, 
+
 ### methods 
 
 - [ply: python lex and yacc](https://github.com/dabeaz/ply)
+- [ply tutorial, 写的非常好](http://www.dabeaz.com/ply/ply.html)
 - [lex and yacc]()
 
-这俩里边决定一个就好，个人推荐 ply, 不想写 C
+**这俩里边决定一个就好，个人推荐 ply, 不想写 C**
 
 ### ref
 
 - [another pascal compiler 更加靠谱](https://github.com/NewtonPascalCompiler/NewtonPascalCompiler) 完整 pascal 语言的一个 compiler, 最后生成 *.asm 文件
+- [pascal 语言 tutorial](http://www.kwongtai.edu.mo/download/resource/computer/pascal/Pascal.pdf)
 
 
 ## refs
