@@ -2,9 +2,9 @@
 # File: yapc_lex.py
 # lexer of yapc
 
-import tok_rules
 import ply.lex as lex
-
+import tok_rules
+# import yapc.tok_rules
 
 if __name__ == "__main__":
 	INPUT = """

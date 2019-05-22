@@ -1,10 +1,10 @@
-# ply notations
+# lexer notations
 
 [extremely nice tutorial](http://www.dabeaz.com/ply/ply.html)
 
 ## token list definition
 
-## pattern matching and actions
+### pattern matching and actions
 
 ### t_ignore
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# File: ply_demo.py
+# File: lex_demo.py
 
 import ply.lex as lex
 
@@ -24,7 +24,7 @@ def t_newline(t):
 	r'\n+'
 	t.lexer.lineno += len(t.value)
 
-t_ignore = r'[\s \t\r]'
+t_ignore = r' \t\r'
 
 # a = r'[\n+]'
 
@@ -33,17 +33,19 @@ def t_error(t):
 
 lexer = lex.lex()
 
-data = """
-3 + 4 * 10
-  + 	-20 * 2
-"""
+if __name__ == "__main__":
 
-lexer.input(data)
+	data = """
+	3 + 4 * 10
+	  + -20 * 2
+	"""
 
-while True:
-	tok = lexer.token()
-	if not tok:
-		break
-	print(tok)
-	print(tok.type, tok.value, tok.lineno, tok.lexpos)
+	lexer.input(data)
+
+	while True:
+		tok = lexer.token()
+		if not tok:
+			break
+		print(tok)
+		print(tok.type, tok.value, tok.lineno, tok.lexpos)
 

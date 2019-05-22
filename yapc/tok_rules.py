@@ -4,7 +4,6 @@
 
 from ply.lex import TOKEN
 
-
 """ reserved word """
 reserved = {
 	'program' 	: 'PROGRAM',
@@ -23,6 +22,7 @@ reserved = {
 	'case'		: 'CASE',
 	'to'		: 'TO',
 	'downto'	: 'DOWNTO',
+	'readln'	: 'READLN',
 	'read'		: 'READ',
 	'write'		: 'WRITE',
 	'writeln'	: 'WRITELN',
@@ -102,6 +102,7 @@ identifier 	= r'[_a-zA-Z][_a-zA-Z0-9]*'
 interger 	= r'\d+'
 real 		= r'\d+\.\d+'
 newline 	= r'\n+'
+comment		= r'{.*}'
 
 t_ignore 	= ' \t'
 
@@ -125,6 +126,15 @@ def t_INTEGER(t):
 def t_newline(t):
 	t.lexer.lineno += len(t.value)
 
+@TOKEN(comment)
+def t_comment(t):
+	# escape the comment
+	pass
+
 def t_error(t):
 	print("Illegal char: '%s'" % t.value[0])
 	exit(-1)
+
+# EOF handling rule
+def t_eof(t):
+    pass

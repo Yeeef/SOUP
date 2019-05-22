@@ -27,12 +27,11 @@ lex -> parse -> semantic analyze -> code generation
 
 ### refs
 
-- [another pascal compiler 更加靠谱](https://github.com/NewtonPascalCompiler/NewtonPascalCompiler) 完整 pascal 语言的一个 compiler, 最后生成 *.asm 文件
-- [pascal 语言 tutorial](http://www.kwongtai.edu.mo/download/resource/computer/pascal/Pascal.pdf)
+- [pascal compiler written in ply 🌟 * 5](https://github.com/alcides/pascal-in-python)
+- [another pascal compiler 更加靠谱 🌟](https://github.com/NewtonPascalCompiler/NewtonPascalCompiler) 完整 pascal 语言的一个 compiler, 最后生成 *.asm 文件
+- [pascal 语言 tutorial 🌟](http://www.kwongtai.edu.mo/download/resource/computer/pascal/Pascal.pdf)
+- [ply: python lex and yacc 🌟](https://github.com/dabeaz/ply)
 - [miniscript 利用 ply](https://github.com/yao-zou/MiniScript)
-- [ply: python lex and yacc](https://github.com/dabeaz/ply)
-- [pascal compiler](https://github.com/goodgooodstudy/Pascal-Compiler)
-- [another pascal compiler 更加靠谱](https://github.com/NewtonPascalCompiler/NewtonPascalCompiler)
 
 ## Q&A
 
