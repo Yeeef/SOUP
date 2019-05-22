@@ -1,3 +1,6 @@
 .DS_Store
+.vscode
 *.bak
 ref_codes
+~$*
+*__pycache__

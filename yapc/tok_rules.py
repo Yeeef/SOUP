@@ -98,14 +98,12 @@ t_SEMICON	= r';'
 t_DOT		= r'\.'
 t_DOUBLEDOT	= r'\.\.'
 
-
 identifier 	= r'[_a-zA-Z][_a-zA-Z0-9]*'
 interger 	= r'\d+'
 real 		= r'\d+\.\d+'
 newline 	= r'\n+'
 
 t_ignore 	= ' \t'
-
 
 @TOKEN(identifier)
 def t_ID(t):
