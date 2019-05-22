@@ -3,8 +3,7 @@
 # lexer of yapc
 
 import ply.lex as lex
-import tok_rules
-# import yapc.tok_rules
+import lex_rules
 
 if __name__ == "__main__":
 	INPUT = """
@@ -12,7 +11,7 @@ if __name__ == "__main__":
 	a = 2
 	a[2] = 4
 	"""
-	lexer = lex.lex(module=tok_rules)
+	lexer = lex.lex(module=lex_rules)
 	lexer.input(INPUT)
 	while True:
 		tok = lexer.token()

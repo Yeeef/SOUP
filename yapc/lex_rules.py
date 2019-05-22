@@ -1,49 +1,35 @@
 # -*- coding: utf-8 -*-
 # File: tok_rules.py
 # specify the lexer rules
-
+import ply.lex as lex
 from ply.lex import TOKEN
 
-""" reserved word """
-reserved = {
-	'program' 	: 'PROGRAM',
-	'function'	: 'FUNCTION',
-	'procedure'	: 'PROCEDURE',
-	'begin'		: 'BEGIN',
-	'end'		: "END",
-	'if'		: 'IF',
-	'then'		: 'THEN',
-	'else'		: 'ELSE',
-	'for'		: 'FOR',
-	'repeat'	: 'REPEAT',
-	'until'		: 'UNTIL',
-	'while'		: 'WHILE',
-	'do'		: 'DO',
-	'case'		: 'CASE',
-	'to'		: 'TO',
-	'downto'	: 'DOWNTO',
-	'readln'	: 'READLN',
-	'read'		: 'READ',
-	'write'		: 'WRITE',
-	'writeln'	: 'WRITELN',
-	'mod'		: 'MOD',
-	'and'		: 'AND',
-	'or'		: 'OR',
-	'not'		: 'NOT',
-	'integer'	: 'INTEGER_TYPE',
-	'real'		: 'REAL_TYPE',
-	'boolean'	: 'BOOL_TYPE',
-	'char'		: 'CHAR_TYPE',
-	'true'		: 'TRUE',
-	'false'		: 'FALSE',
-	'const'		: 'CONST',
-	'var'		: 'VAR',
-	'type'		: 'TYPE',
-	'array'		: 'ARRAY',
-	'of'		: 'OF',
-	'record'	: 'RECORD'
-}
+""" reserved word definition """
+# SYS_FUNCT SYS_PROC SYS_CON SYS_TYPE
+sys_con = ("false", "maxint", "true")
+sys_funct = ("abs", "chr", "odd", "ord", "pred", "sqr", "sqrt", "succ")
+sys_proc = ("write", "writeln")
+sys_type = ("boolean", "char", "integer", "real")
+key_word = ("and","array","begin","case","const","do","downto","else","end","for","function","goto","if","in",
+            "label","mod","not","of","or","packed","procedure","program","read","record","repeat","set","then",
+            "to","type","until","var","while","with",'div')
 
+reserved = dict()
+
+for w in sys_con:
+	reserved[w] = 'SYS_CON'
+
+for w in sys_funct:
+	reserved[w] = 'SYS_FUNCT'
+
+for w in sys_proc:
+	reserved[w] = 'SYS_PROC'
+
+for w in sys_type:
+	reserved[w] = 'SYS_TYPE'
+
+for w in key_word:
+	reserved[w] = 'k' + w.upper()
 
 """ tokens """
 tokens = [
@@ -52,17 +38,22 @@ tokens = [
 	'ID',
 	'CHAR',
 	'STRING',
+	'NAME',
+
 	'ASSIGN',
 	'EQUAL',
-	'ADD',
-	'SUBTRACT',
 	'UNEQUAL',
 	'GE',
 	'LE',
 	'GT',
 	'LT',
+
+	'ADD',
+	'SUBTRACT',
+	'MOD',
 	'MUL',
 	'DIV',
+
 	'LB',
 	'RB',
 	'LP',
@@ -72,7 +63,7 @@ tokens = [
 	'SEMICON',
 	'DOT',
 	'DOUBLEDOT'
-] + list(reserved.values())
+] + list(set(reserved.values()))
 
 # TODO: integer, real rules can be more fine-grained
 t_CHAR 		= r'\'.*\''
@@ -97,6 +88,7 @@ t_COLON		= r':'
 t_SEMICON	= r';'
 t_DOT		= r'\.'
 t_DOUBLEDOT	= r'\.\.'
+
 
 identifier 	= r'[_a-zA-Z][_a-zA-Z0-9]*'
 interger 	= r'\d+'
@@ -138,3 +130,18 @@ def t_error(t):
 # EOF handling rule
 def t_eof(t):
     pass
+
+
+if __name__ == "__main__":
+	INPUT = """
+	1 + 2
+	a = 2
+	a[2] = 4
+	"""
+	lexer = lex.lex()
+	lexer.input(INPUT)
+	while True:
+	    tok = lexer.token()
+	    if not tok:
+	        break
+	    print(tok)
