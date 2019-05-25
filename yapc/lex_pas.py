@@ -120,6 +120,7 @@ def t_newline(t):
 def t_error(t):
 	print("Illegal char: '%s'" % t.value[0])
 	exit(-1)
+lexer = lex.lex()
 
 if __name__ == "__main__":
 	INPUT = """
@@ -127,7 +128,7 @@ if __name__ == "__main__":
 	a = 2
 	a[2] = 4
 	"""
-	lexer = lex.lex()
+	#lexer = lex.lex()
 	lexer.input(INPUT)
 	while True:
 	    tok = lexer.token()
