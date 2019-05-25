@@ -464,7 +464,7 @@ if __name__ == '__main__':
         result = parser.parse(data, debug=1)
         print(result)
         
-        #graph(result,"graph")
+        graph(result,"graph")
     else:
         while True:    
             try:

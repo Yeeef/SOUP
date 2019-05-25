@@ -1,8 +1,5 @@
 import pydot
 
-#目前暂时用了老炮代码
-#画图因为要安装Graphviz暂时还没试过
-
 class Node(object):
 	def __init__(self, t, *args):
 		self.type = t
