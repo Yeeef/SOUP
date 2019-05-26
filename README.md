@@ -39,3 +39,4 @@ lex -> parse -> semantic analyze -> code generation
   - [中间代码与语义分析](https://blog.csdn.net/yongchaocsdn/article/details/79056504)
   - [x] 我们的项目里转换成 *.asm 可以吗？
     - 可以
+- 我们做完 syntax analysis, 生成的是 parse tree 而非 syntax tree?

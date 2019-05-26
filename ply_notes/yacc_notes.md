@@ -89,6 +89,42 @@ def p_expr_uminus(p):
 ```
 ## Syntax Error Handling
 
-没怎么懂
+### Recovery and resynchronization with error rules
+
+The most well-behaved approach for handling syntax errors is to write grammar rules that include the error token.
+
+
+
+### Panic mode recovery
+
+An alternative error recovery scheme is to enter a *panic mode recovery* in which tokens are *discarded* to a point where the parser might be able to *recover in some sensible manner*.
+
+Panic mode recovery is implemented entirely in the `p_error()` func.
+
+```python
+# eg 1
+def p_error(p):
+    print("Whoa. You are seriously hosed.")
+    if not p:
+        print("End of File!")
+        return
+
+    # Read ahead looking for a closing '}'
+    while True:
+        tok = parser.token()             # Get the next token
+        if not tok or tok.type == 'RBRACE': 
+            break
+    parser.restart()
+
+# eg 2
+def p_error(p):
+    if p:
+        print("Syntax error at token", p.type)
+        # Just discard the token and tell the parser it's okay.
+        parser.errok()
+    else:
+        print("Syntax error at EOF")
+```
+
 
 ## Line Number and Position Tracking

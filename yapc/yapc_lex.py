@@ -10,6 +10,11 @@ if __name__ == "__main__":
 	1 + 2
 	a = 2
 	a[2] = 4
+	if
+	program
+	integer
+	real
+	succ
 	"""
 	lexer = lex.lex(module=lex_rules)
 	lexer.input(INPUT)
