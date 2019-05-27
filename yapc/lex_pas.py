@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# File: tok_rules.py
+# File: lex_pas.py
 # specify the lexer rules
+
 import ply.lex as lex
 from ply.lex import TOKEN
 
@@ -126,12 +127,12 @@ def t_comment(t):
 def t_error(t):
 	print("Illegal char: '%s'" % t.value[0])
 	exit(-1)
-lexer = lex.lex()
 
 # EOF handling rule
 def t_eof(t):
     pass
 
+lexer = lex.lex()
 
 if __name__ == "__main__":
 	INPUT = """

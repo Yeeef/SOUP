@@ -3,119 +3,138 @@ import sys
 from lex_pas import tokens
 from AST import *
 
+# FIXME: -5 优先级要比乘法高，详见 <http://www.dabeaz.com/ply/ply.html>
 precedence=(
     ('left','ADD','SUBTRACT'),
     ('left','MUL','DIV','kDIV','kMOD')
 )
 
+
 def p_program(p):
     'program :  program_head  routine  DOT'
-    p[0] = Node('program',p[1], p[2])
+    p[0] = Node('program', p[1], p[2])
+
 
 def p_program_head(p):
     'program_head : kPROGRAM ID SEMICON'
-    p[0]=p[2]
+    p[0] = p[2]
+
 
 def p_routine(p):
 	'routine : routine_head routine_body'
-	p[0]=Node('routine',p[1],p[2])
+	p[0] = Node('routine', p[1], p[2])
+
 
 def p_routine_head(p):
 	'routine_head : const_part type_part var_part routine_part'
-	p[0]=Node('routine_head',p[1],p[2],p[3],[4])
+	p[0] = Node('routine_head', p[1], p[2], p[3], p[4])
+
 
 def p_const_part(p):
-    '''const_part : kCONST    const_expr_list
-                                | empty'''
-    if len(p)==3:
-        p[0]=p[2]
+    '''const_part : kCONST const_expr_list
+                  | empty'''
+    if len(p) == 3:
+        p[0] = p[2]
 
 def p_const_expr_list(p):
     '''const_expr_list :  const_expr_list  const_expr
                     |  const_expr'''
-    if len(p)==3:
-        p[0] = Node("const_expr_list",p[1],p[2])
+    if len(p) == 3:
+        p[0] = Node("const_expr_list", p[1], p[2])
     elif len(p) == 2:
         p[0] = p[1]
     
 
 def p_const_expr(p):
     'const_expr : ID EQUAL const_value SEMICON'
-    p[0]=Node('const_expr',p[1],p[3])
+    p[0] = Node('const_expr', p[1], p[3])
 
-
+# TODO: maybe we can write these shit up
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
 def p_const_value_1(p):
     'const_value : INTEGER'
-    p[0]=Node('int',p[1])
+    p[0] = Node('int', p[1])
+
 
 def p_const_value_2(p):
     'const_value : REAL'
-    p[0]=Node('real',p[1])
+    p[0] = Node('real', p[1])
+
 
 def p_const_value_3(p):
     'const_value : CHAR'
-    p[0]=Node('char',p[1])
+    p[0] = Node('char', p[1])
 
+# TODO: just remove it?
 def p_const_value_4(p):
     'const_value : STRING'
-    p[0]=Node('string',p[1])
+    p[0] = Node('string', p[1])
+
 
 def p_const_value_5(p):
     'const_value : SYS_CON'
-    p[0]=Node('sys_con',p[1])
+    p[0] = Node('sys_con', p[1])
 
 # type_part : TYPE type_decl_list    |    empty
 def p_type_part(p):
     '''type_part : kTYPE type_decl_list
                              | empty'''
-    if len(p)==3:
-        p[0]=p[2]
+    if len(p) == 3:
+        p[0] = p[2]
+
 
 def p_type_decl_list(p):
     '''type_decl_list :  type_decl_list  type_definition  
                     |  type_definition'''
-    if len(p)==3:
-        p[0]=Node("type_decl_list",p[1],p[2])
+    if len(p) == 3:
+        p[0] = Node("type_decl_list", p[1], p[2])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
 
         
 def p_type_definition(p):
     '''type_definition :  NAME  EQUAL  type_decl  SEMICON'''
-    p[0]=Node("type_definition",p[1],p[3])
+    p[0] = Node("type_definition", p[1], p[3])
 
         
 def p_type_decl(p):
     '''type_decl :  simple_type_decl  
                     |  array_type_decl  
                     |  record_type_decl'''
-    p[0]=p[1]
+    p[0] = p[1]
 
         
-    '''simple_type_decl :  SYS_TYPE  
+'''simple_type_decl :  SYS_TYPE  
                     |  NAME  
                     |  LP  name_list  RP  
                     |  const_value  DOTDOT  const_value  
                     |  MINUS  const_value  DOTDOT  const_value
                     |  MINUS  const_value  DOTDOT  MINUS  const_value
                     |  NAME  DOTDOT  NAME'''
+
+
 def p_simple_type_decl_1(p):
     'simple_type_decl : SYS_TYPE'
-    p[0]=Node("sys_type",p[1])
+    p[0] = Node("sys_type", p[1])
 
+
+# TODO: can we just remove it?
 def p_simple_type_decl_2(p):
     'simple_type_decl : LP name_list RP'
-    p[0]=Node('enum',p[2])
+    p[0] = Node('enum', p[2])
+
 
 def p_simple_type_decl_3(p):
     'simple_type_decl : const_value DOUBLEDOT const_value'
-    p[0]=Node('range',p[1],p[3])
+    p[0] = Node('range', p[1], p[3])
 
+
+# FIXME: 为什么叫 var?
 def p_simple_type_decl_4(p):
     'simple_type_decl : ID'
-    p[0]=Node("var",p[1])
+    p[0] = Node("var", p[1])
 
+# TODO: yeeef reading pointer ---------------------------------------------------------
         
 def p_array_type_decl(p):
     'array_type_decl :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl'
@@ -363,8 +382,9 @@ def p_expression_list(p):
         elif len(p) == 2:
             p[0] = p[1]
 
-        
+
 def p_expression(p):
+    # FIXME: 不同符号要建不同的树？
     '''expression :  expression  GE  expr  
                     |  expression  GT  expr  
                     |  expression  LE  expr
@@ -376,6 +396,7 @@ def p_expression(p):
         p[0] = Node("expression",p[1], p[3])
     else:
         p[0] = Node("expression",p[1])
+
         
 def p_expr(p):
     '''expr :  expr  ADD  term  
@@ -451,6 +472,7 @@ def p_empty(p):
     'empty :'
     pass
 
+# TODO: error handling should be more sophisticated
 def p_error(p):
     print ("Syntax error")
 
@@ -478,5 +500,3 @@ if __name__ == '__main__':
             result = parser.parse(data, debug=1)
 
             print(result)
-
-

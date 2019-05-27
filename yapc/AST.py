@@ -12,7 +12,7 @@ class Node(object):
 
 def graph(node,filename):
 	edges = descend(node)
-	g=pydot.graph_from_edges(edges) 
+	g = pydot.graph_from_edges(edges) 
 	if filename:
 		f = filename + ".png"
 	else:
