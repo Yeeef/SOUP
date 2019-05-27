@@ -40,3 +40,6 @@ lex -> parse -> semantic analyze -> code generation
   - [x] 我们的项目里转换成 *.asm 可以吗？
     - 可以
 - 我们做完 syntax analysis, 生成的是 parse tree 而非 syntax tree?
+  - no. 我们构造的就是 abstract syntax tree
+- 什么时候要构建一个节点，什么时候又不需要？这个必须从书中获得答案
+  - 其实不用，这件事有点像艺术，但是并没有那么艺术
