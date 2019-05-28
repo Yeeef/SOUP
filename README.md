@@ -49,5 +49,7 @@ lex -> parse -> semantic analyze -> code generation
 - [x] 与 `Pascal.pdf` 中讲的不同，`pascal 语法子集.doc` 不需要一个特别的声明部分 （对于 function, procedure) 而言，我觉得这很合理；
 	- 想错了，routine 中就包含了这个声明部分
 - [ ] 在 `pascal 语法子集.doc` 中 subroutine 和 routine 语法重复，可以直接写成 `subroutine: routine` 吗？
-- [ ] ID, ID LP args_list RP 是什么蛇皮操作？    
-- [ ] else 的最近匹配规则是怎么实现的来着？
+- [x] else 的最近匹配规则是怎么实现的来着？
+  - parse 直接实现好了
+- [ ] 突然觉得 parse tree 需要构建的纯粹一点，能建节点的都尽量建
+- [ ] 如何更加有效的利用 ply 的 debug 机制
