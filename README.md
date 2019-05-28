@@ -35,11 +35,19 @@ lex -> parse -> semantic analyze -> code generation
 
 ## Q&A
 
-- 什么是编译器生成的中间代码？
+- [x] 什么是编译器生成的中间代码？
   - [中间代码与语义分析](https://blog.csdn.net/yongchaocsdn/article/details/79056504)
   - [x] 我们的项目里转换成 *.asm 可以吗？
     - 可以
-- 我们做完 syntax analysis, 生成的是 parse tree 而非 syntax tree?
+- [x] 我们做完 syntax analysis, 生成的是 parse tree 而非 syntax tree?
   - no. 我们构造的就是 abstract syntax tree
-- 什么时候要构建一个节点，什么时候又不需要？这个必须从书中获得答案
+- [x] 什么时候要构建一个节点，什么时候又不需要？这个必须从书中获得答案
   - 其实不用，这件事有点像艺术，但是并没有那么艺术
+- [x] 是否需要区分 NAME 和 ID?
+	- 不需要，在 `pascal 语法子集.doc` 中 ID 包括了所有的 identifier + reserved word, NAME 实际上是 identifier
+	- 在我们的 lex 中，ID 就是 identifier, reserved word 有他们自己的 type
+- [x] 与 `Pascal.pdf` 中讲的不同，`pascal 语法子集.doc` 不需要一个特别的声明部分 （对于 function, procedure) 而言，我觉得这很合理；
+	- 想错了，routine 中就包含了这个声明部分
+- [ ] 在 `pascal 语法子集.doc` 中 subroutine 和 routine 语法重复，可以直接写成 `subroutine: routine` 吗？
+- [ ] ID, ID LP args_list RP 是什么蛇皮操作？    
+- [ ] else 的最近匹配规则是怎么实现的来着？

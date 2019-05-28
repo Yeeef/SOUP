@@ -105,12 +105,13 @@ def p_type_decl(p):
 
         
 '''simple_type_decl :  SYS_TYPE  
-                    |  NAME  
                     |  LP  name_list  RP  
                     |  const_value  DOTDOT  const_value  
-                    |  MINUS  const_value  DOTDOT  const_value
-                    |  MINUS  const_value  DOTDOT  MINUS  const_value
-                    |  NAME  DOTDOT  NAME'''
+                    |  NAME  
+                    ~~|  MINUS  const_value  DOTDOT  const_value ~~ removed
+                    ~~|  MINUS  const_value  DOTDOT  MINUS  const_value ~~ removed
+                    ~~|  NAME  DOTDOT  NAME ~~ removed
+'''
 
 
 def p_simple_type_decl_1(p):
@@ -134,151 +135,165 @@ def p_simple_type_decl_4(p):
     'simple_type_decl : ID'
     p[0] = Node("var", p[1])
 
-# TODO: yeeef reading pointer ---------------------------------------------------------
-        
+
+# TODO: 我觉得 array_type 中间用不到整个 simple_type_decl?, range 应该就够了   
 def p_array_type_decl(p):
     'array_type_decl :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl'
-    p[0]=Node("array",p[3],p[6])
+    p[0] = Node("array", p[3], p[6])
 
         
 def p_record_type_decl(p):
     'record_type_decl :  kRECORD  field_decl_list  kEND'
-    p[0]=Node("record",p[2])
+    p[0] = Node("record", p[2])
 
         
 def p_field_decl_list(p):
     '''field_decl_list :  field_decl_list  field_decl  
                     |  field_decl'''
-    if len(p)==3:
-        p[0]=Node("field_decl_list",p[1],p[2])
+    if len(p) == 3:
+        p[0] = Node("field_decl_list", p[1], p[2])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
         
+
 def p_field_decl(p):
     'field_decl :  name_list  COLON  type_decl  SEMICON'
-    p[0]=Node("field_decl",p[1],p[3])
+    p[0] = Node("field_decl", p[1], p[3])
 
         
 def p_name_list(p):
     '''name_list :  name_list  COMMA  ID  
                     |  ID'''
-    if len(p)==4:
-        p[0]=Node("name_list",p[1],p[3])
+    if len(p) == 4:
+        p[0] = Node("name_list", p[1], p[3])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
 
 
+# var part
 def p_var_part(p):
     '''var_part :  kVAR  var_decl_list  
                     |  empty'''
-    if len(p)==3:
-        p[0]=p[2]
+    if len(p) == 3:
+        p[0] = p[2]
 
         
 def p_var_decl_list(p):
     '''var_decl_list :  var_decl_list  var_decl  
                     |  var_decl'''
-    if len(p)==3:
-        p[0]=Node("var_decl_list",p[1],p[2])
+    if len(p) == 3:
+        p[0] = Node("var_decl_list", p[1], p[2])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
+
 
 def p_var_decl(p):
     'var_decl :  name_list  COLON  type_decl  SEMICON'
-    p[0]=Node("var_decl",p[1],p[3])
-        
+    p[0] = Node("var_decl", p[1], p[3])
+
+
+# routine part
 def p_routine_part(p):
     '''routine_part :  routine_part  function_decl  
                     |  routine_part  procedure_decl
                     |  function_decl  
                     |  procedure_decl  
                     | empty'''
-    if len(p)==3:
-        p[0]=Node("routine_part",p[1],p[2])
-    elif len(p)==2:
-        p[0]=p[1]
+    if len(p) == 3:
+        p[0] = Node("routine_part", p[1], p[2])
+    elif len(p) == 2:
+        p[0] = p[1]
 
-        
+
+# TODO: 这样写会带来问题吗？
+def p_sub_routine(p):
+    'sub_routine : routine'
+    p[0] = p[1]
+
+
 def p_function_decl(p):
     'function_decl : function_head  SEMICON  sub_routine  SEMICON'
-    p[0]=Node("function_decl",p[1],p[3])
+    p[0] = Node("function_decl",p[1],p[3])
 
         
 def p_function_head(p):
     'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl '
-    p[0]=Node("function_head",p[2],p[3],p[5])
+    p[0] = Node("function_head", p[2], p[3], p[5])
 
         
 def p_procedure_decl(p):
     'procedure_decl :  procedure_head  SEMICON  sub_routine  SEMICON'
-    p[0]=Node("procedure_decl",p[1],p[3])
+    p[0] = Node("procedure_decl", p[1], p[3])
 
-def p_sub_routine(p):
-    'sub_routine : routine'
-    p[0]=p[1]
-        
+
+
 def p_procedure_head(p):
     'procedure_head :  kPROCEDURE ID parameters '
-    p[0]=Node("procedure_head",p[2],p[3])
+    p[0] = Node("procedure_head", p[2], p[3])
 
         
 def p_parameters(p):
     '''parameters :  LP  para_decl_list  RP  
                     |  empty'''
-    if len(p)==4:
-        p[0]=p[2]
+    if len(p) == 4:
+        p[0] = p[2]
 
         
 def p_para_decl_list(p):
     '''para_decl_list :  para_decl_list  SEMICON  para_type_list 
                     | para_type_list'''
-    if len(p)==4:
-        p[0]=Node("para_decl_list",p[1],p[3])
+    if len(p) == 4:
+        p[0] = Node("para_decl_list", p[1], p[3])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
 
         
 def p_para_type_list(p):
     'para_type_list :  var_para_list COLON  simple_type_decl'
-    p[0]=Node("para_type_list",p[1],p[3])
+    p[0] = Node("para_type_list", p[1], p[3])
 
-        
+
+# FIXME: 在 function 定义中 kVAR name_list 和 name_list 的行为是不一样的，以 kVAR name_list 定义的参数可以直觉理解为传了指针，在函数内部改变，外面会跟着变
+# TODO: 我觉得我们可以直接不支持这个 feature, 保证函数的封闭        
 def p_var_para_list(p):
     'var_para_list :  kVAR  name_list'
-    p[0]=p[2]
+    p[0] = p[2]
 
         
 def p_val_para_list(p):
     'val_para_list :  name_list'
-    p[0]=p[1]
+    p[0] = p[1]
 
         
 def p_routine_body(p):
     'routine_body :  compound_stmt'
-    p[0]=p[1]
+    p[0] = p[1]
 
         
 def p_compound_stmt(p):
     'compound_stmt :  kBEGIN  stmt_list  kEND'
-    p[0]=p[2]
+    p[0] = p[2]
 
         
 def p_stmt_list(p):
     '''stmt_list :  stmt_list  stmt  SEMICON  
                     |  empty'''
-    if len(p)==4:
-        p[0]=Node("stmt_list",p[1],p[2])
+    if len(p) == 4:
+        p[0] = Node("stmt_list", p[1], p[2])
 
-        
+
+# [TODO: resolved]: just remove INTEGER COLON?
+# 这是给 goto 用的
 def p_stmt(p):
     '''stmt :  INTEGER  COLON  non_label_stmt  
                     |  non_label_stmt'''
-    if len(p)>2:
-        p[0]=Node("stmt",p[1],p[3])
+    if len(p) > 2:
+        p[0] = Node("stmt", p[1], p[3])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
 
-        
+
+# TODO: remove goto?
 def p_non_label_stmt(p):
     '''non_label_stmt :  assign_stmt 
                     | proc_stmt 
@@ -289,102 +304,104 @@ def p_non_label_stmt(p):
                     | for_stmt 
                     | case_stmt 
                     | goto_stmt'''
-    p[0]=p[1]
+    p[0] = p[1]
 
-        
+
 def p_assign_stmt(p):
     '''assign_stmt :  ID  ASSIGN  expression
                     | ID LB expression RB ASSIGN expression
                     | ID  DOT  ID  ASSIGN  expression'''
-    if len(p)==4:
-        p[0]=Node("assign_stmt",p[1],p[3])
-    elif len(p)==7:
-        p[0]=Node("assign_stmt",p[1],p[3],p[6])
-    elif len(p)==6:
-        p[0]=Node("assign_stmt",p[1],p[3],p[5])
+    if len(p) == 4:
+        p[0] = Node("assign_stmt", p[1], p[3])
+    elif len(p) == 7:
+        p[0] = Node("assign_stmt", p[1], p[3], p[6])
+    elif len(p) == 6:
+        p[0] = Node("assign_stmt", p[1], p[3], p[5])
 
-        
+
+# [TODO: resolved]: ID, ID LP args_list RP 是什么蛇皮操作？    
+# 函数调用
 def p_proc_stmt(p):
     '''proc_stmt :  ID
                     |  ID  LP  args_list  RP
                     |  SYS_PROC
                     |  SYS_PROC  LP  expression_list  RP
                     |  kREAD  LP  factor  RP'''
-    if len(p)==2:
-        p[0]=p[1]
-    elif len(p)==5:
-        p[0]=Node("proc_stmt",p[1],p[3])
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 5:
+        p[0] = Node("proc_stmt", p[1], p[3])
 
         
 def p_if_stmt(p):
     'if_stmt :  kIF  expression  kTHEN  stmt  else_clause'
-    p[0]=Node("if_stmt",p[2],p[4],p[5])
+    p[0] = Node("if_stmt", p[2], p[4], p[5])
 
         
 def p_else_clause(p):
     '''else_clause :  kELSE stmt 
                     |  empty'''
-    if len(p)==3:
-        p[0]=p[2]
+    if len(p) == 3:
+        p[0] = p[2]
 
         
 def p_repeat_stmt(p):
     'repeat_stmt :  kREPEAT  stmt_list  kUNTIL  expression'
-    p[0]=Node("repeat_stmt",p[2],p[4])
+    p[0] = Node("repeat_stmt", p[2], p[4])
 
         
 def p_while_stmt(p):
     'while_stmt :  kWHILE  expression  kDO stmt'
-    p[0]=Node("while_stmt",p[2],p[4])
+    p[0] = Node("while_stmt", p[2], p[4])
 
         
 def p_for_stmt(p):
     'for_stmt :  kFOR  ID  ASSIGN  expression  direction  expression  kDO stmt'
-    p[0]=Node("for_stmt",p[2],p[4],p[5],p[6],p[8])
+    p[0] = Node("for_stmt", p[2], p[4], p[5], p[6], p[8])
 
         
 def p_direction(p):
     '''direction :  kTO 
                     | kDOWNTO'''
-    p[0]=p[1]
+    p[0] = p[1]
     
-        
+
 def p_case_stmt(p):
-    'case_stmt :  kCASE expression kOF case_expr_list  kEND'
-    p[0]=Node("case_stmt",p[2],p[4])
+    'case_stmt: kCASE expression kOF case_expr_list kEND'
+    p[0] = None("case_stmt", p[2], p[4])
 
         
 def p_case_expr_list(p):
     '''case_expr_list :  case_expr_list  case_expr  
                     |  case_expr'''
-    if len(p)==3:
-        p[0]=Node("case_expr_list",p[1],p[2])
+    if len(p) == 3:
+        p[0] = Node("case_expr_list", p[1], p[2])
     else:
-        p[0]=p[1]
+        p[0] = p[1]
 
         
 def p_case_expr(p):
     '''case_expr :  const_value  COLON  stmt  SEMICON
                     |  ID  COLON  stmt  SEMICON'''
-    p[0]=Node("case_expr",p[1],p[3])
+    p[0] = Node("case_expr", p[1], p[3])
 
         
 def p_goto_stmt(p):
     'goto_stmt :  kGOTO  INTEGER'
-    p[0]=Node("goto_stmt",p[2])
+    p[0] = Node("goto_stmt", p[2])
 
         
 def p_expression_list(p):
         '''expression_list :  expression_list  COMMA  expression   
                     |  expression'''
         if len(p) == 4:
-            p[0] = Node("expression_list",p[1], p[3])
+            p[0] = Node("expression_list", p[1], p[3])
         elif len(p) == 2:
             p[0] = p[1]
 
 
 def p_expression(p):
-    # FIXME: 不同符号要建不同的树？
+    # FIXME: 不同符号要建不同的树？是的
     '''expression :  expression  GE  expr  
                     |  expression  GT  expr  
                     |  expression  LE  expr
@@ -393,9 +410,10 @@ def p_expression(p):
                     |  expression  UNEQUAL  expr  
                     |  expr'''
     if len(p) == 4:
-        p[0] = Node("expression",p[1], p[3])
+        p[0] = Node("expression", p[1], p[3])
     else:
-        p[0] = Node("expression",p[1])
+        # TODO: 这个地方可以直接 p[0] = p[1] 吗？
+        p[0] = Node("expression", p[1])
 
         
 def p_expr(p):
@@ -406,9 +424,9 @@ def p_expr(p):
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '+':
-        p[0] = Node("expr-ADD",p[1], p[3])
+        p[0] = Node("expr-ADD", p[1], p[3])
     elif p[2] == '-':
-        p[0] = Node("expr-SUBTRACT",p[1], p[3])
+        p[0] = Node("expr-SUBTRACT", p[1], p[3])
     elif p[2] == '|':
         p[0] = Node("expr-OR",p[1], p[3])
         
@@ -443,11 +461,12 @@ def p_factor_1(p):
                     |  SUBTRACT  factor  
                     |  ID  LB  expression  RB'''
     if len(p) == 2:
-        p[0] = Node("factor",p[1])#ID和函数名字
-    elif len(p)==5:
-        p[0] = Node("factor",p[1],p[3])#带arglist
-    elif len(p)==3:
-        p[0] = Node("factor",p[1],p[2])#not和负
+        p[0] = Node("factor", p[1])  # var / 函数名字
+    elif len(p) == 5:
+        # TODO: ID LB expression RB 感觉要区分
+        p[0] = Node("factor", p[1], p[3])  # func(arglist)
+    elif len(p) == 3:
+        p[0] = Node("factor", p[1], p[2])  # not和负
 
 def p_factor_2(p):
     'factor : LP  expression  RP'
@@ -455,16 +474,17 @@ def p_factor_2(p):
 
 def p_factor3(p):
     'factor : ID  DOT  ID'
-    p[0]=Node("factor-member",p[1],p[3])
+    p[0] = Node("factor-member", p[1], p[3])
 
         
 def p_args_list(p):
     """args_list :  args_list  COMMA  expression  
             |  expression"""
     if len(p) == 4:
-        p[0] = Node("args_list",p[1],p[3])
+        p[0] = Node("args_list", p[1], p[3])
     elif len(p) == 2:
-        p[0] = Node("expression",p[1])
+        # FIXME: 这里不应该是 expression node, 应该是 args_list node, 或者不建立 node
+        p[0] = Node("expression", p[1])
 
 
 # 空产生式
