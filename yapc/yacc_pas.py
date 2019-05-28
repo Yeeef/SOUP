@@ -1,12 +1,14 @@
-from ply import yacc,lex
+from ply import yacc, lex
 import sys
+import logging
 from lex_pas import tokens
+import lex_pas
 from AST import *
 
 # FIXME: -5 优先级要比乘法高，详见 <http://www.dabeaz.com/ply/ply.html>
-precedence=(
-    ('left','ADD','SUBTRACT'),
-    ('left','MUL','DIV','kDIV','kMOD')
+precedence = (
+    ('left', 'ADD', 'SUBTRACT'),
+    ('left', 'MUL', 'DIV', 'kDIV', 'kMOD')
 )
 
 
@@ -21,13 +23,13 @@ def p_program_head(p):
 
 
 def p_routine(p):
-	'routine : routine_head routine_body'
-	p[0] = Node('routine', p[1], p[2])
+    'routine : routine_head routine_body'
+    p[0] = Node('routine', p[1], p[2])
 
 
 def p_routine_head(p):
-	'routine_head : const_part type_part var_part routine_part'
-	p[0] = Node('routine_head', p[1], p[2], p[3], p[4])
+    'routine_head : const_part type_part var_part routine_part'
+    p[0] = Node('routine_head', p[1], p[2], p[3], p[4])
 
 
 def p_const_part(p):
@@ -36,6 +38,7 @@ def p_const_part(p):
     if len(p) == 3:
         p[0] = p[2]
 
+
 def p_const_expr_list(p):
     '''const_expr_list :  const_expr_list  const_expr
                     |  const_expr'''
@@ -43,11 +46,12 @@ def p_const_expr_list(p):
         p[0] = Node("const_expr_list", p[1], p[2])
     elif len(p) == 2:
         p[0] = p[1]
-    
+
 
 def p_const_expr(p):
     'const_expr : ID EQUAL const_value SEMICON'
     p[0] = Node('const_expr', p[1], p[3])
+
 
 # TODO: maybe we can write these shit up
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
@@ -65,6 +69,7 @@ def p_const_value_3(p):
     'const_value : CHAR'
     p[0] = Node('char', p[1])
 
+
 # TODO: just remove it?
 def p_const_value_4(p):
     'const_value : STRING'
@@ -74,6 +79,7 @@ def p_const_value_4(p):
 def p_const_value_5(p):
     'const_value : SYS_CON'
     p[0] = Node('sys_con', p[1])
+
 
 # type_part : TYPE type_decl_list    |    empty
 def p_type_part(p):
@@ -91,19 +97,19 @@ def p_type_decl_list(p):
     else:
         p[0] = p[1]
 
-        
+
 def p_type_definition(p):
     '''type_definition :  NAME  EQUAL  type_decl  SEMICON'''
     p[0] = Node("type_definition", p[1], p[3])
 
-        
+
 def p_type_decl(p):
     '''type_decl :  simple_type_decl  
                     |  array_type_decl  
                     |  record_type_decl'''
     p[0] = p[1]
 
-        
+
 '''simple_type_decl :  SYS_TYPE  
                     |  LP  name_list  RP  
                     |  const_value  DOTDOT  const_value  
@@ -141,12 +147,12 @@ def p_array_type_decl(p):
     'array_type_decl :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl'
     p[0] = Node("array", p[3], p[6])
 
-        
+
 def p_record_type_decl(p):
     'record_type_decl :  kRECORD  field_decl_list  kEND'
     p[0] = Node("record", p[2])
 
-        
+
 def p_field_decl_list(p):
     '''field_decl_list :  field_decl_list  field_decl  
                     |  field_decl'''
@@ -154,13 +160,13 @@ def p_field_decl_list(p):
         p[0] = Node("field_decl_list", p[1], p[2])
     else:
         p[0] = p[1]
-        
+
 
 def p_field_decl(p):
     'field_decl :  name_list  COLON  type_decl  SEMICON'
     p[0] = Node("field_decl", p[1], p[3])
 
-        
+
 def p_name_list(p):
     '''name_list :  name_list  COMMA  ID  
                     |  ID'''
@@ -177,7 +183,7 @@ def p_var_part(p):
     if len(p) == 3:
         p[0] = p[2]
 
-        
+
 def p_var_decl_list(p):
     '''var_decl_list :  var_decl_list  var_decl  
                     |  var_decl'''
@@ -213,32 +219,31 @@ def p_sub_routine(p):
 
 def p_function_decl(p):
     'function_decl : function_head  SEMICON  sub_routine  SEMICON'
-    p[0] = Node("function_decl",p[1],p[3])
+    p[0] = Node("function_decl", p[1], p[3])
 
-        
+
 def p_function_head(p):
     'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl '
     p[0] = Node("function_head", p[2], p[3], p[5])
 
-        
+
 def p_procedure_decl(p):
     'procedure_decl :  procedure_head  SEMICON  sub_routine  SEMICON'
     p[0] = Node("procedure_decl", p[1], p[3])
-
 
 
 def p_procedure_head(p):
     'procedure_head :  kPROCEDURE ID parameters '
     p[0] = Node("procedure_head", p[2], p[3])
 
-        
+
 def p_parameters(p):
     '''parameters :  LP  para_decl_list  RP  
                     |  empty'''
     if len(p) == 4:
         p[0] = p[2]
 
-        
+
 def p_para_decl_list(p):
     '''para_decl_list :  para_decl_list  SEMICON  para_type_list 
                     | para_type_list'''
@@ -247,7 +252,7 @@ def p_para_decl_list(p):
     else:
         p[0] = p[1]
 
-        
+
 def p_para_type_list(p):
     'para_type_list :  var_para_list COLON  simple_type_decl'
     p[0] = Node("para_type_list", p[1], p[3])
@@ -259,22 +264,22 @@ def p_var_para_list(p):
     'var_para_list :  kVAR  name_list'
     p[0] = p[2]
 
-        
+
 def p_val_para_list(p):
     'val_para_list :  name_list'
     p[0] = p[1]
 
-        
+
 def p_routine_body(p):
     'routine_body :  compound_stmt'
     p[0] = p[1]
 
-        
+
 def p_compound_stmt(p):
     'compound_stmt :  kBEGIN  stmt_list  kEND'
     p[0] = p[2]
 
-        
+
 def p_stmt_list(p):
     '''stmt_list :  stmt_list  stmt  SEMICON  
                     |  empty'''
@@ -332,45 +337,45 @@ def p_proc_stmt(p):
     elif len(p) == 5:
         p[0] = Node("proc_stmt", p[1], p[3])
 
-        
+
 def p_if_stmt(p):
     'if_stmt :  kIF  expression  kTHEN  stmt  else_clause'
     p[0] = Node("if_stmt", p[2], p[4], p[5])
 
-        
+
 def p_else_clause(p):
     '''else_clause :  kELSE stmt 
                     |  empty'''
     if len(p) == 3:
         p[0] = p[2]
 
-        
+
 def p_repeat_stmt(p):
     'repeat_stmt :  kREPEAT  stmt_list  kUNTIL  expression'
     p[0] = Node("repeat_stmt", p[2], p[4])
 
-        
+
 def p_while_stmt(p):
     'while_stmt :  kWHILE  expression  kDO stmt'
     p[0] = Node("while_stmt", p[2], p[4])
 
-        
+
 def p_for_stmt(p):
     'for_stmt :  kFOR  ID  ASSIGN  expression  direction  expression  kDO stmt'
     p[0] = Node("for_stmt", p[2], p[4], p[5], p[6], p[8])
 
-        
+
 def p_direction(p):
     '''direction :  kTO 
                     | kDOWNTO'''
     p[0] = p[1]
-    
+
 
 def p_case_stmt(p):
-    'case_stmt: kCASE expression kOF case_expr_list kEND'
-    p[0] = None("case_stmt", p[2], p[4])
+    """case_stmt : kCASE expression kOF case_expr_list kEND"""
+    p[0] = Node("case_stmt", p[2], p[4])
 
-        
+
 def p_case_expr_list(p):
     '''case_expr_list :  case_expr_list  case_expr  
                     |  case_expr'''
@@ -379,25 +384,25 @@ def p_case_expr_list(p):
     else:
         p[0] = p[1]
 
-        
+
 def p_case_expr(p):
     '''case_expr :  const_value  COLON  stmt  SEMICON
                     |  ID  COLON  stmt  SEMICON'''
     p[0] = Node("case_expr", p[1], p[3])
 
-        
+
 def p_goto_stmt(p):
     'goto_stmt :  kGOTO  INTEGER'
     p[0] = Node("goto_stmt", p[2])
 
-        
+
 def p_expression_list(p):
-        '''expression_list :  expression_list  COMMA  expression   
+    '''expression_list :  expression_list  COMMA  expression
                     |  expression'''
-        if len(p) == 4:
-            p[0] = Node("expression_list", p[1], p[3])
-        elif len(p) == 2:
-            p[0] = p[1]
+    if len(p) == 4:
+        p[0] = Node("expression_list", p[1], p[3])
+    elif len(p) == 2:
+        p[0] = p[1]
 
 
 def p_expression(p):
@@ -415,7 +420,7 @@ def p_expression(p):
         # TODO: 这个地方可以直接 p[0] = p[1] 吗？
         p[0] = Node("expression", p[1])
 
-        
+
 def p_expr(p):
     '''expr :  expr  ADD  term  
                     |  expr  SUBTRACT  term  
@@ -428,10 +433,9 @@ def p_expr(p):
     elif p[2] == '-':
         p[0] = Node("expr-SUBTRACT", p[1], p[3])
     elif p[2] == '|':
-        p[0] = Node("expr-OR",p[1], p[3])
-        
+        p[0] = Node("expr-OR", p[1], p[3])
 
-        
+
 def p_term(p):
     '''term :  term  MUL  factor  
                     |  term  DIV  factor  
@@ -441,23 +445,22 @@ def p_term(p):
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '*':
-        p[0] = Node("term-MUL",p[1], p[3])
+        p[0] = Node("term-MUL", p[1], p[3])
     elif p[2] == '/':
-        p[0] = Node("term-DIV",p[1], p[3])
+        p[0] = Node("term-DIV", p[1], p[3])
     elif p[2] == 'MOD':
-        p[0] = Node("term-MOD",p[1], p[3])
+        p[0] = Node("term-MOD", p[1], p[3])
     elif p[2] == 'and':
-        p[0] = Node("term-AND",p[1], p[3])
+        p[0] = Node("term-AND", p[1], p[3])
 
 
-        
 def p_factor_1(p):
     '''factor :  ID  
                     |  ID  LP  args_list  RP  
                     |  SYS_FUNCT  
                     |  SYS_FUNCT  LP  args_list  RP  
                     |  const_value  
-                    |  NOT  factor  
+                    |  kNOT  factor
                     |  SUBTRACT  factor  
                     |  ID  LB  expression  RB'''
     if len(p) == 2:
@@ -468,15 +471,17 @@ def p_factor_1(p):
     elif len(p) == 3:
         p[0] = Node("factor", p[1], p[2])  # not和负
 
+
 def p_factor_2(p):
     'factor : LP  expression  RP'
-    p[0]=p[2]
+    p[0] = p[2]
+
 
 def p_factor3(p):
     'factor : ID  DOT  ID'
     p[0] = Node("factor-member", p[1], p[3])
 
-        
+
 def p_args_list(p):
     """args_list :  args_list  COMMA  expression  
             |  expression"""
@@ -492,31 +497,38 @@ def p_empty(p):
     'empty :'
     pass
 
+
 # TODO: error handling should be more sophisticated
 def p_error(p):
-    print ("Syntax error")
+    print("Syntax error")
+    print("invalid token '%s' at line %s. (total Position: %d)" % (p.value, p.lineno, p.lexpos))
 
+
+from SymbolTable import *
 
 if __name__ == '__main__':
-    parser = yacc.yacc()
-    if len(sys.argv) > 1:
-        f = open(sys.argv[1],"r")
-        data = f.read()
-        f.close()
-        result = parser.parse(data, debug=1)
-        print(result)
-        
-        graph(result,"graph")
-    else:
-        while True:    
-            try:
-                data = input('calc > ')
-            except EOFError:
-                break
-            if data == "q" or data =="quit":
-                break
-            if not data:continue
-
-            result = parser.parse(data, debug=1)
-
-            print(result)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="parselog.txt",
+        filemode="w",
+        format="%(filename)10s:%(lineno)4d:%(message)s"
+    )
+    log = logging.getLogger()
+    parser = yacc.yacc(debug=True, debuglog=log)
+    test_file = 'test_yacc/const.pas'
+    with open(test_file, 'r') as infile:
+        data = infile.read()
+    parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debuglog=log), debug=log)
+    graph(parse_tree_root, "graph")
+    symbol_table = SymbolTable(parse_tree_root)
+    print(symbol_table)
+    # if len(sys.argv) == 2:
+    #     f = open(sys.argv[1], "r")
+    #     data = f.read()
+    #     f.close()
+    #
+    #     result = parser.parse(data, lexer=lex.lex(module=lex_pas), debug=log)
+    #     print(type(result))
+    #     print(result)
+    #
+    #     graph(result, "graph")
