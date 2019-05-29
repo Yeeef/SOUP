@@ -522,12 +522,13 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/arithmic.pas'
+    test_file = 'test_yacc/scope.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
     graph(parse_tree_root, "graph")
     static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
+
     print(static_semantic_analyzer.symbol_table)
     graph(parse_tree_root, "new_graph")

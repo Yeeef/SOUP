@@ -158,9 +158,10 @@ class SemanticAnalyzer(object):
                         constant_fold_ret = constant_folding(expression_node, self.symbol_table)
                         if constant_fold_ret is not None:
                             root_node._children = (id_, constant_fold_ret)
-                    else:
+                    else:  # ID  DOT  ID  ASSIGN  expression
                         pass
                     pass
+
             else:
                 for child in root_node.children:
                     self._traverse_tree_and_fill_tab(child)

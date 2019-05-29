@@ -214,8 +214,22 @@ together according to the semantic rules
     - [x] 有括号的情况
     - [x] 负数还没有支持
     - [x] 数组赋值
+    - [ ] 有一个问题在于 x := arr[1] + 1 + 2, 这个 1 + 2 不会被 fold 到一起，因为 1 在前面
+        - [ ] 这个问题可以由把同种符号的 flatten 开解决
+    - [ ] 关系表达式还没有 folding
+   
+
 
 constant folding 的一些感觉
 
 - 需要后序遍历，只有所有的孩子都可以 constant folding，才可以 constant folding
 - 最底下的一般是 factor, 如果直接是常数的话
+
+
+### symbol table 对于 scope 的支持
+
+- 观察
+    - 无论如何，begin end 中的语句都由 stmt_list 起头
+    - 嵌套的 stmt list 将会导致一个 stmt_list 两个孩子都是 stmt_list，上一级 scope 在 children 的前一个
+    - 总觉得 stmt_list 生成的结果有点多余，这主要是由于 stmt_list 特殊的 grammar 导致的，无论如何都要建出来一个节点
+    - 在 non-lable_stmt 中，除了 assign, 其余的都会有自己的 scope 出现
