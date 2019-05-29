@@ -1,4 +1,5 @@
 import pydot
+from ErrorHandler import *
 
 
 class Node(object):
@@ -19,8 +20,30 @@ class Node(object):
     def __str__(self):
         # s = "Node type: %s" % self._type/
         s = "type: " + str(self._type) + "\n"
-        s += "".join(["i: " + str(i) + "\n" for i in self._children])
+        # s += "".join(["i: " + str(i) + "\n" for i in self._children])
         return s
+
+
+def get_range_from_range_node(Node):
+    # parse tree error
+    assert Node.type == 'range', Node.type
+    assert len(Node.children) == 2, Node.children
+
+    left_range_node, right_range_node = Node.children
+    left_type, right_type = left_range_node.type, right_range_node.type
+    # semantic error
+    if left_type != right_type:
+        raise Exception('left range type: `{}`, right range type: `{}`'.format(left_type, right_type))
+
+    if left_type not in ['integer', 'char']:
+        raise Exception('arr only supprt integer / char indices, not {}'.format(left_type))
+
+    left_val, *_ = left_range_node.children
+    right_val, *_ = right_range_node.children
+
+    if left_val > right_val:
+        raise Exception('left range val `{}` > right range val `{}`'.format(left_val, right_val))
+    return left_type, left_val, right_val
 
 
 def graph(node, filename):

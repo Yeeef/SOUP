@@ -53,3 +53,5 @@ lex -> parse -> semantic analyze -> code generation
   - parse 直接实现好了
 - [ ] 突然觉得 parse tree 需要构建的纯粹一点，能建节点的都尽量建
 - [ ] 如何更加有效的利用 ply 的 debug 机制
+- [x] 需要注意的一个点，token 读进去的 char 实际上是 `'l'`, 我们在做运算的时候，要用的是 `l`
+    - 修改了 lex, 解决

@@ -127,3 +127,76 @@
 
 - value binding
 - variable 
+
+## version
+
+### 0.0
+
+semantic analysis, 其实做的是 static semantic analysis
+
+symbol table 本身可以看作一种 inherited attribute，也就是通过前序遍历&中序遍历的方法就可以构建出来
+
+如果觉得不方便的话，multi-pass 我认为也是可以接受的
+
+symbol table 需要存的东西有：
+
+- type declaration
+    - value binding
+    - var type
+    - type alias
+    - record type
+    - func / procedure declaration? 这个应该存储哪些信息呢？这一版先不支持 func 和 procedure
+- var values
+
+we may wish to associate associate separate symbol tables with different regions fo a program(such as procedures), and link them
+together according to the semantic rules
+
+也就是说，对于不同scope, 要建多个 symbol table, 再把他们连起来，这一步操作先 delay, 需要看看 code generation 到底在干什么
+我才能继续下去
+
+先从最简答情况入手，把流程打通
+
+- lex, yacc 写完整
+- 但是语法上尽量简单
+    - 暂时不支持 type declaration
+    - 不支持 record_type_decl
+    - 所以 type_decl 仅支持 SYS_TYPE 和 ~~array_type_decl~~
+    - 不支持 procedure
+    - scope rule 需要支持
+    
+和 xm, 大概讨论了一下，稍微捋清了到底应该在 static semantic analysis 中做到哪一步，constant folding, variable 指代，
+以及 scope 信息，**一个问题在于，对于函数返回值的 assignment, 如何在 symbol table 中暂时表示**
+
+之前想到的 synthezied attribute 的问题，应该通过局部后序遍历的方法来解决就可以
+    
+### 第一个任务
+
+- 1 scope
+- sys_type
+- 2 pass, 把 value 的值在 symbol table 中存好, 尽管是 value binding ,但是这个过程依旧很难写成一个 post-order,
+因为在后续需要加入 scope 的信息，而 scope 是一个需要前序遍历才能得到的属性，
+
+### 第二个任务
+
+- 能否变为 1 pass, 其实不是很难
+
+### 第三个任务
+
+- 了解清楚 func / procedure 到底要做到哪一步
+- 加入多 scope 机制
+
+仔细想了一想，发现 static semantic analysis 不能做太多事情，否则就变成了一个 pascal 解释器
+
+不考虑不同 scope 的前提下，那么，static 的任务应该是
+
+- declaration 存好
+- type checking
+- constant folding?
+- partially compress parse tree
+
+那么接下来的工作：
+
+- [x] 加入 1d array declaration
+- [ ] 加入 type declaration
+- [ ] 加入 type checking
+- [ ] 加入 constant folding

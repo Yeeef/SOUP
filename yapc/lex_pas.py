@@ -4,6 +4,7 @@
 
 import ply.lex as lex
 from ply.lex import TOKEN
+import re
 
 """ reserved word definition """
 # SYS_FUNCT SYS_PROC SYS_CON SYS_TYPE
@@ -12,9 +13,9 @@ sys_funct = ("abs", "chr", "odd", "ord", "pred", "sqr", "sqrt", "succ")
 sys_proc = ("write", "writeln")
 sys_type = ("boolean", "char", "integer", "real")
 key_word = (
-"and", "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "goto", "if", "in",
-"label", "mod", "not", "of", "or", "packed", "procedure", "program", "read", "record", "repeat", "set", "then",
-"to", "type", "until", "var", "while", "with", 'div')
+    "and", "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "goto", "if", "in",
+    "label", "mod", "not", "of", "or", "packed", "procedure", "program", "read", "record", "repeat", "set", "then",
+    "to", "type", "until", "var", "while", "with", 'div')
 
 reserved = dict()
 
@@ -40,7 +41,6 @@ tokens = [
              'ID',
              'CHAR',
              'STRING',
-             'NAME',
 
              'ASSIGN',
              'EQUAL',
@@ -69,7 +69,8 @@ tokens = [
 
 # TODO: integer, real rules can be more fine-grained
 # TODO: char can be more fine-grained
-t_CHAR = r'\'.*\''
+# t_CHAR = r'\'.*\''
+# re.compile(r'(\'([^\\\'\.]*)\')|(\"([^\\\"\.]*)\")')
 t_STRING = r'\".*\"'
 t_ASSIGN = r':='
 t_EQUAL = r'='
@@ -92,6 +93,7 @@ t_SEMICON = r';'
 t_DOT = r'\.'
 t_DOUBLEDOT = r'\.\.'
 
+char = r'(\'([^\\\'\.]?)\')|(\"([^\\\"\.]?)\")'
 identifier = r'[_a-zA-Z][_a-zA-Z0-9]*'
 interger = r'\d+'
 real = r'\d+\.\d+'
@@ -105,6 +107,12 @@ t_ignore = ' \t'
 def t_ID(t):
     # check for the reserved word
     t.type = reserved.get(t.value, 'ID')
+    return t
+
+
+@TOKEN(char)
+def t_CHAR(t):
+    t.value = t.value[1:-1]
     return t
 
 
@@ -141,17 +149,20 @@ def t_eof(t):
     pass
 
 
-
 if __name__ == "__main__":
     INPUT = """
-	1 + 2
-	a = 2
-	a[2] = 4
-	if
-	program
-	integer
-	real
-	succ
+program Const;
+const a = 2; b = 3.4; c = 'l';
+type 
+    int_alias=int;
+    double=real;
+    int_arr=array[1..3] of int;
+var x, y, z: integer;
+    m: real;
+    ch: char;
+    arr2: array['3'..'5'] of int;
+begin
+end.
 	"""
 
     lexer = lex.lex()

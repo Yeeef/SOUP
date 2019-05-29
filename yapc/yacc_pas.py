@@ -99,7 +99,7 @@ def p_type_decl_list(p):
 
 
 def p_type_definition(p):
-    '''type_definition :  NAME  EQUAL  type_decl  SEMICON'''
+    '''type_definition :  ID  EQUAL  type_decl  SEMICON'''
     p[0] = Node("type_definition", p[1], p[3])
 
 
@@ -139,7 +139,7 @@ def p_simple_type_decl_3(p):
 # FIXME: 为什么叫 var?
 def p_simple_type_decl_4(p):
     'simple_type_decl : ID'
-    p[0] = Node("var", p[1])
+    p[0] = Node("alias", p[1])
 
 
 # TODO: 我觉得 array_type 中间用不到整个 simple_type_decl?, range 应该就够了   
@@ -505,6 +505,7 @@ def p_error(p):
 
 
 from SymbolTable import *
+from Semantic import SemanticAnalyzer
 
 if __name__ == '__main__':
     logging.basicConfig(
@@ -518,17 +519,9 @@ if __name__ == '__main__':
     test_file = 'test_yacc/const.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
-    parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debuglog=log), debug=log)
+    parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
     graph(parse_tree_root, "graph")
-    symbol_table = SymbolTable(parse_tree_root)
-    print(symbol_table)
-    # if len(sys.argv) == 2:
-    #     f = open(sys.argv[1], "r")
-    #     data = f.read()
-    #     f.close()
-    #
-    #     result = parser.parse(data, lexer=lex.lex(module=lex_pas), debug=log)
-    #     print(type(result))
-    #     print(result)
-    #
-    #     graph(result, "graph")
+    static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
+    static_semantic_analyzer.analyze()
+    print(static_semantic_analyzer.symbol_table)
+    graph(parse_tree_root, "new_graph")

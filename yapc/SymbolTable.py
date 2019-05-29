@@ -9,11 +9,28 @@ class _NotFound(object):
     pass
 
 
+class SymbolTableItem(object):
+    def __init__(self, type, value):
+        self._type = type
+        self._value = value
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def value(self):
+        return self._value
+
+    def __str__(self):
+        info = '<SymbolTableItem type: {}, value: {}>'.format(self._type, self._value)
+        return info
+
+
 class SymbolTable(object):
-    def __init__(self, root_node):
-        self._root_node = root_node
+    def __init__(self):
         self._symb_tab = dict()
-        self._construct_tab()
+        # self._construct_tab()
 
     def __str__(self):
         info = 'Symbol Table:\n'
@@ -21,34 +38,16 @@ class SymbolTable(object):
             info += '{}: {}\n'.format(key, val)
         return info
 
-    def _construct_tab(self):
-        """
-        traverse tree in pre-order
-        Contains 4 kinds of declarations
-            * constant declaration / value binding
-            * variable declaration
-            * type declaration
-            * record declaration?
-        """
-        self._traverse_tree_and_fill_tab(self._root_node)
-
-    def _traverse_tree_and_fill_tab(self, root_node):
-        if isinstance(root_node, Node) and root_node.type == 'const_expr':
-            """ const declaration """
-            id, const_val_node = root_node.children
-            const_val, *_ = const_val_node.children
-            is_conflict, ret_val = self.insert(id, const_val)
-            if is_conflict:
-                raise ConflictIDError(id, ret_val)
-        else:
-            # if there is no children, this statement will not be executed
-            if not isinstance(root_node, Node):
-                return
-            for child in root_node.children:
-                self._traverse_tree_and_fill_tab(child)
-        # elif root_node.type == '':
-        #     """ var declaration """
-        #     pass
+    # def _construct_tab(self):
+    #     """
+    #     traverse tree in pre-order
+    #     Contains 4 kinds of declarations
+    #         * constant declaration / value binding
+    #         * variable declaration
+    #         * type declaration
+    #         * record declaration?
+    #     """
+    #     self._traverse_tree_and_fill_tab(self._root_node)
 
     def insert(self, key, value):
         val = self._symb_tab.setdefault(key, value)
