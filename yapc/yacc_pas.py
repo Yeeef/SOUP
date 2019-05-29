@@ -418,7 +418,9 @@ def p_expression(p):
         p[0] = Node("expression", p[1], p[3])
     else:
         # TODO: 这个地方可以直接 p[0] = p[1] 吗？
-        p[0] = Node("expression", p[1])
+        # yeeef: make the tree smaller
+        p[0] = p[1]
+        # p[0] = Node("expression", p[1])
 
 
 def p_expr(p):
@@ -437,9 +439,10 @@ def p_expr(p):
 
 
 def p_term(p):
-    '''term :  term  MUL  factor  
+    '''term :  term  MUL  factor
+                    |  term  kDIV factor
                     |  term  DIV  factor  
-                    |  term  MOD  factor 
+                    |  term  kMOD  factor
                     |  term  kAND  factor  
                     |  factor'''
     if len(p) == 2:
@@ -448,7 +451,9 @@ def p_term(p):
         p[0] = Node("term-MUL", p[1], p[3])
     elif p[2] == '/':
         p[0] = Node("term-DIV", p[1], p[3])
-    elif p[2] == 'MOD':
+    elif p[2] == 'div':
+        p[0] = Node("term-INTDIV", p[1], p[3])
+    elif p[2] == 'mod':
         p[0] = Node("term-MOD", p[1], p[3])
     elif p[2] == 'and':
         p[0] = Node("term-AND", p[1], p[3])
@@ -464,7 +469,8 @@ def p_factor_1(p):
                     |  SUBTRACT  factor  
                     |  ID  LB  expression  RB'''
     if len(p) == 2:
-        p[0] = Node("factor", p[1])  # var / 函数名字
+        # yeeef: make the tree smaller
+        p[0] = p[1]
     elif len(p) == 5:
         # TODO: ID LB expression RB 感觉要区分
         p[0] = Node("factor", p[1], p[3])  # func(arglist)

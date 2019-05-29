@@ -52,7 +52,6 @@ tokens = [
 
              'ADD',
              'SUBTRACT',
-             'MOD',
              'MUL',
              'DIV',
 
