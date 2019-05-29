@@ -137,6 +137,8 @@ class SemanticAnalyzer(object):
                 if len(children) == 2:  # ID ASSIGN expression
                     id_, expression_node = children
                     ret_val = self._lookup(id_)
+                    if ret_val is None:
+                        raise Exception('var {} assigned before declared'.format(id_))
                     if ret_val.type == 'const':
                         raise Exception('const {} cannot be assigned!'.format(id_))
 
@@ -145,7 +147,19 @@ class SemanticAnalyzer(object):
                         root_node._children = (id_, constant_fold_ret)
 
                 elif len(children) == 3:  # ID LB expression RB ASSIGN expression / ID  DOT  ID  ASSIGN  expression
-
+                    # 代码可以复用
+                    if isinstance(children[1], Node):  # ID LB expression RB ASSIGN expression
+                        id_, _, expression_node = children
+                        ret_val = self._lookup(id_)
+                        if ret_val is None:
+                            raise Exception('var {} assigned before declared'.format(id_))
+                        if ret_val.type == 'const':
+                            raise Exception('const {} cannot be assigned!'.format(id_))
+                        constant_fold_ret = constant_folding(expression_node, self.symbol_table)
+                        if constant_fold_ret is not None:
+                            root_node._children = (id_, constant_fold_ret)
+                    else:
+                        pass
                     pass
             else:
                 for child in root_node.children:

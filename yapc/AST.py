@@ -224,11 +224,18 @@ def constant_folding(node, symbol_table):
         # kNOT factor
         # TODO: add array index support
         first, second = node.children
-        if first in ['not']:  # not true
+        if first == 'not':  # not true
             second_val = constant_folding(second, symbol_table)
             if second_val is not None:
                 node._children = (first, second_val)
                 return not second_val
+            else:
+                return None
+        elif first == '-':
+            second_val = constant_folding(second, symbol_table)
+            if second_val is not None:
+                node._children = (first, second_val)
+                return -second_val
             else:
                 return None
         else:

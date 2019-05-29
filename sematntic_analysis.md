@@ -212,7 +212,8 @@ together according to the semantic rules
         - [x] 加入 not factor 支持
         - [x] 暂时限制不能与数字一起做运算, 直接转化为 python 内置类型 True, False 省事
     - [x] 有括号的情况
-    - [] 数组赋值
+    - [x] 负数还没有支持
+    - [x] 数组赋值
 
 constant folding 的一些感觉
 
