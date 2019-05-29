@@ -1,5 +1,5 @@
 program Const;
-const a = 2; b = 3.4; c = 'l';
+const a = 2; b = 3.4; c = 'l', flag=true;
 type
     int=integer;
     int_alias=int;

@@ -2,6 +2,7 @@ import pydot
 from ErrorHandler import *
 from SymbolTable import *
 import copy
+from functools import reduce
 
 
 def traverse_skew_tree(node, stop_node_type=None):
@@ -180,6 +181,80 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
             symb_tab_item = ret_val
 
     return flatten_name_list, symb_tab_item
+
+bin_op_to_func = {'+': lambda x, y: x+y, '-': lambda x, y: x-y, '*': lambda x, y: x*y,
+                          '/': lambda x, y: x/y, 'div': lambda x, y: x//y, 'mod': lambda x, y: x % y,
+                          'and': lambda x, y: x and y, 'or': lambda x, y: x or y}
+type_to_func = dict([
+            ('expr-ADD', '+'),
+            ('expr-SUBSTRACT', '-'),
+            ('expr-OR', 'or'),
+            ('term-MUL', '*'),
+            ('term-DIV', '/'),
+            ('term-INTDIV', 'div'),
+            ('term-MOD', 'mod'),
+            ('term-AND', 'and'),
+        ])
+bool_dict = {'true': True, 'false': False}
+
+
+def constant_folding(node, symbol_table):
+    global bin_op_to_func, type_to_func, bool_dict
+
+    if not isinstance(node, Node):  # id (一般是 constant 的名字或者 function 的名字 / variable)
+        id_ = node
+        # 去 symbol table 查找
+        ret_val = symbol_table.lookup(id_)
+        if not ret_val:
+            raise Exception('{} is not a function or a constant'.format(id_))
+        assert ret_val.type in ['const', 'var'], ret_val.type
+        if ret_val.type == 'const':
+            return ret_val.value
+        else:
+            return None
+
+    elif node.type in ['integer', 'real', 'char', 'sys_con']:  # 直接的常数 1, 1.3, c, true
+
+        val = node.children[0]
+        if node.type == 'sys_con':
+            return bool_dict[val]
+        else:
+            return val
+    elif node.type == 'factor':
+        # kNOT factor
+        # TODO: add array index support
+        first, second = node.children
+        if first in ['not']:  # not true
+            second_val = constant_folding(second, symbol_table)
+            if second_val is not None:
+                node._children = (first, second_val)
+                return not second_val
+            else:
+                return None
+        else:
+            return None
+    else:  # internal node, term  / expr
+        node_type = node.type
+
+        arithmic_func = bin_op_to_func[type_to_func[node_type]]
+        children = node.children
+        val_list = []
+        can_const_fold = True
+        new_children = []
+
+        for idx, child in enumerate(children):
+            val = constant_folding(child, symbol_table)
+            if val is None:
+                can_const_fold = False
+                new_children.append(child)
+            else:
+                val_list.append(val)
+                new_children.append(val)
+        node._children = tuple(new_children)
+        if can_const_fold:
+            return reduce(arithmic_func, val_list)
+        else:
+            return None
 
 
 def graph(node, filename):

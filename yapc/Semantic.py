@@ -128,6 +128,25 @@ class SemanticAnalyzer(object):
 
                     if is_conflict:
                         raise ConflictIDError(id_, symb_tab_item)
+
+            elif root_node.type == 'assign_stmt':
+
+                """ constant folding, constant filling """
+
+                children = root_node.children
+                if len(children) == 2:  # ID ASSIGN expression
+                    id_, expression_node = children
+                    ret_val = self._lookup(id_)
+                    if ret_val.type == 'const':
+                        raise Exception('const {} cannot be assigned!'.format(id_))
+
+                    constant_fold_ret = constant_folding(expression_node, self.symbol_table)
+                    if constant_fold_ret is not None:
+                        root_node._children = (id_, constant_fold_ret)
+
+                elif len(children) == 3:  # ID LB expression RB ASSIGN expression / ID  DOT  ID  ASSIGN  expression
+
+                    pass
             else:
                 for child in root_node.children:
                     self._traverse_tree_and_fill_tab(child)

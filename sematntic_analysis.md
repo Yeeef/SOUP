@@ -206,5 +206,15 @@ together according to the semantic rules
     - [x] type declaration 也可能是 name_list(不在 grammar rule 中)
 - [x] 加入 type checking
     - [ ] 现在只有基础的 type checking, 也就是是否定义过
-- [ ] 加入 constant folding
-- [ ] constant 不能被再次赋值
+- [x] 加入 constant folding
+    - [x] constant 不能被再次赋值
+    - [x] 对 boolean 的处理
+        - [x] 加入 not factor 支持
+        - [x] 暂时限制不能与数字一起做运算, 直接转化为 python 内置类型 True, False 省事
+    - [x] 有括号的情况
+    - [] 数组赋值
+
+constant folding 的一些感觉
+
+- 需要后序遍历，只有所有的孩子都可以 constant folding，才可以 constant folding
+- 最底下的一般是 factor, 如果直接是常数的话

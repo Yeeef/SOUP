@@ -434,7 +434,7 @@ def p_expr(p):
         p[0] = Node("expr-ADD", p[1], p[3])
     elif p[2] == '-':
         p[0] = Node("expr-SUBTRACT", p[1], p[3])
-    elif p[2] == '|':
+    elif p[2] == 'or':
         p[0] = Node("expr-OR", p[1], p[3])
 
 
@@ -462,7 +462,7 @@ def p_term(p):
 def p_factor_1(p):
     '''factor :  ID  
                     |  ID  LP  args_list  RP  
-                    |  SYS_FUNCT  
+                    |  SYS_FUNCT
                     |  SYS_FUNCT  LP  args_list  RP  
                     |  const_value  
                     |  kNOT  factor
