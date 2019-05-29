@@ -111,9 +111,9 @@ def p_type_decl(p):
 
 
 '''simple_type_decl :  SYS_TYPE  
-                    |  LP  name_list  RP  
-                    |  const_value  DOTDOT  const_value  
-                    |  NAME  
+                    |  LP  name_list  RP (enum) 
+                    |  const_value  DOTDOT  const_value (range) 
+                    |  ID  
                     ~~|  MINUS  const_value  DOTDOT  const_value ~~ removed
                     ~~|  MINUS  const_value  DOTDOT  MINUS  const_value ~~ removed
                     ~~|  NAME  DOTDOT  NAME ~~ removed
@@ -516,7 +516,7 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/const.pas'
+    test_file = 'test_yacc/arithmic.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)

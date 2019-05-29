@@ -1,6 +1,7 @@
 import pydot
 from ErrorHandler import *
 from SymbolTable import *
+import copy
 
 
 def traverse_skew_tree(node, stop_node_type=None):
@@ -69,9 +70,9 @@ def parse_range_from_range_node(Node):
     return left_type, left_val, right_val
 
 
-def parse_type_definition_from_type_node(node):
+def parse_type_definition_from_type_node(node, symbol_table):
     """
-    parse type_definition node, return symb tab item
+    parse type_definition node, only return information
     :param node:
     :return:
     """
@@ -89,22 +90,62 @@ def parse_type_definition_from_type_node(node):
         return 'sys_type', id_, sys_type
     else:
         # 1d array, compicated
-        index_type, element_type, left_val, right_val = parse_array_from_array_node(type_node)
+        index_type, element_type, left_val, right_val = parse_array_from_array_node(type_node, symbol_table)
         return 'array', id_, index_type, element_type, left_val, right_val
 
 
-def parse_array_from_array_node(arr_node):
+def parse_type_decl_node(type_decl_node, symbol_table):
+    """
+    grammar rule:
+        * type_decl         : simple_type_decl
+                            | array_type_decl
+        * simple_type_decl  :  SYS_TYPE
+                            |  LP  name_list  RP (enum)
+                            |  const_value  DOTDOT  const_value (range)
+                            |  ID
+        * array_type_decl   :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl
+    :param type_decl_node:
+    :return: type(sys_type from [integer, real, char]) / array_type(Array Type instance)
+    """
+    if type_decl_node.type == 'sys_type':
+        sys_type = type_decl_node.children[0]
+        return sys_type
+    elif type_decl_node.type == 'alias':
+        # check whether the alias type exits
+        alias_type = type_decl_node.children[0]
+        ret_val = symbol_table.lookup(alias_type)
+        if not ret_val:
+            raise Exception('alias type: `{}` used before defined'.format(alias_type))
+        # return the true type
+        if ret_val.type == 'sys_type':
+            return ret_val.value['sys_type']
+        else:  # array type
+            return ret_val.value
+
+    elif type_decl_node.type == 'array':
+        index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
+        return ArrayType(index_type, (left_val, right_val), element_type)
+
+
+def parse_array_from_array_node(arr_node, symbol_table):
+    """
+
+    :param arr_node:
+    :param symbol_table:
+    :return: symb_tab_item to be inserted
+    """
     assert arr_node.type == 'array', arr_node.type
-    range_node, sys_type_node = arr_node.children
+    range_node, type_node = arr_node.children
     index_type, left_val, right_val = parse_range_from_range_node(range_node)
-    element_type = sys_type_node.children[0]
+    element_type = parse_type_decl_node(type_node, symbol_table)
     return index_type, element_type, left_val, right_val
 
 
-def parse_var_decl_from_node(var_decl_node):
+def parse_var_decl_from_node(var_decl_node, symbol_table):
     """
     parse var decl node,
     :param var_decl_node:
+    :param symbol_table:
     :return: flatten name list and associated symb_tab_item
     """
     assert var_decl_node.type == 'var_decl', var_decl_node.type
@@ -121,16 +162,23 @@ def parse_var_decl_from_node(var_decl_node):
         flatten_name_list = [maybe_name_list_node]
 
     # get the var type
-    assert type_decl_node.type in ['sys_type', 'array'], type_decl_node.type
+    assert type_decl_node.type in ['sys_type', 'array', 'alias'], type_decl_node.type
     if type_decl_node.type == 'sys_type':
         var_type, *_ = type_decl_node.children
         symb_tab_item = SymbolTableItem('var', {'var_type': var_type})
     elif type_decl_node.type == 'array':
-        index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node)
+        index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
+        array_type = ArrayType(index_type, (left_val, right_val), element_type)
         symb_tab_item = SymbolTableItem('arr_var',
-                                        {'index_type': index_type,
-                                         'index_range': (left_val, right_val),
-                                         'element_type': element_type})
+                                        array_type)
+    else:  # alias
+        alias_type = type_decl_node.children[0]
+        ret_val = symbol_table.lookup(alias_type)
+        if not ret_val:
+            raise Exception('alias type {} used before defined'.format(alias_type))
+        else:
+            symb_tab_item = ret_val
+
     return flatten_name_list, symb_tab_item
 
 

@@ -196,7 +196,15 @@ together according to the semantic rules
 
 那么接下来的工作：
 
+- [ ] 如何更好的分离返回 symb_tab 的 parse 和返回信息的 parse, 用一个装饰器？
 - [x] 加入 1d array declaration
-- [ ] 加入 type declaration
-- [ ] 加入 type checking
+- [x] 加入 type declaration
+    - [x] array 的 type 也可能是 alias type, 
+        - [x] 先实现仅仅是 sys_type 的 alias 处理
+    - [x] recursive type definition 如何处理？
+        - [x] 先定义 ArrayType 的表示
+    - [x] type declaration 也可能是 name_list(不在 grammar rule 中)
+- [x] 加入 type checking
+    - [ ] 现在只有基础的 type checking, 也就是是否定义过
 - [ ] 加入 constant folding
+- [ ] constant 不能被再次赋值
