@@ -4,28 +4,10 @@
 # semantic 在做的事情其实就是生成 symbol table, 我们之前有生成一个简单的初始 symbol table
 from AST import *
 from SymbolTable import *
+import copy
 
 
-def traverse_skew_tree(node, stop_node_type=None):
-    """
-    遍历一种很特殊但是在我们的 parse tree 中频繁出现的一种结构（左递归导致的）
-    能不能顺便做一个 compress ✅
-    :param node:
-    :return: flattened subtree
-    """
-    descending_leaves = []
-    children = node.children
-    for child in children:
-        if isinstance(child, Node):
-            if child.type == stop_node_type:
-                descending_leaves.append(child)
-            else:
-                descending_leaves.extend(traverse_skew_tree(child, stop_node_type))
-        else:
-            # reach the leaf node
-            descending_leaves.append(child)
 
-    return tuple(descending_leaves)
 
 
 class SemanticAnalyzer(object):
@@ -69,53 +51,39 @@ class SemanticAnalyzer(object):
     def _traverse_tree_and_fill_tab(self, root_node):
         if isinstance(root_node, Node):
 
-            if root_node.type == 'const_expr':
+            if root_node.type == 'const_expr_list':
 
                 """ const declaration """
 
-                id, const_val_node = root_node.children
-                const_val, *_ = const_val_node.children
-                # TODO: use enum
-                symb_tab_item = SymbolTableItem('const', const_val)
-                is_conflict, ret_val = self._insert(id, symb_tab_item)
-                if is_conflict:
-                    raise ConflictIDError(id, ret_val)
+                # flatten the sub tree
 
-            elif root_node.type == 'var_decl':  # find var_decl node
+                root_node._children = traverse_skew_tree(root_node, 'const_expr')
+
+                for child in root_node.children:
+                    id_, const_val_node = child.children
+                    const_val, *_ = const_val_node.children
+                    # TODO: use enum
+                    symb_tab_item = SymbolTableItem('const', const_val)
+                    is_conflict, ret_val = self._insert(id_, symb_tab_item)
+                    if is_conflict:
+                        raise ConflictIDError(id_, ret_val)
+
+            elif root_node.type == 'var_decl_list':
 
                 """ variable declaration """
 
-                maybe_name_list_node, type_decl_node = root_node.children
+                # flatten var_decl
 
-                # get name_list
-                if isinstance(maybe_name_list_node, Node):
-                    # traverse name_list
-                    flatten_name_list = traverse_skew_tree(maybe_name_list_node)
-                    # flatten the subtree for future use
-                    maybe_name_list_node._children = flatten_name_list
-                else:
-                    # just a leaf node
-                    flatten_name_list = [maybe_name_list_node]
+                root_node._children = traverse_skew_tree(root_node, 'var_decl')
 
-                # get the var type
-                assert type_decl_node.type in ['sys_type', 'array'], type_decl_node.type
-                if type_decl_node.type == 'sys_type':
-                    var_type, *_ = type_decl_node.children
-                    symb_tab_item = SymbolTableItem('var', var_type)
-                elif type_decl_node.type == 'array':
-                    range_node, sys_type_node = type_decl_node.children
-                    index_type, left_val, right_val = get_range_from_range_node(range_node)
-                    element_type = sys_type_node.children[0]
-                    symb_tab_item = SymbolTableItem('arr_var',
-                                                    {'index_type': index_type,
-                                                     'index_range': (left_val, right_val),
-                                                     'element_type': element_type})
+                for child in root_node.children:
+                    flatten_name_list, symb_tab_item = parse_var_decl_from_node(child)
 
-                # insert (name, type) in symbol table
-                for name in flatten_name_list:
-                    is_conflict, ret_val = self._insert(name, symb_tab_item)
-                    if is_conflict:
-                        raise ConflictIDError(name, symb_tab_item)
+                    # insert (name, type) in symbol table
+                    for id_ in flatten_name_list:
+                        is_conflict, ret_val = self._insert(id_, symb_tab_item)
+                        if is_conflict:
+                            raise ConflictIDError(id_, symb_tab_item)
 
             elif root_node.type == 'type_decl_list':
 
@@ -124,8 +92,34 @@ class SemanticAnalyzer(object):
                 # flatten type definitions
                 root_node._children = traverse_skew_tree(root_node, 'type_definition')
 
-                # parse type_definition
+                for child in root_node.children:
+                    # parse type_definition
+                    type_, id_, *attributes = parse_type_definition_from_type_node(child)
 
+                    if type_ == 'alias':
+                        # check whether the alias type exist
+                        type_alias = attributes[0]
+                        ret_val = self._lookup(type_alias)
+                        if not ret_val:
+                            raise Exception('type alias: `{}` used before defined'.format(type_alias))
+                        symb_tab_item = copy.deepcopy(ret_val)
+
+                    elif type_ == 'sys_type':
+                        sys_type = attributes[0]
+                        symb_tab_item = SymbolTableItem('sys_type', {'sys_type': sys_type})
+
+                    else:  # array type
+                        index_type, element_type, left_val, right_val = attributes
+                        symb_tab_item = SymbolTableItem('arr_var',
+                                                        {'index_type': index_type,
+                                                         'index_range': (left_val, right_val),
+                                                         'element_type': element_type})
+
+                    # insert into symbol table
+                    is_conflict, ret_val = self._insert(id_, symb_tab_item)
+
+                    if is_conflict:
+                        raise ConflictIDError(id_, symb_tab_item)
             else:
                 for child in root_node.children:
                     self._traverse_tree_and_fill_tab(child)

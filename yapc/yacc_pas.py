@@ -57,7 +57,7 @@ def p_const_expr(p):
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
 def p_const_value_1(p):
     'const_value : INTEGER'
-    p[0] = Node('int', p[1])
+    p[0] = Node('integer', p[1])
 
 
 def p_const_value_2(p):

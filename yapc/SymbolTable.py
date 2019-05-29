@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 # File: SymbolTable.py
 # define SymbolTable data struct and util funcs
-from AST import Node
-from ErrorHandler import *
-
-
-class _NotFound(object):
-    pass
 
 
 class SymbolTableItem(object):
@@ -58,11 +52,11 @@ class SymbolTable(object):
             return False, val
 
     def lookup(self, key):
-        val = self._symb_tab.get(key, _NotFound())
+        val = self._symb_tab.get(key, None)
         return val
 
     def delete(self, key):
-        if isinstance(self.lookup(key), _NotFound):
-            return False, _NotFound
+        if isinstance(self.lookup(key), None):
+            return False, None
         else:
             return True, self._symb_tab.pop(key)
