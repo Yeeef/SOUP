@@ -226,6 +226,10 @@ constant folding 的一些感觉
 - 最底下的一般是 factor, 如果直接是常数的话
 
 
+### type checking
+
+- arr 索引是否在范围之内，索引是否是定义类型
+
 ### symbol table 对于 scope 的支持
 
 - 观察
