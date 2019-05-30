@@ -105,7 +105,7 @@
         - [ ] 同时进行 static range 检查?
         - [x] as right val
             - [x] support 1-d array
-        - [ ] as left val
+        - [x] as left val
 - [ ]  
 
 ## tricks
