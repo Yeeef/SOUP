@@ -206,6 +206,7 @@ together according to the semantic rules
     - [x] type declaration 也可能是 name_list(不在 grammar rule 中)
 - [x] 加入 type checking
     - [ ] 现在只有基础的 type checking, 也就是是否定义过
+    - [ ] 可以做的狠一点
 - [x] 加入 constant folding
     - [x] constant 不能被再次赋值
     - [x] 对 boolean 的处理
