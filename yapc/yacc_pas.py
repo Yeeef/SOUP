@@ -313,16 +313,23 @@ def p_non_label_stmt(p):
     p[0] = p[1]
 
 
+def p_assign_stmt_arr(p):
+    """
+    assign_stmt : ID LB expression RB ASSIGN expression
+    """
+    p[0] = Node("assign_stmt-arr", p[1], p[3], p[6])
+
+
+def p_assign_stmt_record(p):
+    """
+    assign_stmt : ID  DOT  ID  ASSIGN  expression
+    """
+    p[0] = Node("assign_stmt-record", p[1], p[3], p[5])
+
+
 def p_assign_stmt(p):
-    '''assign_stmt :  ID  ASSIGN  expression
-                    | ID LB expression RB ASSIGN expression
-                    | ID  DOT  ID  ASSIGN  expression'''
-    if len(p) == 4:
-        p[0] = Node("assign_stmt", p[1], p[3])
-    elif len(p) == 7:
-        p[0] = Node("assign_stmt", p[1], p[3], p[6])
-    elif len(p) == 6:
-        p[0] = Node("assign_stmt", p[1], p[3], p[5])
+    '''assign_stmt :  ID  ASSIGN  expression '''
+    p[0] = Node("assign_stmt", p[1], p[3])
 
 
 # [TODO: resolved]: ID, ID LP args_list RP 是什么蛇皮操作？    
@@ -541,10 +548,10 @@ if __name__ == '__main__':
     graph(parse_tree_root, "graph")
     static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
-    # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-    # code_generator.gen_three_address_code()
+    code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
+    code_generator.gen_three_address_code()
     print(static_semantic_analyzer.symbol_table)
 
-    # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+    _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
 
     graph(parse_tree_root, "new_graph")

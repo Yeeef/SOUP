@@ -133,13 +133,12 @@ class SemanticAnalyzer(object):
 
                     if is_conflict:
                         raise ConflictIDError(id_, symb_tab_item)
-
-            elif root_node.type == 'assign_stmt':
+            elif root_node.type.startswith('assign_stmt'):
 
                 """ constant folding, constant filling """
 
                 children = root_node.children
-                if len(children) == 2:  # ID ASSIGN expression
+                if root_node.type == 'assign_stmt':  # ID ASSIGN expression
                     id_, expression_node = children
                     ret_val = self._lookup(id_)
                     if ret_val is None:
@@ -151,20 +150,19 @@ class SemanticAnalyzer(object):
                     if constant_fold_ret is not None:
                         root_node._children = (id_, constant_fold_ret)
 
-                elif len(children) == 3:  # ID LB expression RB ASSIGN expression / ID  DOT  ID  ASSIGN  expression
-                    # 代码可以复用
-                    if isinstance(children[1], Node):  # ID LB expression RB ASSIGN expression
-                        id_, _, expression_node = children
-                        ret_val = self._lookup(id_)
-                        if ret_val is None:
-                            raise Exception('var {} assigned before declared'.format(id_))
-                        if ret_val.type == 'const':
-                            raise Exception('const {} cannot be assigned!'.format(id_))
-                        constant_fold_ret = constant_folding(expression_node, self.symbol_table)
-                        if constant_fold_ret is not None:
-                            root_node._children = (id_, constant_fold_ret)
-                    else:  # ID  DOT  ID  ASSIGN  expression
-                        pass
+                elif root_node.type == 'assign_stmt-arr':  # ID LB expression RB ASSIGN expression
+                    id_, index_expression_node, expression_node = children
+                    ret_val = self._lookup(id_)
+                    if ret_val is None:
+                        raise Exception('var {} assigned before declared'.format(id_))
+                    if ret_val.type == 'const':
+                        raise Exception('const {} cannot be assigned!'.format(id_))
+                    constant_fold_ret = constant_folding(expression_node, self.symbol_table)
+                    index_fold_ret = constant_folding(index_expression_node, self.symbol_table)
+                    root_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
+                                                    expression_node if constant_fold_ret is None else constant_fold_ret)
+                else:  # ID  DOT  ID  ASSIGN  expression
+                    raise NotImplementedError
                     pass
 
             else:

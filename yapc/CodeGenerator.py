@@ -81,28 +81,36 @@ class CodeGenerator(object):
         """
         if isinstance(root_node, Node):
 
-            if root_node.type == 'assign_stmt':
+            if root_node.type.startswith('assign_stmt'):
+
+                """ assign statement """
+
                 children = root_node.children
-                if len(children) == 2:  # ID ASSIGN expression
-                    # maybe_expression_node, because it may have been a constant folding result
-                    id_, maybe_expression_node = children
-                    if not isinstance(maybe_expression_node, Node):
-                        self._quad_list.append(Quadruple(None, id_, maybe_expression_node, None))
-                    else:
-                        val = gen_quad_list_from_expression_node(maybe_expression_node, self._quad_list)
-                        self._quad_list.append(Quadruple(None, id_, val, None))
+                if root_node.type == 'assign_stmt':
 
-                elif len(children) == 3:  # ID LB expression RB ASSIGN expression / ID  DOT  ID  ASSIGN  expression
-                    if isinstance(children[1], Node):  # ID LB expression RB ASSIGN expression
-                        id_, range_expression_node, val_expression_node = children
+                    if len(children) == 2:  # ID ASSIGN expression
+                        # maybe_expression_node, because it may have been a constant folding result
+                        id_, maybe_expression_node = children
+                        if not isinstance(maybe_expression_node, Node):
+                            self._quad_list.append(Quadruple(None, id_, maybe_expression_node, None))
+                        else:
+                            val = gen_quad_list_from_expression_node(maybe_expression_node, self._quad_list)
+                            self._quad_list.append(Quadruple(None, id_, val, None))
 
-                    else:  # ID  DOT  ID  ASSIGN  expression
-                        pass
-                    pass
+                elif root_node.type == 'assign_stmt-arr':  # ID LB expression RB assign expression
+
+                    id_, index_expression_node, val_expression_node = children
+                    index_val = gen_quad_list_from_expression_node(index_expression_node, self._quad_list)
+                    assign_val = gen_quad_list_from_expression_node(val_expression_node, self._quad_list)
+                    self._quad_list.append(Quadruple(None, f'{id_}[{index_val}]', assign_val, None))
+
+                else:  # ID  DOT  ID  ASSIGN  expression
+                    raise NotImplementedError
             else:
                 children = root_node.children
                 for child in children:
                     self._traverse_ast_gen_code(child)
+
         else:  # terminal node
             pass
 
@@ -137,18 +145,19 @@ def gen_quad_list_from_expression_node(expression_node, quad_list):
         if expression_node.type == 'factor':
 
             children = expression_node.children
-            if len(children) == 2:
-                # kNOT factor
-                # SUBSTRACT factor
-                unary_op, right_child = children
-                right_val = gen_quad_list_from_expression_node(right_child, quad_list)
-                target = 't{}'.format(len(quad_list))
-                quad_list.append(Quadruple(unary_op, target, right_val, None))
-                return target
-            else:  # len(children
-                # TODO: record support
-                raise NotImplementedError('currently not support array and record')
-
+            # kNOT factor
+            # SUBSTRACT factor
+            unary_op, right_child = children
+            right_val = gen_quad_list_from_expression_node(right_child, quad_list)
+            target = 't{}'.format(len(quad_list))
+            quad_list.append(Quadruple(unary_op, target, right_val, None))
+            return target
+        elif expression_node.type == 'factor-arr':
+            arr_id, right_child_node = expression_node.children
+            index_val = gen_quad_list_from_expression_node(right_child_node, quad_list)
+            target = 't{}'.format(len(quad_list))
+            quad_list.append(Quadruple(None, target, f'{arr_id}[{index_val}]', None))
+            return target
         else:
             # expr-[ADD|SUBSTRACT|OR]
             # term-[MUL|DIV|INTDIV|MOD|AND]

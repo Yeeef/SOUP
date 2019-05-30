@@ -206,26 +206,39 @@ def constant_folding(node, symbol_table):
             return bool_dict[val]
         else:
             return val
+    elif node.type == 'factor-arr':
+
+        arr_id, right_child = node.children
+        arr_id_lookup = symbol_table.lookup(arr_id)
+        if arr_id_lookup is None:
+            raise Exception('{} used before declaration'.format(arr_id))
+        right_val = constant_folding(right_child, symbol_table)
+        if right_val is not None:
+            node._children = (arr_id, right_val)
+        return None  # return None, because the factor-arr is known to be non-const
+    elif node.type == 'factor-func':
+        pass
     elif node.type == 'factor':
         # kNOT factor
-        # TODO: add array index support
-        first, second = node.children
-        if first == 'not':  # not true
-            second_val = constant_folding(second, symbol_table)
+        # SUBSTRACT factor
+        unary_op, right_child = node.children
+        if unary_op == 'not':  # not true
+            second_val = constant_folding(right_child, symbol_table)
             if second_val is not None:
-                node._children = (first, second_val)
+                node._children = (unary_op, second_val)
                 return not second_val
             else:
                 return None
-        elif first == '-':
-            second_val = constant_folding(second, symbol_table)
+        elif unary_op == '-':
+            second_val = constant_folding(right_child, symbol_table)
             if second_val is not None:
-                node._children = (first, second_val)
+                node._children = (unary_op, second_val)
                 return -second_val
             else:
                 return None
         else:
-            return None
+            raise Exception('factor node with unknown unary op: {}'.format(unary_op))
+
     else:  # internal node, term  / expr
         node_type = node.type
 

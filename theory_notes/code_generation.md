@@ -101,6 +101,13 @@
 - [ ] variable assignment
     - [x] simple variable assignment
     - [ ] array reference
-        - [ ] as right val
-            - [ ] support 1-d array
+        - [ ] 替换为指针表达
+        - [ ] 同时进行 static range 检查?
+        - [x] as right val
+            - [x] support 1-d array
+        - [ ] as left val
 - [ ]  
+
+## tricks
+
+- 为了避免太多分支，用 startswith 

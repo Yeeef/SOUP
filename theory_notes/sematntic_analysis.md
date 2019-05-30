@@ -223,7 +223,7 @@ together according to the semantic rules
    
 
 
-constant folding 的一些感觉
+constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__
 
 - 需要后序遍历，只有所有的孩子都可以 constant folding，才可以 constant folding
 - 最底下的一般是 factor, 如果直接是常数的话
