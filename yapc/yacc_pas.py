@@ -4,6 +4,7 @@ import logging
 from lex_pas import tokens
 import lex_pas
 from AST import *
+from CodeGenerator import CodeGenerator
 
 # FIXME: -5 优先级要比乘法高，详见 <http://www.dabeaz.com/ply/ply.html>
 precedence = (
@@ -522,13 +523,17 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/scope.pas'
+    test_file = 'test_yacc/simple.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
     graph(parse_tree_root, "graph")
     static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
-
+    code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
+    code_generator.gen_three_address_code()
     print(static_semantic_analyzer.symbol_table)
+
+    _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+
     graph(parse_tree_root, "new_graph")

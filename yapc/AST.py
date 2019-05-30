@@ -3,6 +3,7 @@ from ErrorHandler import *
 from SymbolTable import *
 import copy
 from functools import reduce
+from utils import (bin_op_to_func, type_to_bin_op, bool_dict)
 
 
 def traverse_skew_tree(node, stop_node_type=None):
@@ -182,24 +183,9 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
 
     return flatten_name_list, symb_tab_item
 
-bin_op_to_func = {'+': lambda x, y: x+y, '-': lambda x, y: x-y, '*': lambda x, y: x*y,
-                          '/': lambda x, y: x/y, 'div': lambda x, y: x//y, 'mod': lambda x, y: x % y,
-                          'and': lambda x, y: x and y, 'or': lambda x, y: x or y}
-type_to_func = dict([
-            ('expr-ADD', '+'),
-            ('expr-SUBSTRACT', '-'),
-            ('expr-OR', 'or'),
-            ('term-MUL', '*'),
-            ('term-DIV', '/'),
-            ('term-INTDIV', 'div'),
-            ('term-MOD', 'mod'),
-            ('term-AND', 'and'),
-        ])
-bool_dict = {'true': True, 'false': False}
-
 
 def constant_folding(node, symbol_table):
-    global bin_op_to_func, type_to_func, bool_dict
+    global bin_op_to_func, type_to_bin_op, bool_dict
 
     if not isinstance(node, Node):  # id (一般是 constant 的名字或者 function 的名字 / variable)
         id_ = node
@@ -243,7 +229,7 @@ def constant_folding(node, symbol_table):
     else:  # internal node, term  / expr
         node_type = node.type
 
-        arithmic_func = bin_op_to_func[type_to_func[node_type]]
+        arithmic_func = bin_op_to_func[type_to_bin_op[node_type]]
         children = node.children
         val_list = []
         can_const_fold = True

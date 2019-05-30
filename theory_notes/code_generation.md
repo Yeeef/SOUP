@@ -90,3 +90,13 @@
 ## Q&A
 
 - [ ] 生成三地址码的话，其实完全不需要 symbol table, 心累
+- [ ] 单纯的 scope 嵌套，不需要特殊的 entry point 声明吗？
+
+## 计划
+
+按照书上的顺序，简单的 variable assignment -> control statement -> func / proc statement
+
+并在这个过程中逐渐填补 semantic 的坑
+
+### variable assignment
+

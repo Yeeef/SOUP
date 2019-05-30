@@ -218,6 +218,7 @@ together according to the semantic rules
     - [ ] 有一个问题在于 x := arr[1] + 1 + 2, 这个 1 + 2 不会被 fold 到一起，因为 1 在前面
         - [ ] 这个问题可以由把同种符号的 flatten 开解决
     - [ ] 关系表达式还没有 folding
+- [ ] 报错要精准到行
    
 
 
