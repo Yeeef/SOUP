@@ -94,14 +94,19 @@ class SemanticAnalyzer(object):
                             if is_conflict:
                                 raise ConflictIDError(id_, symb_tab_item)
 
-            elif root_node.type == 'type_decl_list':
+            elif root_node.type == 'type_decl_list' or root_node.type == 'type_definition':
 
                 """ type declartion """
 
-                # flatten type definitions
-                root_node._children = traverse_skew_tree(root_node, 'type_definition')
+                if root_node.type == 'type_definition':
+                    type_definition_node_list = [root_node]
+                else:
 
-                for child in root_node.children:
+                    # flatten type definitions
+                    root_node._children = traverse_skew_tree(root_node, 'type_definition')
+                    type_definition_node_list = root_node.children
+
+                for child in type_definition_node_list:
                     # parse type_definition
                     type_, id_, *attributes = parse_type_definition_from_type_node(child, self.symbol_table)
 

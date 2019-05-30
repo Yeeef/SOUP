@@ -13,459 +13,420 @@
    yacc.py: 445:Action : Shift and goto state 20
    yacc.py: 410:
    yacc.py: 411:State  : 20
-   yacc.py: 435:Stack  : kPROGRAM ID SEMICON . LexToken(kVAR,'var',2,16)
+   yacc.py: 435:Stack  : kPROGRAM ID SEMICON . LexToken(kTYPE,'type',2,16)
    yacc.py: 471:Action : Reduce rule [program_head -> kPROGRAM ID SEMICON] with ['program','Simple',';'] and goto state 2
-   yacc.py: 506:Result : <str @ 0x110b2a6f8> ('Simple')
+   yacc.py: 506:Result : <str @ 0x1075d56f8> ('Simple')
    yacc.py: 410:
    yacc.py: 411:State  : 2
-   yacc.py: 435:Stack  : program_head . LexToken(kVAR,'var',2,16)
+   yacc.py: 435:Stack  : program_head . LexToken(kTYPE,'type',2,16)
    yacc.py: 474:Action : Reduce rule [empty -> <empty>] with [] and goto state 8
-   yacc.py: 548:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 548:Result : <NoneType @ 0x105344f78> (None)
    yacc.py: 410:
    yacc.py: 411:State  : 8
-   yacc.py: 435:Stack  : program_head empty . LexToken(kVAR,'var',2,16)
+   yacc.py: 435:Stack  : program_head empty . LexToken(kTYPE,'type',2,16)
    yacc.py: 471:Action : Reduce rule [const_part -> empty] with [None] and goto state 6
-   yacc.py: 506:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 506:Result : <NoneType @ 0x105344f78> (None)
    yacc.py: 410:
    yacc.py: 411:State  : 6
-   yacc.py: 435:Stack  : program_head const_part . LexToken(kVAR,'var',2,16)
-   yacc.py: 474:Action : Reduce rule [empty -> <empty>] with [] and goto state 16
-   yacc.py: 548:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 435:Stack  : program_head const_part . LexToken(kTYPE,'type',2,16)
+   yacc.py: 445:Action : Shift and goto state 15
    yacc.py: 410:
-   yacc.py: 411:State  : 16
-   yacc.py: 435:Stack  : program_head const_part empty . LexToken(kVAR,'var',2,16)
-   yacc.py: 471:Action : Reduce rule [type_part -> empty] with [None] and goto state 14
-   yacc.py: 506:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 411:State  : 15
+   yacc.py: 435:Stack  : program_head const_part kTYPE . LexToken(ID,'real_arr',3,25)
+   yacc.py: 445:Action : Shift and goto state 28
    yacc.py: 410:
-   yacc.py: 411:State  : 14
-   yacc.py: 435:Stack  : program_head const_part type_part . LexToken(kVAR,'var',2,16)
-   yacc.py: 445:Action : Shift and goto state 24
+   yacc.py: 411:State  : 28
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID . LexToken(EQUAL,'=',3,33)
+   yacc.py: 445:Action : Shift and goto state 66
    yacc.py: 410:
-   yacc.py: 411:State  : 24
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR . LexToken(ID,'x',2,20)
-   yacc.py: 445:Action : Shift and goto state 64
+   yacc.py: 411:State  : 66
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL . LexToken(kARRAY,'array',3,34)
+   yacc.py: 445:Action : Shift and goto state 113
    yacc.py: 410:
-   yacc.py: 411:State  : 64
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR ID . LexToken(COMMA,',',2,21)
-   yacc.py: 471:Action : Reduce rule [name_list -> ID] with ['x'] and goto state 63
-   yacc.py: 506:Result : <str @ 0x10ea55768> ('x')
+   yacc.py: 411:State  : 113
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY . LexToken(LB,'[',3,39)
+   yacc.py: 445:Action : Shift and goto state 163
    yacc.py: 410:
-   yacc.py: 411:State  : 63
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list . LexToken(COMMA,',',2,21)
-   yacc.py: 445:Action : Shift and goto state 104
+   yacc.py: 411:State  : 163
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB . LexToken(INTEGER,2,3,40)
+   yacc.py: 445:Action : Shift and goto state 68
    yacc.py: 410:
-   yacc.py: 411:State  : 104
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA . LexToken(ID,'y',2,23)
-   yacc.py: 445:Action : Shift and goto state 159
+   yacc.py: 411:State  : 68
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB INTEGER . LexToken(DOUBLEDOT,'..',3,41)
+   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [2] and goto state 112
+   yacc.py: 506:Result : <Node @ 0x1075d55c0> (<AST.Node object at 0x1075d55c0>)
    yacc.py: 410:
-   yacc.py: 411:State  : 159
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA ID . LexToken(COMMA,',',2,24)
-   yacc.py: 471:Action : Reduce rule [name_list -> name_list COMMA ID] with ['x',',','y'] and goto state 63
-   yacc.py: 506:Result : <Node @ 0x110b2a550> (<AST.Node object at 0x110b2a550>)
+   yacc.py: 411:State  : 112
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB const_value . LexToken(DOUBLEDOT,'..',3,41)
+   yacc.py: 445:Action : Shift and goto state 162
    yacc.py: 410:
-   yacc.py: 411:State  : 63
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list . LexToken(COMMA,',',2,24)
-   yacc.py: 445:Action : Shift and goto state 104
+   yacc.py: 411:State  : 162
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB const_value DOUBLEDOT . LexToken(INTEGER,10,3,43)
+   yacc.py: 445:Action : Shift and goto state 68
    yacc.py: 410:
-   yacc.py: 411:State  : 104
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA . LexToken(ID,'s',2,26)
-   yacc.py: 445:Action : Shift and goto state 159
+   yacc.py: 411:State  : 68
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB const_value DOUBLEDOT INTEGER . LexToken(RB,']',3,45)
+   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [10] and goto state 210
+   yacc.py: 506:Result : <Node @ 0x1075d5898> (<AST.Node object at 0x1075d5898>)
    yacc.py: 410:
-   yacc.py: 411:State  : 159
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA ID . LexToken(COLON,':',2,27)
-   yacc.py: 471:Action : Reduce rule [name_list -> name_list COMMA ID] with [<Node @ 0x110b2a550>,',','s'] and goto state 63
-   yacc.py: 506:Result : <Node @ 0x110b2a630> (<AST.Node object at 0x110b2a630>)
+   yacc.py: 411:State  : 210
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB const_value DOUBLEDOT const_value . LexToken(RB,']',3,45)
+   yacc.py: 471:Action : Reduce rule [simple_type_decl -> const_value DOUBLEDOT const_value] with [<Node @ 0x1075d55c0>,'..',<Node @ 0x1075d5898>] and goto state 211
+   yacc.py: 506:Result : <Node @ 0x1075d5978> (<AST.Node object at 0x1075d5978>)
    yacc.py: 410:
-   yacc.py: 411:State  : 63
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list . LexToken(COLON,':',2,27)
-   yacc.py: 445:Action : Shift and goto state 103
+   yacc.py: 411:State  : 211
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB simple_type_decl . LexToken(RB,']',3,45)
+   yacc.py: 445:Action : Shift and goto state 237
    yacc.py: 410:
-   yacc.py: 411:State  : 103
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON . LexToken(SYS_TYPE,'integer',2,29)
+   yacc.py: 411:State  : 237
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB simple_type_decl RB . LexToken(kOF,'of',3,47)
+   yacc.py: 445:Action : Shift and goto state 246
+   yacc.py: 410:
+   yacc.py: 411:State  : 246
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB simple_type_decl RB kOF . LexToken(SYS_TYPE,'real',3,50)
    yacc.py: 445:Action : Shift and goto state 110
    yacc.py: 410:
    yacc.py: 411:State  : 110
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON SYS_TYPE . LexToken(SEMICON,';',2,36)
-   yacc.py: 471:Action : Reduce rule [simple_type_decl -> SYS_TYPE] with ['integer'] and goto state 107
-   yacc.py: 506:Result : <Node @ 0x110b2a748> (<AST.Node object at 0x110b2a748>)
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB simple_type_decl RB kOF SYS_TYPE . LexToken(SEMICON,';',3,54)
+   yacc.py: 471:Action : Reduce rule [simple_type_decl -> SYS_TYPE] with ['real'] and goto state 107
+   yacc.py: 506:Result : <Node @ 0x1075d5748> (<AST.Node object at 0x1075d5748>)
    yacc.py: 410:
    yacc.py: 411:State  : 107
    yacc.py: 430:Defaulted state 107: Reduce using 20
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON simple_type_decl . LexToken(SEMICON,';',2,36)
-   yacc.py: 471:Action : Reduce rule [type_decl -> simple_type_decl] with [<Node @ 0x110b2a748>] and goto state 158
-   yacc.py: 506:Result : <Node @ 0x110b2a748> (<AST.Node object at 0x110b2a748>)
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB simple_type_decl RB kOF simple_type_decl . LexToken(SEMICON,';',3,54)
+   yacc.py: 471:Action : Reduce rule [type_decl -> simple_type_decl] with [<Node @ 0x1075d5748>] and goto state 251
+   yacc.py: 506:Result : <Node @ 0x1075d5748> (<AST.Node object at 0x1075d5748>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 251
+   yacc.py: 430:Defaulted state 251: Reduce using 27
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL kARRAY LB simple_type_decl RB kOF type_decl . LexToken(SEMICON,';',3,54)
+   yacc.py: 471:Action : Reduce rule [array_type_decl -> kARRAY LB simple_type_decl RB kOF type_decl] with ['array','[',<Node @ 0x1075d5978>,']','of',<Node @ 0x1075d5748>] and goto state 108
+   yacc.py: 506:Result : <Node @ 0x1075d5a20> (<AST.Node object at 0x1075d5a20>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 108
+   yacc.py: 430:Defaulted state 108: Reduce using 21
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL array_type_decl . LexToken(SEMICON,';',3,54)
+   yacc.py: 471:Action : Reduce rule [type_decl -> array_type_decl] with [<Node @ 0x1075d5a20>] and goto state 106
+   yacc.py: 506:Result : <Node @ 0x1075d5a20> (<AST.Node object at 0x1075d5a20>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 106
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL type_decl . LexToken(SEMICON,';',3,54)
+   yacc.py: 445:Action : Shift and goto state 160
+   yacc.py: 410:
+   yacc.py: 411:State  : 160
+   yacc.py: 435:Stack  : program_head const_part kTYPE ID EQUAL type_decl SEMICON . LexToken(kVAR,'var',5,95)
+   yacc.py: 471:Action : Reduce rule [type_definition -> ID EQUAL type_decl SEMICON] with ['real_arr','=',<Node @ 0x1075d5a20>,';'] and goto state 27
+   yacc.py: 506:Result : <Node @ 0x1075d5b00> (<AST.Node object at 0x1075d5b00>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 27
+   yacc.py: 435:Stack  : program_head const_part kTYPE type_definition . LexToken(kVAR,'var',5,95)
+   yacc.py: 471:Action : Reduce rule [type_decl_list -> type_definition] with [<Node @ 0x1075d5b00>] and goto state 26
+   yacc.py: 506:Result : <Node @ 0x1075d5b00> (<AST.Node object at 0x1075d5b00>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 26
+   yacc.py: 435:Stack  : program_head const_part kTYPE type_decl_list . LexToken(kVAR,'var',5,95)
+   yacc.py: 471:Action : Reduce rule [type_part -> kTYPE type_decl_list] with ['type',<Node @ 0x1075d5b00>] and goto state 14
+   yacc.py: 506:Result : <Node @ 0x1075d5b00> (<AST.Node object at 0x1075d5b00>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 14
+   yacc.py: 435:Stack  : program_head const_part type_part . LexToken(kVAR,'var',5,95)
+   yacc.py: 445:Action : Shift and goto state 24
+   yacc.py: 410:
+   yacc.py: 411:State  : 24
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR . LexToken(ID,'x',5,99)
+   yacc.py: 445:Action : Shift and goto state 64
+   yacc.py: 410:
+   yacc.py: 411:State  : 64
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR ID . LexToken(COMMA,',',5,100)
+   yacc.py: 471:Action : Reduce rule [name_list -> ID] with ['x'] and goto state 63
+   yacc.py: 506:Result : <str @ 0x1054fe768> ('x')
+   yacc.py: 410:
+   yacc.py: 411:State  : 63
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list . LexToken(COMMA,',',5,100)
+   yacc.py: 445:Action : Shift and goto state 104
+   yacc.py: 410:
+   yacc.py: 411:State  : 104
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA . LexToken(ID,'y',5,102)
+   yacc.py: 445:Action : Shift and goto state 159
+   yacc.py: 410:
+   yacc.py: 411:State  : 159
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA ID . LexToken(COMMA,',',5,103)
+   yacc.py: 471:Action : Reduce rule [name_list -> name_list COMMA ID] with ['x',',','y'] and goto state 63
+   yacc.py: 506:Result : <Node @ 0x1075d5b38> (<AST.Node object at 0x1075d5b38>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 63
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list . LexToken(COMMA,',',5,103)
+   yacc.py: 445:Action : Shift and goto state 104
+   yacc.py: 410:
+   yacc.py: 411:State  : 104
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA . LexToken(ID,'s',5,105)
+   yacc.py: 445:Action : Shift and goto state 159
+   yacc.py: 410:
+   yacc.py: 411:State  : 159
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COMMA ID . LexToken(COLON,':',5,106)
+   yacc.py: 471:Action : Reduce rule [name_list -> name_list COMMA ID] with [<Node @ 0x1075d5b38>,',','s'] and goto state 63
+   yacc.py: 506:Result : <Node @ 0x1075d5ac8> (<AST.Node object at 0x1075d5ac8>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 63
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list . LexToken(COLON,':',5,106)
+   yacc.py: 445:Action : Shift and goto state 103
+   yacc.py: 410:
+   yacc.py: 411:State  : 103
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON . LexToken(SYS_TYPE,'integer',5,108)
+   yacc.py: 445:Action : Shift and goto state 110
+   yacc.py: 410:
+   yacc.py: 411:State  : 110
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON SYS_TYPE . LexToken(SEMICON,';',5,115)
+   yacc.py: 471:Action : Reduce rule [simple_type_decl -> SYS_TYPE] with ['integer'] and goto state 107
+   yacc.py: 506:Result : <Node @ 0x1075d55f8> (<AST.Node object at 0x1075d55f8>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 107
+   yacc.py: 430:Defaulted state 107: Reduce using 20
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON simple_type_decl . LexToken(SEMICON,';',5,115)
+   yacc.py: 471:Action : Reduce rule [type_decl -> simple_type_decl] with [<Node @ 0x1075d55f8>] and goto state 158
+   yacc.py: 506:Result : <Node @ 0x1075d55f8> (<AST.Node object at 0x1075d55f8>)
    yacc.py: 410:
    yacc.py: 411:State  : 158
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON type_decl . LexToken(SEMICON,';',2,36)
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON type_decl . LexToken(SEMICON,';',5,115)
    yacc.py: 445:Action : Shift and goto state 208
    yacc.py: 410:
    yacc.py: 411:State  : 208
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON type_decl SEMICON . LexToken(kBEGIN,'begin',3,38)
-   yacc.py: 471:Action : Reduce rule [var_decl -> name_list COLON type_decl SEMICON] with [<Node @ 0x110b2a630>,':',<Node @ 0x110b2a748>,';'] and goto state 62
-   yacc.py: 506:Result : <Node @ 0x110b2a668> (<AST.Node object at 0x110b2a668>)
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR name_list COLON type_decl SEMICON . LexToken(ID,'arr1',5,117)
+   yacc.py: 471:Action : Reduce rule [var_decl -> name_list COLON type_decl SEMICON] with [<Node @ 0x1075d5ac8>,':',<Node @ 0x1075d55f8>,';'] and goto state 62
+   yacc.py: 506:Result : <Node @ 0x1075d5ba8> (<AST.Node object at 0x1075d5ba8>)
    yacc.py: 410:
    yacc.py: 411:State  : 62
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl . LexToken(kBEGIN,'begin',3,38)
-   yacc.py: 471:Action : Reduce rule [var_decl_list -> var_decl] with [<Node @ 0x110b2a668>] and goto state 61
-   yacc.py: 506:Result : <Node @ 0x110b2a668> (<AST.Node object at 0x110b2a668>)
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl . LexToken(ID,'arr1',5,117)
+   yacc.py: 471:Action : Reduce rule [var_decl_list -> var_decl] with [<Node @ 0x1075d5ba8>] and goto state 61
+   yacc.py: 506:Result : <Node @ 0x1075d5ba8> (<AST.Node object at 0x1075d5ba8>)
    yacc.py: 410:
    yacc.py: 411:State  : 61
-   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list . LexToken(kBEGIN,'begin',3,38)
-   yacc.py: 471:Action : Reduce rule [var_part -> kVAR var_decl_list] with ['var',<Node @ 0x110b2a668>] and goto state 23
-   yacc.py: 506:Result : <Node @ 0x110b2a668> (<AST.Node object at 0x110b2a668>)
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list . LexToken(ID,'arr1',5,117)
+   yacc.py: 445:Action : Shift and goto state 64
+   yacc.py: 410:
+   yacc.py: 411:State  : 64
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list ID . LexToken(COLON,':',5,121)
+   yacc.py: 471:Action : Reduce rule [name_list -> ID] with ['arr1'] and goto state 63
+   yacc.py: 506:Result : <str @ 0x1075d5998> ('arr1')
+   yacc.py: 410:
+   yacc.py: 411:State  : 63
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list name_list . LexToken(COLON,':',5,121)
+   yacc.py: 445:Action : Shift and goto state 103
+   yacc.py: 410:
+   yacc.py: 411:State  : 103
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list name_list COLON . LexToken(ID,'real_arr',5,123)
+   yacc.py: 445:Action : Shift and goto state 105
+   yacc.py: 410:
+   yacc.py: 411:State  : 105
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list name_list COLON ID . LexToken(SEMICON,';',5,131)
+   yacc.py: 471:Action : Reduce rule [simple_type_decl -> ID] with ['real_arr'] and goto state 107
+   yacc.py: 506:Result : <Node @ 0x1075d5be0> (<AST.Node object at 0x1075d5be0>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 107
+   yacc.py: 430:Defaulted state 107: Reduce using 20
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list name_list COLON simple_type_decl . LexToken(SEMICON,';',5,131)
+   yacc.py: 471:Action : Reduce rule [type_decl -> simple_type_decl] with [<Node @ 0x1075d5be0>] and goto state 158
+   yacc.py: 506:Result : <Node @ 0x1075d5be0> (<AST.Node object at 0x1075d5be0>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 158
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list name_list COLON type_decl . LexToken(SEMICON,';',5,131)
+   yacc.py: 445:Action : Shift and goto state 208
+   yacc.py: 410:
+   yacc.py: 411:State  : 208
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list name_list COLON type_decl SEMICON . LexToken(kBEGIN,'begin',6,133)
+   yacc.py: 471:Action : Reduce rule [var_decl -> name_list COLON type_decl SEMICON] with ['arr1',':',<Node @ 0x1075d5be0>,';'] and goto state 102
+   yacc.py: 506:Result : <Node @ 0x1075d5860> (<AST.Node object at 0x1075d5860>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 102
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list var_decl . LexToken(kBEGIN,'begin',6,133)
+   yacc.py: 471:Action : Reduce rule [var_decl_list -> var_decl_list var_decl] with [<Node @ 0x1075d5ba8>,<Node @ 0x1075d5860>] and goto state 61
+   yacc.py: 506:Result : <Node @ 0x1075d5908> (<AST.Node object at 0x1075d5908>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 61
+   yacc.py: 435:Stack  : program_head const_part type_part kVAR var_decl_list . LexToken(kBEGIN,'begin',6,133)
+   yacc.py: 471:Action : Reduce rule [var_part -> kVAR var_decl_list] with ['var',<Node @ 0x1075d5908>] and goto state 23
+   yacc.py: 506:Result : <Node @ 0x1075d5908> (<AST.Node object at 0x1075d5908>)
    yacc.py: 410:
    yacc.py: 411:State  : 23
-   yacc.py: 435:Stack  : program_head const_part type_part var_part . LexToken(kBEGIN,'begin',3,38)
+   yacc.py: 435:Stack  : program_head const_part type_part var_part . LexToken(kBEGIN,'begin',6,133)
    yacc.py: 474:Action : Reduce rule [empty -> <empty>] with [] and goto state 56
-   yacc.py: 548:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 548:Result : <NoneType @ 0x105344f78> (None)
    yacc.py: 410:
    yacc.py: 411:State  : 56
-   yacc.py: 435:Stack  : program_head const_part type_part var_part empty . LexToken(kBEGIN,'begin',3,38)
+   yacc.py: 435:Stack  : program_head const_part type_part var_part empty . LexToken(kBEGIN,'begin',6,133)
    yacc.py: 471:Action : Reduce rule [routine_part -> empty] with [None] and goto state 53
-   yacc.py: 506:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 506:Result : <NoneType @ 0x105344f78> (None)
    yacc.py: 410:
    yacc.py: 411:State  : 53
-   yacc.py: 435:Stack  : program_head const_part type_part var_part routine_part . LexToken(kBEGIN,'begin',3,38)
-   yacc.py: 471:Action : Reduce rule [routine_head -> const_part type_part var_part routine_part] with [None,None,<Node @ 0x110b2a668>,None] and goto state 5
-   yacc.py: 506:Result : <Node @ 0x110b2a898> (<AST.Node object at 0x110b2a898>)
+   yacc.py: 435:Stack  : program_head const_part type_part var_part routine_part . LexToken(kBEGIN,'begin',6,133)
+   yacc.py: 471:Action : Reduce rule [routine_head -> const_part type_part var_part routine_part] with [None,<Node @ 0x1075d5b00>,<Node @ 0x1075d5908>,None] and goto state 5
+   yacc.py: 506:Result : <Node @ 0x1075d5a58> (<AST.Node object at 0x1075d5a58>)
    yacc.py: 410:
    yacc.py: 411:State  : 5
-   yacc.py: 435:Stack  : program_head routine_head . LexToken(kBEGIN,'begin',3,38)
+   yacc.py: 435:Stack  : program_head routine_head . LexToken(kBEGIN,'begin',6,133)
    yacc.py: 445:Action : Shift and goto state 13
    yacc.py: 410:
    yacc.py: 411:State  : 13
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN . LexToken(ID,'x',4,45)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN . LexToken(ID,'s',10,191)
    yacc.py: 474:Action : Reduce rule [empty -> <empty>] with [] and goto state 22
-   yacc.py: 548:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 548:Result : <NoneType @ 0x105344f78> (None)
    yacc.py: 410:
    yacc.py: 411:State  : 22
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN empty . LexToken(ID,'x',4,45)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN empty . LexToken(ID,'s',10,191)
    yacc.py: 471:Action : Reduce rule [stmt_list -> empty] with [None] and goto state 21
-   yacc.py: 506:Result : <NoneType @ 0x10e89bf78> (None)
+   yacc.py: 506:Result : <NoneType @ 0x105344f78> (None)
    yacc.py: 410:
    yacc.py: 411:State  : 21
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list . LexToken(ID,'x',4,45)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list . LexToken(ID,'s',10,191)
    yacc.py: 445:Action : Shift and goto state 44
    yacc.py: 410:
    yacc.py: 411:State  : 44
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID . LexToken(ASSIGN,':=',4,47)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID . LexToken(ASSIGN,':=',10,193)
    yacc.py: 445:Action : Shift and goto state 75
    yacc.py: 410:
    yacc.py: 411:State  : 75
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN . LexToken(SUBTRACT,'-',4,50)
-   yacc.py: 445:Action : Shift and goto state 84
-   yacc.py: 410:
-   yacc.py: 411:State  : 84
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT . LexToken(INTEGER,4,4,51)
-   yacc.py: 445:Action : Shift and goto state 68
-   yacc.py: 410:
-   yacc.py: 411:State  : 68
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT INTEGER . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [4] and goto state 89
-   yacc.py: 506:Result : <Node @ 0x110b2a940> (<AST.Node object at 0x110b2a940>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 89
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT const_value . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [factor -> const_value] with [<Node @ 0x110b2a940>] and goto state 140
-   yacc.py: 506:Result : <Node @ 0x110b2a940> (<AST.Node object at 0x110b2a940>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 140
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT factor . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [factor -> SUBTRACT factor] with ['-',<Node @ 0x110b2a940>] and goto state 85
-   yacc.py: 506:Result : <Node @ 0x110b2a5c0> (<AST.Node object at 0x110b2a5c0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 85
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN factor . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x110b2a5c0>] and goto state 83
-   yacc.py: 506:Result : <Node @ 0x110b2a5c0> (<AST.Node object at 0x110b2a5c0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 83
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN term . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [expr -> term] with [<Node @ 0x110b2a5c0>] and goto state 82
-   yacc.py: 506:Result : <Node @ 0x110b2a5c0> (<AST.Node object at 0x110b2a5c0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 82
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [expression -> expr] with [<Node @ 0x110b2a5c0>] and goto state 117
-   yacc.py: 506:Result : <Node @ 0x110b2a5c0> (<AST.Node object at 0x110b2a5c0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 117
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expression . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [assign_stmt -> ID ASSIGN expression] with ['x',':=',<Node @ 0x110b2a5c0>] and goto state 35
-   yacc.py: 506:Result : <Node @ 0x110b2a5f8> (<AST.Node object at 0x110b2a5f8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 35
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list assign_stmt . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [non_label_stmt -> assign_stmt] with [<Node @ 0x110b2a5f8>] and goto state 34
-   yacc.py: 506:Result : <Node @ 0x110b2a5f8> (<AST.Node object at 0x110b2a5f8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 34
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list non_label_stmt . LexToken(SEMICON,';',4,52)
-   yacc.py: 471:Action : Reduce rule [stmt -> non_label_stmt] with [<Node @ 0x110b2a5f8>] and goto state 32
-   yacc.py: 506:Result : <Node @ 0x110b2a5f8> (<AST.Node object at 0x110b2a5f8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 32
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt . LexToken(SEMICON,';',4,52)
-   yacc.py: 445:Action : Shift and goto state 73
-   yacc.py: 410:
-   yacc.py: 411:State  : 73
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt SEMICON . LexToken(ID,'y',5,55)
-   yacc.py: 471:Action : Reduce rule [stmt_list -> stmt_list stmt SEMICON] with [None,<Node @ 0x110b2a5f8>,';'] and goto state 21
-   yacc.py: 506:Result : <Node @ 0x110b2aa58> (<AST.Node object at 0x110b2aa58>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 21
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list . LexToken(ID,'y',5,55)
-   yacc.py: 445:Action : Shift and goto state 44
-   yacc.py: 410:
-   yacc.py: 411:State  : 44
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID . LexToken(ASSIGN,':=',5,57)
-   yacc.py: 445:Action : Shift and goto state 75
-   yacc.py: 410:
-   yacc.py: 411:State  : 75
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN . LexToken(INTEGER,1,5,60)
-   yacc.py: 445:Action : Shift and goto state 68
-   yacc.py: 410:
-   yacc.py: 411:State  : 68
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN INTEGER . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [1] and goto state 89
-   yacc.py: 506:Result : <Node @ 0x110b2a7b8> (<AST.Node object at 0x110b2a7b8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 89
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN const_value . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [factor -> const_value] with [<Node @ 0x110b2a7b8>] and goto state 85
-   yacc.py: 506:Result : <Node @ 0x110b2a7b8> (<AST.Node object at 0x110b2a7b8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 85
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN factor . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x110b2a7b8>] and goto state 83
-   yacc.py: 506:Result : <Node @ 0x110b2a7b8> (<AST.Node object at 0x110b2a7b8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 83
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN term . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [expr -> term] with [<Node @ 0x110b2a7b8>] and goto state 82
-   yacc.py: 506:Result : <Node @ 0x110b2a7b8> (<AST.Node object at 0x110b2a7b8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 82
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [expression -> expr] with [<Node @ 0x110b2a7b8>] and goto state 117
-   yacc.py: 506:Result : <Node @ 0x110b2a7b8> (<AST.Node object at 0x110b2a7b8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 117
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expression . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [assign_stmt -> ID ASSIGN expression] with ['y',':=',<Node @ 0x110b2a7b8>] and goto state 35
-   yacc.py: 506:Result : <Node @ 0x110b2a8d0> (<AST.Node object at 0x110b2a8d0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 35
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list assign_stmt . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [non_label_stmt -> assign_stmt] with [<Node @ 0x110b2a8d0>] and goto state 34
-   yacc.py: 506:Result : <Node @ 0x110b2a8d0> (<AST.Node object at 0x110b2a8d0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 34
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list non_label_stmt . LexToken(SEMICON,';',5,61)
-   yacc.py: 471:Action : Reduce rule [stmt -> non_label_stmt] with [<Node @ 0x110b2a8d0>] and goto state 32
-   yacc.py: 506:Result : <Node @ 0x110b2a8d0> (<AST.Node object at 0x110b2a8d0>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 32
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt . LexToken(SEMICON,';',5,61)
-   yacc.py: 445:Action : Shift and goto state 73
-   yacc.py: 410:
-   yacc.py: 411:State  : 73
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt SEMICON . LexToken(ID,'s',6,64)
-   yacc.py: 471:Action : Reduce rule [stmt_list -> stmt_list stmt SEMICON] with [<Node @ 0x110b2aa58>,<Node @ 0x110b2a8d0>,';'] and goto state 21
-   yacc.py: 506:Result : <Node @ 0x110b2aac8> (<AST.Node object at 0x110b2aac8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 21
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list . LexToken(ID,'s',6,64)
-   yacc.py: 445:Action : Shift and goto state 44
-   yacc.py: 410:
-   yacc.py: 411:State  : 44
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID . LexToken(ASSIGN,':=',6,66)
-   yacc.py: 445:Action : Shift and goto state 75
-   yacc.py: 410:
-   yacc.py: 411:State  : 75
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN . LexToken(SUBTRACT,'-',6,69)
-   yacc.py: 445:Action : Shift and goto state 84
-   yacc.py: 410:
-   yacc.py: 411:State  : 84
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT . LexToken(ID,'x',6,70)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN . LexToken(ID,'real_arr',10,196)
    yacc.py: 445:Action : Shift and goto state 86
    yacc.py: 410:
    yacc.py: 411:State  : 86
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT ID . LexToken(ADD,'+',6,72)
-   yacc.py: 471:Action : Reduce rule [factor -> ID] with ['x'] and goto state 140
-   yacc.py: 506:Result : <str @ 0x10ea55768> ('x')
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID . LexToken(LB,'[',10,204)
+   yacc.py: 445:Action : Shift and goto state 142
    yacc.py: 410:
-   yacc.py: 411:State  : 140
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN SUBTRACT factor . LexToken(ADD,'+',6,72)
-   yacc.py: 471:Action : Reduce rule [factor -> SUBTRACT factor] with ['-','x'] and goto state 85
-   yacc.py: 506:Result : <Node @ 0x110b2a978> (<AST.Node object at 0x110b2a978>)
+   yacc.py: 411:State  : 142
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB . LexToken(INTEGER,2,10,205)
+   yacc.py: 445:Action : Shift and goto state 68
+   yacc.py: 410:
+   yacc.py: 411:State  : 68
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB INTEGER . LexToken(ADD,'+',10,206)
+   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [2] and goto state 89
+   yacc.py: 506:Result : <Node @ 0x1075d5c88> (<AST.Node object at 0x1075d5c88>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 89
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB const_value . LexToken(ADD,'+',10,206)
+   yacc.py: 471:Action : Reduce rule [factor -> const_value] with [<Node @ 0x1075d5c88>] and goto state 85
+   yacc.py: 506:Result : <Node @ 0x1075d5c88> (<AST.Node object at 0x1075d5c88>)
    yacc.py: 410:
    yacc.py: 411:State  : 85
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN factor . LexToken(ADD,'+',6,72)
-   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x110b2a978>] and goto state 83
-   yacc.py: 506:Result : <Node @ 0x110b2a978> (<AST.Node object at 0x110b2a978>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB factor . LexToken(ADD,'+',10,206)
+   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x1075d5c88>] and goto state 83
+   yacc.py: 506:Result : <Node @ 0x1075d5c88> (<AST.Node object at 0x1075d5c88>)
    yacc.py: 410:
    yacc.py: 411:State  : 83
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN term . LexToken(ADD,'+',6,72)
-   yacc.py: 471:Action : Reduce rule [expr -> term] with [<Node @ 0x110b2a978>] and goto state 82
-   yacc.py: 506:Result : <Node @ 0x110b2a978> (<AST.Node object at 0x110b2a978>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB term . LexToken(ADD,'+',10,206)
+   yacc.py: 471:Action : Reduce rule [expr -> term] with [<Node @ 0x1075d5c88>] and goto state 82
+   yacc.py: 506:Result : <Node @ 0x1075d5c88> (<AST.Node object at 0x1075d5c88>)
    yacc.py: 410:
    yacc.py: 411:State  : 82
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr . LexToken(ADD,'+',6,72)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr . LexToken(ADD,'+',10,206)
    yacc.py: 445:Action : Shift and goto state 132
    yacc.py: 410:
    yacc.py: 411:State  : 132
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD . LexToken(ID,'y',6,74)
-   yacc.py: 445:Action : Shift and goto state 86
-   yacc.py: 410:
-   yacc.py: 411:State  : 86
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD ID . LexToken(kDIV,'div',6,76)
-   yacc.py: 471:Action : Reduce rule [factor -> ID] with ['y'] and goto state 85
-   yacc.py: 506:Result : <str @ 0x10ec7c110> ('y')
-   yacc.py: 410:
-   yacc.py: 411:State  : 85
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD factor . LexToken(kDIV,'div',6,76)
-   yacc.py: 471:Action : Reduce rule [term -> factor] with ['y'] and goto state 181
-   yacc.py: 506:Result : <str @ 0x10ec7c110> ('y')
-   yacc.py: 410:
-   yacc.py: 411:State  : 181
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term . LexToken(kDIV,'div',6,76)
-   yacc.py: 445:Action : Shift and goto state 136
-   yacc.py: 410:
-   yacc.py: 411:State  : 136
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV . LexToken(LP,'(',6,80)
-   yacc.py: 445:Action : Shift and goto state 87
-   yacc.py: 410:
-   yacc.py: 411:State  : 87
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP . LexToken(INTEGER,5,6,81)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr ADD . LexToken(INTEGER,1,10,207)
    yacc.py: 445:Action : Shift and goto state 68
    yacc.py: 410:
    yacc.py: 411:State  : 68
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP INTEGER . LexToken(DIV,'/',6,83)
-   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [5] and goto state 89
-   yacc.py: 506:Result : <Node @ 0x110b2aa90> (<AST.Node object at 0x110b2aa90>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr ADD INTEGER . LexToken(RB,']',10,208)
+   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [1] and goto state 89
+   yacc.py: 506:Result : <Node @ 0x1075d5c18> (<AST.Node object at 0x1075d5c18>)
    yacc.py: 410:
    yacc.py: 411:State  : 89
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP const_value . LexToken(DIV,'/',6,83)
-   yacc.py: 471:Action : Reduce rule [factor -> const_value] with [<Node @ 0x110b2aa90>] and goto state 85
-   yacc.py: 506:Result : <Node @ 0x110b2aa90> (<AST.Node object at 0x110b2aa90>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr ADD const_value . LexToken(RB,']',10,208)
+   yacc.py: 471:Action : Reduce rule [factor -> const_value] with [<Node @ 0x1075d5c18>] and goto state 85
+   yacc.py: 506:Result : <Node @ 0x1075d5c18> (<AST.Node object at 0x1075d5c18>)
    yacc.py: 410:
    yacc.py: 411:State  : 85
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP factor . LexToken(DIV,'/',6,83)
-   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x110b2aa90>] and goto state 83
-   yacc.py: 506:Result : <Node @ 0x110b2aa90> (<AST.Node object at 0x110b2aa90>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 83
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP term . LexToken(DIV,'/',6,83)
-   yacc.py: 445:Action : Shift and goto state 137
-   yacc.py: 410:
-   yacc.py: 411:State  : 137
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP term DIV . LexToken(INTEGER,4,6,85)
-   yacc.py: 445:Action : Shift and goto state 68
-   yacc.py: 410:
-   yacc.py: 411:State  : 68
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP term DIV INTEGER . LexToken(RP,')',6,86)
-   yacc.py: 471:Action : Reduce rule [const_value -> INTEGER] with [4] and goto state 89
-   yacc.py: 506:Result : <Node @ 0x110b2aeb8> (<AST.Node object at 0x110b2aeb8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 89
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP term DIV const_value . LexToken(RP,')',6,86)
-   yacc.py: 471:Action : Reduce rule [factor -> const_value] with [<Node @ 0x110b2aeb8>] and goto state 186
-   yacc.py: 506:Result : <Node @ 0x110b2aeb8> (<AST.Node object at 0x110b2aeb8>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 186
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP term DIV factor . LexToken(RP,')',6,86)
-   yacc.py: 471:Action : Reduce rule [term -> term DIV factor] with [<Node @ 0x110b2aa90>,'/',<Node @ 0x110b2aeb8>] and goto state 83
-   yacc.py: 506:Result : <Node @ 0x110b2ac50> (<AST.Node object at 0x110b2ac50>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 83
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP term . LexToken(RP,')',6,86)
-   yacc.py: 471:Action : Reduce rule [expr -> term] with [<Node @ 0x110b2ac50>] and goto state 82
-   yacc.py: 506:Result : <Node @ 0x110b2ac50> (<AST.Node object at 0x110b2ac50>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 82
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP expr . LexToken(RP,')',6,86)
-   yacc.py: 471:Action : Reduce rule [expression -> expr] with [<Node @ 0x110b2ac50>] and goto state 144
-   yacc.py: 506:Result : <Node @ 0x110b2ac50> (<AST.Node object at 0x110b2ac50>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 144
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP expression . LexToken(RP,')',6,86)
-   yacc.py: 445:Action : Shift and goto state 192
-   yacc.py: 410:
-   yacc.py: 411:State  : 192
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV LP expression RP . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [factor -> LP expression RP] with ['(',<Node @ 0x110b2ac50>,')'] and goto state 185
-   yacc.py: 506:Result : <Node @ 0x110b2ac50> (<AST.Node object at 0x110b2ac50>)
-   yacc.py: 410:
-   yacc.py: 411:State  : 185
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term kDIV factor . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [term -> term kDIV factor] with ['y','div',<Node @ 0x110b2ac50>] and goto state 181
-   yacc.py: 506:Result : <Node @ 0x110b2ad30> (<AST.Node object at 0x110b2ad30>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr ADD factor . LexToken(RB,']',10,208)
+   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x1075d5c18>] and goto state 181
+   yacc.py: 506:Result : <Node @ 0x1075d5c18> (<AST.Node object at 0x1075d5c18>)
    yacc.py: 410:
    yacc.py: 411:State  : 181
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr ADD term . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [expr -> expr ADD term] with [<Node @ 0x110b2a978>,'+',<Node @ 0x110b2ad30>] and goto state 82
-   yacc.py: 506:Result : <Node @ 0x110b2a908> (<AST.Node object at 0x110b2a908>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr ADD term . LexToken(RB,']',10,208)
+   yacc.py: 471:Action : Reduce rule [expr -> expr ADD term] with [<Node @ 0x1075d5c88>,'+',<Node @ 0x1075d5c18>] and goto state 82
+   yacc.py: 506:Result : <Node @ 0x1075d5fd0> (<AST.Node object at 0x1075d5fd0>)
    yacc.py: 410:
    yacc.py: 411:State  : 82
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [expression -> expr] with [<Node @ 0x110b2a908>] and goto state 117
-   yacc.py: 506:Result : <Node @ 0x110b2a908> (<AST.Node object at 0x110b2a908>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expr . LexToken(RB,']',10,208)
+   yacc.py: 471:Action : Reduce rule [expression -> expr] with [<Node @ 0x1075d5fd0>] and goto state 190
+   yacc.py: 506:Result : <Node @ 0x1075d5fd0> (<AST.Node object at 0x1075d5fd0>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 190
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expression . LexToken(RB,']',10,208)
+   yacc.py: 445:Action : Shift and goto state 223
+   yacc.py: 410:
+   yacc.py: 411:State  : 223
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN ID LB expression RB . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [factor -> ID LB expression RB] with ['real_arr','[',<Node @ 0x1075d5fd0>,']'] and goto state 85
+   yacc.py: 506:Result : <Node @ 0x1075d5eb8> (<AST.Node object at 0x1075d5eb8>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 85
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN factor . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [term -> factor] with [<Node @ 0x1075d5eb8>] and goto state 83
+   yacc.py: 506:Result : <Node @ 0x1075d5eb8> (<AST.Node object at 0x1075d5eb8>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 83
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN term . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [expr -> term] with [<Node @ 0x1075d5eb8>] and goto state 82
+   yacc.py: 506:Result : <Node @ 0x1075d5eb8> (<AST.Node object at 0x1075d5eb8>)
+   yacc.py: 410:
+   yacc.py: 411:State  : 82
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expr . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [expression -> expr] with [<Node @ 0x1075d5eb8>] and goto state 117
+   yacc.py: 506:Result : <Node @ 0x1075d5eb8> (<AST.Node object at 0x1075d5eb8>)
    yacc.py: 410:
    yacc.py: 411:State  : 117
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expression . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [assign_stmt -> ID ASSIGN expression] with ['s',':=',<Node @ 0x110b2a908>] and goto state 35
-   yacc.py: 506:Result : <Node @ 0x110b2acc0> (<AST.Node object at 0x110b2acc0>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list ID ASSIGN expression . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [assign_stmt -> ID ASSIGN expression] with ['s',':=',<Node @ 0x1075d5eb8>] and goto state 35
+   yacc.py: 506:Result : <Node @ 0x1075d5668> (<AST.Node object at 0x1075d5668>)
    yacc.py: 410:
    yacc.py: 411:State  : 35
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list assign_stmt . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [non_label_stmt -> assign_stmt] with [<Node @ 0x110b2acc0>] and goto state 34
-   yacc.py: 506:Result : <Node @ 0x110b2acc0> (<AST.Node object at 0x110b2acc0>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list assign_stmt . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [non_label_stmt -> assign_stmt] with [<Node @ 0x1075d5668>] and goto state 34
+   yacc.py: 506:Result : <Node @ 0x1075d5668> (<AST.Node object at 0x1075d5668>)
    yacc.py: 410:
    yacc.py: 411:State  : 34
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list non_label_stmt . LexToken(SEMICON,';',6,87)
-   yacc.py: 471:Action : Reduce rule [stmt -> non_label_stmt] with [<Node @ 0x110b2acc0>] and goto state 32
-   yacc.py: 506:Result : <Node @ 0x110b2acc0> (<AST.Node object at 0x110b2acc0>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list non_label_stmt . LexToken(SEMICON,';',10,209)
+   yacc.py: 471:Action : Reduce rule [stmt -> non_label_stmt] with [<Node @ 0x1075d5668>] and goto state 32
+   yacc.py: 506:Result : <Node @ 0x1075d5668> (<AST.Node object at 0x1075d5668>)
    yacc.py: 410:
    yacc.py: 411:State  : 32
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt . LexToken(SEMICON,';',6,87)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt . LexToken(SEMICON,';',10,209)
    yacc.py: 445:Action : Shift and goto state 73
    yacc.py: 410:
    yacc.py: 411:State  : 73
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt SEMICON . LexToken(kEND,'end',7,89)
-   yacc.py: 471:Action : Reduce rule [stmt_list -> stmt_list stmt SEMICON] with [<Node @ 0x110b2aac8>,<Node @ 0x110b2acc0>,';'] and goto state 21
-   yacc.py: 506:Result : <Node @ 0x110b2ac18> (<AST.Node object at 0x110b2ac18>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list stmt SEMICON . LexToken(kEND,'end',11,211)
+   yacc.py: 471:Action : Reduce rule [stmt_list -> stmt_list stmt SEMICON] with [None,<Node @ 0x1075d5668>,';'] and goto state 21
+   yacc.py: 506:Result : <Node @ 0x1075d56a0> (<AST.Node object at 0x1075d56a0>)
    yacc.py: 410:
    yacc.py: 411:State  : 21
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list . LexToken(kEND,'end',7,89)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list . LexToken(kEND,'end',11,211)
    yacc.py: 445:Action : Shift and goto state 31
    yacc.py: 410:
    yacc.py: 411:State  : 31
-   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list kEND . LexToken(DOT,'.',7,92)
-   yacc.py: 471:Action : Reduce rule [compound_stmt -> kBEGIN stmt_list kEND] with ['begin',<Node @ 0x110b2ac18>,'end'] and goto state 12
-   yacc.py: 506:Result : <Node @ 0x110b2ac18> (<AST.Node object at 0x110b2ac18>)
+   yacc.py: 435:Stack  : program_head routine_head kBEGIN stmt_list kEND . LexToken(DOT,'.',11,214)
+   yacc.py: 471:Action : Reduce rule [compound_stmt -> kBEGIN stmt_list kEND] with ['begin',<Node @ 0x1075d56a0>,'end'] and goto state 12
+   yacc.py: 506:Result : <Node @ 0x1075d56a0> (<AST.Node object at 0x1075d56a0>)
    yacc.py: 410:
    yacc.py: 411:State  : 12
-   yacc.py: 435:Stack  : program_head routine_head compound_stmt . LexToken(DOT,'.',7,92)
-   yacc.py: 471:Action : Reduce rule [routine_body -> compound_stmt] with [<Node @ 0x110b2ac18>] and goto state 11
-   yacc.py: 506:Result : <Node @ 0x110b2ac18> (<AST.Node object at 0x110b2ac18>)
+   yacc.py: 435:Stack  : program_head routine_head compound_stmt . LexToken(DOT,'.',11,214)
+   yacc.py: 471:Action : Reduce rule [routine_body -> compound_stmt] with [<Node @ 0x1075d56a0>] and goto state 11
+   yacc.py: 506:Result : <Node @ 0x1075d56a0> (<AST.Node object at 0x1075d56a0>)
    yacc.py: 410:
    yacc.py: 411:State  : 11
-   yacc.py: 435:Stack  : program_head routine_head routine_body . LexToken(DOT,'.',7,92)
-   yacc.py: 471:Action : Reduce rule [routine -> routine_head routine_body] with [<Node @ 0x110b2a898>,<Node @ 0x110b2ac18>] and goto state 4
-   yacc.py: 506:Result : <Node @ 0x110b2afd0> (<AST.Node object at 0x110b2afd0>)
+   yacc.py: 435:Stack  : program_head routine_head routine_body . LexToken(DOT,'.',11,214)
+   yacc.py: 471:Action : Reduce rule [routine -> routine_head routine_body] with [<Node @ 0x1075d5a58>,<Node @ 0x1075d56a0>] and goto state 4
+   yacc.py: 506:Result : <Node @ 0x1075d5e80> (<AST.Node object at 0x1075d5e80>)
    yacc.py: 410:
    yacc.py: 411:State  : 4
-   yacc.py: 435:Stack  : program_head routine . LexToken(DOT,'.',7,92)
+   yacc.py: 435:Stack  : program_head routine . LexToken(DOT,'.',11,214)
    yacc.py: 445:Action : Shift and goto state 10
    yacc.py: 410:
    yacc.py: 411:State  : 10
    yacc.py: 430:Defaulted state 10: Reduce using 1
    yacc.py: 435:Stack  : program_head routine DOT . None
-   yacc.py: 471:Action : Reduce rule [program -> program_head routine DOT] with ['Simple',<Node @ 0x110b2afd0>,'.'] and goto state 1
-   yacc.py: 506:Result : <Node @ 0x110b2a6a0> (<AST.Node object at 0x110b2a6a0>)
+   yacc.py: 471:Action : Reduce rule [program -> program_head routine DOT] with ['Simple',<Node @ 0x1075d5e80>,'.'] and goto state 1
+   yacc.py: 506:Result : <Node @ 0x1075d5550> (<AST.Node object at 0x1075d5550>)
    yacc.py: 410:
    yacc.py: 411:State  : 1
    yacc.py: 435:Stack  : program . $end
-   yacc.py: 571:Done   : Returning <Node @ 0x110b2a6a0> (<AST.Node object at 0x110b2a6a0>)
+   yacc.py: 571:Done   : Returning <Node @ 0x1075d5550> (<AST.Node object at 0x1075d5550>)
    yacc.py: 572:PLY: PARSE DEBUG END

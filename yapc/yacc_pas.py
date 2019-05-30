@@ -460,21 +460,32 @@ def p_term(p):
         p[0] = Node("term-AND", p[1], p[3])
 
 
+def p_factor_func(p):
+    """
+    factor  : ID  LP  args_list  RP
+            | SYS_FUNCT  LP  args_list  RP
+    """
+    p[0] = Node('factor-func', p[1], p[3])
+
+
+def p_factor_arr(p):
+    """
+    factor  : ID  LB  expression  RB
+    """
+    p[0] = Node('factor-arr', p[1], p[3])
+
+
 def p_factor_1(p):
-    '''factor :  ID  
-                    |  ID  LP  args_list  RP  
+    # factor : ID  LB  expression  RB // for array
+    '''factor :  ID
                     |  SYS_FUNCT
-                    |  SYS_FUNCT  LP  args_list  RP  
-                    |  const_value  
+                    |  const_value
                     |  kNOT  factor
                     |  SUBTRACT  factor  
-                    |  ID  LB  expression  RB'''
+    '''
     if len(p) == 2:
         # yeeef: make the tree smaller
         p[0] = p[1]
-    elif len(p) == 5:
-        # TODO: ID LB expression RB 感觉要区分
-        p[0] = Node("factor", p[1], p[3])  # func(arglist)
     elif len(p) == 3:
         p[0] = Node("factor", p[1], p[2])  # not和负
 
@@ -530,10 +541,10 @@ if __name__ == '__main__':
     graph(parse_tree_root, "graph")
     static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
-    code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-    code_generator.gen_three_address_code()
+    # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
+    # code_generator.gen_three_address_code()
     print(static_semantic_analyzer.symbol_table)
 
-    _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+    # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
 
     graph(parse_tree_root, "new_graph")

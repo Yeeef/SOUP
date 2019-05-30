@@ -219,6 +219,7 @@ together according to the semantic rules
         - [ ] 这个问题可以由把同种符号的 flatten 开解决
     - [ ] 关系表达式还没有 folding
 - [ ] 报错要精准到行
+- [ ] 把嵌套的 array type 直接压平 \[1..3, 2..4] of \[integer, real]
    
 
 

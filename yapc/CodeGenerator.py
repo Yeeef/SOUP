@@ -94,7 +94,8 @@ class CodeGenerator(object):
 
                 elif len(children) == 3:  # ID LB expression RB ASSIGN expression / ID  DOT  ID  ASSIGN  expression
                     if isinstance(children[1], Node):  # ID LB expression RB ASSIGN expression
-                        id_, _, expression_node = children
+                        id_, range_expression_node, val_expression_node = children
+
                     else:  # ID  DOT  ID  ASSIGN  expression
                         pass
                     pass
@@ -144,8 +145,8 @@ def gen_quad_list_from_expression_node(expression_node, quad_list):
                 target = 't{}'.format(len(quad_list))
                 quad_list.append(Quadruple(unary_op, target, right_val, None))
                 return target
-            else:
-                # TODO: array and record support
+            else:  # len(children
+                # TODO: record support
                 raise NotImplementedError('currently not support array and record')
 
         else:

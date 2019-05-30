@@ -98,5 +98,9 @@
 
 并在这个过程中逐渐填补 semantic 的坑
 
-### variable assignment
-
+- [ ] variable assignment
+    - [x] simple variable assignment
+    - [ ] array reference
+        - [ ] as right val
+            - [ ] support 1-d array
+- [ ]  

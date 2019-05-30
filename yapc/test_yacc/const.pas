@@ -1,5 +1,5 @@
 program Const;
-const a = 2; b = 3.4; c = 'l', flag=true;
+const a = 2; b = 3.4; c = 'l'; flag=true;
 type
     int=integer;
     int_alias=int;
@@ -17,6 +17,6 @@ var x, y, z: integer;
     quantum1 : array[1..10] of int_cube;
 begin
 
-    a := 1 * 5 + 2;
-    b := 2.5 / 5;
+    x := 1 * 5 + 2;
+    m := 2.5 / 5;
 end.
