@@ -4,6 +4,7 @@ from SymbolTable import *
 import copy
 from functools import reduce
 from utils import (bin_op_to_func, type_to_bin_op, bool_dict)
+import random
 
 
 def traverse_skew_tree(node, stop_node_type=None):
@@ -286,5 +287,5 @@ def descend(node):
 
 def s(node):
     if node.__class__ != Node:
-        return "%s (%s)" % (node, id(node))
+        return "%s (%s)" % (node, random.uniform(0, 10))
     return "%s (%s)" % (node.type, id(node))

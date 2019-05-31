@@ -14,7 +14,8 @@ class SemanticAnalyzer(object):
     def __init__(self, root_node):
         assert isinstance(root_node, Node), type(root_node)
         self._ast = root_node
-        self._symb_tab = SymbolTable()
+        # dummy parent, no children
+        self._symb_tab = SymbolTableNode(None, None)
 
     @property
     def symbol_table(self):
@@ -133,6 +134,13 @@ class SemanticAnalyzer(object):
 
                     if is_conflict:
                         raise ConflictIDError(id_, symb_tab_item)
+
+            elif root_node.type == 'procedure_decl':
+
+                """ procedure declaration """
+
+
+                pass
 
             elif root_node.type.startswith('assign_stmt'):
 

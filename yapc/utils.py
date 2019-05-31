@@ -6,7 +6,7 @@ bin_op_to_func = {'+': lambda x, y: x+y, '-': lambda x, y: x-y, '*': lambda x, y
                   'and': lambda x, y: x and y, 'or': lambda x, y: x or y}
 type_to_bin_op = dict([
             ('expr-ADD', '+'),
-            ('expr-SUBSTRACT', '-'),
+            ('expr-SUBTRACT', '-'),
             ('expr-OR', 'or'),
             ('term-MUL', '*'),
             ('term-DIV', '/'),

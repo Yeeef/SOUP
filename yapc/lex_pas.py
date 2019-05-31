@@ -97,9 +97,9 @@ identifier = r'[_a-zA-Z][_a-zA-Z0-9]*'
 interger = r'\d+'
 real = r'\d+\.\d+'
 newline = r'\n+'
-comment = r'{.*}'
+comment = r'{[\S\s\n]*?}'
 
-t_ignore = ' \t'
+t_ignore = ' \t\r'
 
 
 @TOKEN(identifier)
@@ -139,7 +139,7 @@ def t_comment(t):
 
 
 def t_error(t):
-    print("Illegal char: '%s'" % t.value[0])
+    print("Illegal char: `%s` at line %d" % (t.value[0], t.lexer.lineno))
     exit(-1)
 
 
@@ -152,6 +152,8 @@ if __name__ == "__main__":
     INPUT = """
 program Const;
 const a = 2; b = 3.4; c = 'l';
+{asdf sd
+asdfdfs}
 type 
     int_alias=int;
     double=real;

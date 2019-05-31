@@ -2,6 +2,8 @@
 # File: SymbolTable.py
 # define SymbolTable data struct and util funcs
 
+import pydot
+
 
 class ArrayType(object):
     def __init__(self, index_type, index_range, element_type):
@@ -86,7 +88,44 @@ class SymbolTable(object):
         return val
 
     def delete(self, key):
-        if isinstance(self.lookup(key), None):
+        if self.lookup(key) is None:
             return False, None
         else:
             return True, self._symb_tab.pop(key)
+
+
+class SymbolTableNode(SymbolTable):
+
+    def __init__(self, parent, children):
+        super(SymbolTableNode, self).__init__()
+        self.parent = parent
+        if children is not None:
+            self.children = list(children)
+        else:
+            self.children = []
+
+    def add_child(self, child):
+        assert isinstance(child, SymbolTableNode), type(child)
+        self.children.append(child)
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def to_graph(self, file_name):
+        edges = self._descend()
+        g = pydot.graph_from_edges(edges)
+        g.write_png(file_name, prog='dot')
+
+    def _descend(self):
+        edges = []
+        if len(self.children) == 0:
+            edges.append((str(self), "no child"))
+        for child in self.children:
+            edges.append((str(self), str(child)))
+            edges += child._descend()
+        return edges
+
+
+def make_parent_and_child(parent_node, child_node):
+    parent_node.add_child(child_node)
+    child_node.set_parent(parent_node)
