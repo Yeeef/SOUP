@@ -15,3 +15,6 @@ type_to_bin_op = dict([
             ('term-AND', 'and'),
         ])
 bool_dict = {'true': True, 'false': False}
+bool_op_to_func = {'>=': lambda x, y: x >= y, '>': lambda x, y: x > y,
+                   '<=': lambda x, y: x <= y, '<': lambda x, y: x < y,
+                   '=': lambda x, y: x == y, '<>': lambda x, y: x != y}
