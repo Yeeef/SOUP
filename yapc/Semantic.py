@@ -27,12 +27,6 @@ class SemanticAnalyzer(object):
 
     def analyze(self):
         """
-        semantic analysis interface
-        currently 1 scope, 2 pass, 1th pass is done in __init__
-        So basically, this func will bind values to the variable
-        影响 value 值的语句，只有 assignment_statement
-        但是 func, procedure 的值不方便直接做推断，这里先通通假设没有 func / procedure
-        if 语句也会影响啊。。。我晕了，看看一开始的那个 c++ 代码吧
         :return:
         """
         self._traverse_tree_and_fill_tab(self._ast)
@@ -127,7 +121,7 @@ class SemanticAnalyzer(object):
                         index_type, element_type, left_val, right_val = attributes
                         array_type = ArrayType(index_type, (left_val, right_val), element_type)
                         symb_tab_item = SymbolTableItem('arr_var',
-                                                        array_type)
+                                                        array_type.to_dict())
 
                     # insert into symbol table
                     is_conflict, ret_val = self._insert(id_, symb_tab_item)
@@ -139,8 +133,18 @@ class SemanticAnalyzer(object):
 
                 """ procedure declaration """
 
+                proc_head_node, routine_node = root_node.children
+                proc_id, para_decl_list_node = proc_head_node.children
+                ret_val = self._symb_tab.lookup(proc_id)
+                if ret_val is not None:
+                    raise Exception('procedure `{}` is already defined'.format(proc_id))
 
-                pass
+                # parse para_decl_list
+
+                var_val_para_type_list = parse_para_decl_list(para_decl_list_node, self._symb_tab)
+                print(var_val_para_type_list)
+                symb_tab_item = ProcedureItem(var_val_para_type_list, [])
+                self._symb_tab.insert(proc_id, symb_tab_item)
 
             elif root_node.type.startswith('assign_stmt'):
 

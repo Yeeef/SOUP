@@ -202,6 +202,7 @@ together according to the semantic rules
     - [x] type declaration 也可能是 name_list(不在 grammar rule 中)
 - [x] 加入 type checking
     - [x] 现在只有基础的 type checking, 也就是是否定义过
+    - [ ] 之前所有仅仅判断了是否没有定义，但是么有管是否重复定义
     - [ ] 可以做的狠一点, 强制左右必须一致
 - [x] 加入 constant folding
     - [x] constant 不能被再次赋值
@@ -218,9 +219,21 @@ together according to the semantic rules
 - [ ] 报错要精准到行
 - [ ] 把嵌套的 array type 直接压平 \[1..3, 2..4] of \[integer, real]
 - [ ] 加入对 record 支持 
+- [ ] 之前所有仅仅判断了是否没有定义，但是么有管是否重复定义
+- [ ] 其实之前把那玩意压平的操作用处不大，后续也可能会出现问题
+- [ ] constant folding 的操作完全可以加入到 parse expression node 中，否则我在之后每次都要判断哪些节点需要 constant_folding
+    - [ ] 根本问题在于我的递归并没有写在一个函数里，而是通过一些子递归
+    - [ ] 解决这个问题，我感觉可以通过把 routine 当作一个逻辑单元来解决
 - [ ] 加入对 procedure 的支持
-    - [ ] scope 机制需要实现了
-    - [ ] 暂时仅支持 param passing by value, 不支持 param passing by reference  
+    - [x] 修改了 symboltable 的数据结构，继承 symboltable, 得到 symbol_table node
+        - [x] 可视化
+        - [x] look up 操作需要更改
+    - [x] 先考虑只有一个 procedure 的情况
+    - [x] scope 机制需要实现了
+    - [ ] 开始两个 procedure 的情况
+    - [ ] procedure 嵌套 procedure 的情况
+    - [ ] 暂时仅支持 param passing by value, 不支持 param passing by reference
+- [ ] array type 也继承 symboltab item  
 
 
 constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__

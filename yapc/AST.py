@@ -3,7 +3,7 @@ from ErrorHandler import *
 from SymbolTable import *
 import copy
 from functools import reduce
-from utils import (bin_op_to_func, type_to_bin_op, bool_dict)
+from utils import *
 import random
 
 
@@ -128,6 +128,9 @@ def parse_type_decl_node(type_decl_node, symbol_table):
     elif type_decl_node.type == 'array':
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
         return ArrayType(index_type, (left_val, right_val), element_type)
+
+    else:
+        raise NotImplementedError('{}'.format(type_decl_node.type))
 
 
 def parse_array_from_array_node(arr_node, symbol_table):
@@ -262,6 +265,63 @@ def constant_folding(node, symbol_table):
             return reduce(arithmic_func, val_list)
         else:
             return None
+
+
+def parse_para_decl_list(ast_node, symb_tab_node):
+    """
+    需要建一个新的 symbol table
+    :param node: ast node
+    :param symbol_table_node: symb_tab node
+    :return:
+    """
+    new_symb_tab_node = SymbolTableNode(None, None)
+    make_parent_and_child(symb_tab_node, new_symb_tab_node)
+    if ast_node.type == 'para_decl_list':
+        left_child, right_child = ast_node.children
+        return [parse_var_val_para_type_list(left_child, new_symb_tab_node),
+               parse_var_val_para_type_list(right_child, new_symb_tab_node)]
+    else:  # 只有一个 para_decl 的情况
+        return [parse_var_val_para_type_list(ast_node, new_symb_tab_node)]
+
+
+def parse_var_val_para_type_list(ast_node, symb_tab_node):
+    """
+    需要在 symbtab 中插入这些 para declaration
+    parse var_para_type_list|val_para_type_list
+    :param ast_node:
+    :param symb_tab_node:
+    :return:
+    """
+    left_child, right_child = ast_node.children
+    name_list = parse_name_list(left_child, symb_tab_node)
+    type_ = parse_type_decl_node(right_child, symb_tab_node)
+    for name in name_list:
+        # TODO: 暂时把所有参数在新的 scope 下存成 var 型
+        symb_tab_item = SymbolTableItem('var', {'var_type': type_})
+        symb_tab_node.insert(name, symb_tab_item)
+    if ast_node.type == 'var_para_type_list':  # var_para_type_list
+
+        return 'var', name_list, type_
+    else:  # val_para_type_list
+        return 'val', name_list, type_
+
+
+def parse_name_list(ast_node, symb_tab_node):
+    """
+    maybe name_list or just a str
+    """
+    if isinstance(ast_node, str):
+        if symb_tab_node.lookup(ast_node) is not None:
+            raise Exception('variable {} is already defined'.format(ast_node))
+        return [ast_node]
+
+    elif ast_node.type == 'name_list':
+        left_child, right_child = ast_node.children
+        name_list = parse_name_list(left_child, symb_tab_node) + parse_name_list(right_child, symb_tab_node)
+        return name_list
+
+    else:
+        raise NotImplementedError("{} is supported when parsing name_list node".format(ast_node.type))
 
 
 def graph(node, filename):

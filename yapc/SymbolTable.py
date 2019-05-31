@@ -47,7 +47,11 @@ class ArrayElementType(object):
 
 
 class SymbolTableItem(object):
+    """
+    base class for SymbolTableItem
+    """
     def __init__(self, type, value):
+        assert isinstance(value, dict), type(value)
         self._type = type
         self._value = value
 
@@ -62,6 +66,26 @@ class SymbolTableItem(object):
     def __str__(self):
         info = '<SymbolTableItem type: {}, value: {}>'.format(self._type, self._value)
         return info
+
+
+class ProcedureItem(SymbolTableItem):
+    """
+    procedure
+    """
+    def __init__(self, para_list, declare_list):
+        type_ = 'procedure'
+        self.para_list = ProcedureItem.flatten_para_list(para_list)
+        self.declare_list = declare_list
+        super(ProcedureItem, self).__init__(type_, {'para_list': self.para_list, 'declare_list': self.declare_list})
+
+    @staticmethod
+    def flatten_para_list(para_list):
+        param_val_var_list = []
+        for para in para_list:
+            var_or_val, name_list, data_type = para
+            for name in name_list:
+                param_val_var_list.append((var_or_val, name, data_type))
+        return param_val_var_list
 
 
 class SymbolTable(object):
@@ -104,12 +128,25 @@ class SymbolTableNode(SymbolTable):
         else:
             self.children = []
 
-    def add_child(self, child):
+    def _add_child(self, child):
         assert isinstance(child, SymbolTableNode), type(child)
         self.children.append(child)
 
-    def set_parent(self, parent):
+    def _set_parent(self, parent):
         self.parent = parent
+
+    def chain_look_up(self, key):
+        """
+        post-order lookup
+        """
+        val = self._symb_tab.get(key, None)
+        if val is None:
+            if self.parent is None:
+                return None
+            else:
+                return self.parent.lookup(key)
+        else:
+            return val
 
     def to_graph(self, file_name):
         edges = self._descend()
@@ -127,5 +164,7 @@ class SymbolTableNode(SymbolTable):
 
 
 def make_parent_and_child(parent_node, child_node):
-    parent_node.add_child(child_node)
-    child_node.set_parent(parent_node)
+    assert isinstance(parent_node, SymbolTableNode)
+    assert isinstance(child_node, SymbolTableNode)
+    parent_node._add_child(child_node)
+    child_node._set_parent(parent_node)

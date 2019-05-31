@@ -15,3 +15,5 @@ type_to_bin_op = dict([
             ('term-AND', 'and'),
         ])
 bool_dict = {'true': True, 'false': False}
+_sys_type_set = {'real', 'integer', 'char'}
+SYS_TYPE_SET = _sys_type_set
