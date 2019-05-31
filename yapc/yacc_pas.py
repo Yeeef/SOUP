@@ -254,19 +254,22 @@ def p_para_decl_list(p):
         p[0] = p[1]
 
 
-def p_para_type_list(p):
+def p_var_para_type_list(p):
     'para_type_list :  var_para_list COLON  simple_type_decl'
-    p[0] = Node("para_type_list", p[1], p[3])
+    p[0] = Node("var_para_type_list", p[1], p[3])
 
 
-# FIXME: 在 function 定义中 kVAR name_list 和 name_list 的行为是不一样的，以 kVAR name_list 定义的参数可以直觉理解为传了指针，在函数内部改变，外面会跟着变
-# TODO: 我觉得我们可以直接不支持这个 feature, 保证函数的封闭        
-def p_var_para_list(p):
+def p_val_para_type_list(p):
+    'para_type_list :  val_para_list COLON  simple_type_decl'
+    p[0] = Node("val_para_type_list", p[1], p[3])
+
+
+def p_var_para_list_0(p):
     'var_para_list :  kVAR  name_list'
     p[0] = p[2]
 
 
-def p_val_para_list(p):
+def p_val_para_list_1(p):
     'val_para_list :  name_list'
     p[0] = p[1]
 
@@ -291,10 +294,12 @@ def p_stmt_list(p):
 # [TODO: resolved]: just remove INTEGER COLON?
 # 这是给 goto 用的
 def p_stmt(p):
-    '''stmt :  INTEGER  COLON  non_label_stmt  
-                    |  non_label_stmt'''
+    """
+    stmt :  INTEGER  COLON  non_label_stmt
+         |  non_label_stmt
+    """
     if len(p) > 2:
-        p[0] = Node("stmt", p[1], p[3])
+        p[0] = Node("stmt-label", p[1], p[3])
     else:
         p[0] = p[1]
 
@@ -341,7 +346,7 @@ def p_proc_stmt(p):
                     |  SYS_PROC  LP  expression_list  RP
                     |  kREAD  LP  factor  RP'''
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = Node("proc_stmt-simple", p[1])
     elif len(p) == 5:
         p[0] = Node("proc_stmt", p[1], p[3])
 
@@ -549,10 +554,11 @@ if __name__ == '__main__':
     graph(parse_tree_root, "graph")
     static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
-    code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-    code_generator.gen_three_address_code()
     print(static_semantic_analyzer.symbol_table)
+    static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
+    # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
+    # code_generator.gen_three_address_code()
 
-    _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+    # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
 
     graph(parse_tree_root, "new_graph")

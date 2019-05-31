@@ -1,9 +1,28 @@
 # schedule
 
-定好项目的进度时间
+## 分工
 
-如何分工？如何测试？接口怎么定好？
+- wdy: lexer, parser
+- yeeef: 
+    - static semantic analysis
+        - type checking
+        - constant folding
+        - scope mechanism
+    - code generator
+        - variable assignment
+        - array reference
+- cjr:
+    - code generator
+        - control statement
+        - func / proc definition & call
+        
+- _:
+    - optimization
+    - target code generation 
+    
+## plan
 
-接口可以参考 tiny 语言的文件定义
+### 5.31
 
-首先去了解 ply，这里还比较重要，再去搞清楚他的代码结构，这样才能想清楚我们的接口
+- finish code generator
+- finish static semantic analysis

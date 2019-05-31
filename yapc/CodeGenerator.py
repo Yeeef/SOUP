@@ -53,7 +53,6 @@ class CodeGenerator(object):
     """
     Accept ast and symbol table, generate intermediate code and [target code]
     """
-
     def __init__(self, ast, symbol_table):
         self._ast = ast
         self._symb_tab = symbol_table
@@ -105,7 +104,7 @@ class CodeGenerator(object):
                 """ assign statement """
 
                 children = root_node.children
-                if root_node.type == 'assign_stmt':
+                if root_node.type == 'assign_stmt':  # ID ASSIGN expression
 
                     if len(children) == 2:  # ID ASSIGN expression
                         # maybe_expression_node, because it may have been a constant folding result

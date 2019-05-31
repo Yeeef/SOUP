@@ -176,9 +176,6 @@ together according to the semantic rules
 - 2 pass, 把 value 的值在 symbol table 中存好, 尽管是 value binding ,但是这个过程依旧很难写成一个 post-order,
 因为在后续需要加入 scope 的信息，而 scope 是一个需要前序遍历才能得到的属性，
 
-### 第二个任务
-
-- 能否变为 1 pass, 其实不是很难
 
 ### 第三个任务
 
@@ -196,7 +193,6 @@ together according to the semantic rules
 
 那么接下来的工作：
 
-- [ ] 如何更好的分离返回 symb_tab 的 parse 和返回信息的 parse, 用一个装饰器？
 - [x] 加入 1d array declaration
 - [x] 加入 type declaration
     - [x] array 的 type 也可能是 alias type, 
@@ -205,8 +201,9 @@ together according to the semantic rules
         - [x] 先定义 ArrayType 的表示
     - [x] type declaration 也可能是 name_list(不在 grammar rule 中)
 - [x] 加入 type checking
-    - [ ] 现在只有基础的 type checking, 也就是是否定义过
-    - [ ] 可以做的狠一点
+    - [x] 现在只有基础的 type checking, 也就是是否定义过
+    - [ ] 之前所有仅仅判断了是否没有定义，但是么有管是否重复定义
+    - [ ] 可以做的狠一点, 强制左右必须一致
 - [x] 加入 constant folding
     - [x] constant 不能被再次赋值
     - [x] 对 boolean 的处理
@@ -217,11 +214,28 @@ together according to the semantic rules
     - [x] 数组赋值
     - [ ] 有一个问题在于 x := arr[1] + 1 + 2, 这个 1 + 2 不会被 fold 到一起，因为 1 在前面
         - [ ] 这个问题可以由把同种符号的 flatten 开解决
-    - [ ] 关系表达式还没有 folding
+    - [x] 关系表达式还没有 folding
+    - [ ] 其实可以全部转移到 code generator 中
 - [ ] 报错要精准到行
 - [ ] 把嵌套的 array type 直接压平 \[1..3, 2..4] of \[integer, real]
-   
-
+- [ ] 加入对 record 支持 
+- [ ] 之前所有仅仅判断了是否没有定义，但是么有管是否重复定义
+- [ ] 其实之前把那玩意压平的操作用处不大，后续也可能会出现问题
+- [ ] constant folding 的操作完全可以加入到 parse expression node 中，否则我在之后每次都要判断哪些节点需要 constant_folding
+    - [ ] 根本问题在于我的递归并没有写在一个函数里，而是通过一些子递归
+    - [ ] 解决这个问题，我感觉可以通过把 routine 当作一个逻辑单元来解决
+    - [ ] 尽量把所有操作封装进入 parse_*
+- [ ] 加入对 procedure 的支持
+    - [x] 修改了 symboltable 的数据结构，继承 symboltable, 得到 symbol_table node
+        - [x] 可视化
+        - [x] look up 操作需要更改
+    - [x] 先考虑只有一个 procedure 的情况
+    - [x] scope 机制需要实现了
+    - [ ] 开始两个 procedure 的情况
+    - [ ] procedure 嵌套 procedure 的情况
+    - [ ] 暂时仅支持 param passing by value, 不支持 param passing by reference
+- [ ] array type 也继承 symboltab item  
+- [ ] traverse skew tree 是一个比较好的操作，一定不能随随便就不用了
 
 constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__
 
