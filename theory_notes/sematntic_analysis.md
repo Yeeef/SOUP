@@ -224,6 +224,7 @@ together according to the semantic rules
 - [ ] constant folding 的操作完全可以加入到 parse expression node 中，否则我在之后每次都要判断哪些节点需要 constant_folding
     - [ ] 根本问题在于我的递归并没有写在一个函数里，而是通过一些子递归
     - [ ] 解决这个问题，我感觉可以通过把 routine 当作一个逻辑单元来解决
+    - [ ] 尽量把所有操作封装进入 parse_*
 - [ ] 加入对 procedure 的支持
     - [x] 修改了 symboltable 的数据结构，继承 symboltable, 得到 symbol_table node
         - [x] 可视化
@@ -234,7 +235,7 @@ together according to the semantic rules
     - [ ] procedure 嵌套 procedure 的情况
     - [ ] 暂时仅支持 param passing by value, 不支持 param passing by reference
 - [ ] array type 也继承 symboltab item  
-
+- [ ] traverse skew tree 是一个比较好的操作，一定不能随随便就不用了
 
 constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__
 

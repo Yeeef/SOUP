@@ -294,10 +294,12 @@ def p_stmt_list(p):
 # [TODO: resolved]: just remove INTEGER COLON?
 # 这是给 goto 用的
 def p_stmt(p):
-    '''stmt :  INTEGER  COLON  non_label_stmt  
-                    |  non_label_stmt'''
+    """
+    stmt :  INTEGER  COLON  non_label_stmt
+         |  non_label_stmt
+    """
     if len(p) > 2:
-        p[0] = Node("stmt", p[1], p[3])
+        p[0] = Node("stmt-label", p[1], p[3])
     else:
         p[0] = p[1]
 
@@ -344,7 +346,7 @@ def p_proc_stmt(p):
                     |  SYS_PROC  LP  expression_list  RP
                     |  kREAD  LP  factor  RP'''
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = Node("proc_stmt-simple", p[1])
     elif len(p) == 5:
         p[0] = Node("proc_stmt", p[1], p[3])
 
@@ -544,7 +546,7 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/proc.pas'
+    test_file = 'test_yacc/simple.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)

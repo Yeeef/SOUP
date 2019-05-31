@@ -51,7 +51,7 @@ class SymbolTableItem(object):
     base class for SymbolTableItem
     """
     def __init__(self, type, value):
-        assert isinstance(value, dict), type(value)
+        # assert isinstance(value, dict), type(value)
         self._type = type
         self._value = value
 
@@ -89,12 +89,13 @@ class ProcedureItem(SymbolTableItem):
 
 
 class SymbolTable(object):
-    def __init__(self):
+    def __init__(self, name):
         self._symb_tab = dict()
+        self._name = name
         # self._construct_tab()
 
     def __str__(self):
-        info = 'Symbol Table:\n'
+        info = 'Symbol Table: <{}>\n'.format(self._name)
         for key, val in self._symb_tab.items():
             info += '{}: {}\n'.format(key, val)
         return info
@@ -120,8 +121,8 @@ class SymbolTable(object):
 
 class SymbolTableNode(SymbolTable):
 
-    def __init__(self, parent, children):
-        super(SymbolTableNode, self).__init__()
+    def __init__(self, name, parent, children):
+        super(SymbolTableNode, self).__init__(name)
         self.parent = parent
         if children is not None:
             self.children = list(children)
