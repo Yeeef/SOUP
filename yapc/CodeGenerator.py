@@ -86,16 +86,15 @@ class CodeGenerator(object):
                 """ assign statement """
 
                 children = root_node.children
-                if root_node.type == 'assign_stmt':
+                if root_node.type == 'assign_stmt':  # ID ASSIGN expression
 
-                    if len(children) == 2:  # ID ASSIGN expression
-                        # maybe_expression_node, because it may have been a constant folding result
-                        id_, maybe_expression_node = children
-                        if not isinstance(maybe_expression_node, Node):
-                            self._quad_list.append(Quadruple(None, id_, maybe_expression_node, None))
-                        else:
-                            val = gen_quad_list_from_expression_node(maybe_expression_node, self._quad_list)
-                            self._quad_list.append(Quadruple(None, id_, val, None))
+                    # maybe_expression_node, because it may have been a constant folding result
+                    id_, maybe_expression_node = children
+                    if not isinstance(maybe_expression_node, Node):
+                        self._quad_list.append(Quadruple(None, id_, maybe_expression_node, None))
+                    else:
+                        val = gen_quad_list_from_expression_node(maybe_expression_node, self._quad_list)
+                        self._quad_list.append(Quadruple(None, id_, val, None))
 
                 elif root_node.type == 'assign_stmt-arr':  # ID LB expression RB assign expression
 

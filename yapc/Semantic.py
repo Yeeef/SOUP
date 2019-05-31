@@ -133,6 +133,7 @@ class SemanticAnalyzer(object):
 
                     if is_conflict:
                         raise ConflictIDError(id_, symb_tab_item)
+
             elif root_node.type.startswith('assign_stmt'):
 
                 """ constant folding, constant filling """
