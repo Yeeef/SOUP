@@ -205,7 +205,7 @@ def p_routine_part(p):
                     |  routine_part  procedure_decl
                     |  function_decl  
                     |  procedure_decl  
-                    | empty'''
+                    |  empty'''
     if len(p) == 3:
         p[0] = Node("routine_part", p[1], p[2])
     elif len(p) == 2:
@@ -224,7 +224,7 @@ def p_function_decl(p):
 
 
 def p_function_head(p):
-    'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl '
+    'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl'
     p[0] = Node("function_head", p[2], p[3], p[5])
 
 
@@ -234,7 +234,7 @@ def p_procedure_decl(p):
 
 
 def p_procedure_head(p):
-    'procedure_head :  kPROCEDURE ID parameters '
+    'procedure_head :  kPROCEDURE ID parameters'
     p[0] = Node("procedure_head", p[2], p[3])
 
 
@@ -475,10 +475,14 @@ def p_term(p):
 
 def p_factor_func(p):
     '''
-    factor  : ID  LP  args_list  RP
+    factor  : SYS_FUNCT
+            | ID  LP  args_list  RP
             | SYS_FUNCT  LP  args_list  RP
     '''
-    p[0] = Node('factor-func', p[1], p[3])
+    if len(p) == 2:
+        p[0] = Node('factor-func', p[1])
+    else:
+        p[0] = Node('factor-func', p[1], p[3])
 
 
 def p_factor_arr(p):
@@ -491,10 +495,9 @@ def p_factor_arr(p):
 def p_factor_1(p):
     # factor : ID  LB  expression  RB // for array
     '''factor :  ID
-                    |  SYS_FUNCT
-                    |  const_value
-                    |  kNOT  factor
-                    |  SUBTRACT  factor  
+              |  const_value
+              |  kNOT  factor
+              |  SUBTRACT  factor
     '''
     if len(p) == 2:
         # yeeef: make the tree smaller
