@@ -51,4 +51,4 @@ class SemanticAnalyzer(object):
                     self._traverse_tree_and_fill_tab(child)
 
         else:
-            return
+            pass

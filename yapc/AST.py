@@ -327,7 +327,7 @@ def parse_name_list(ast_node, symb_tab_node):
         return name_list
 
     else:
-        raise NotImplementedError("{} is supported when parsing name_list node".format(ast_node.type))
+        raise NotImplementedError("{} is not supported when parsing name_list node".format(ast_node.type))
 
 
 def parse_procedure_decl_node(ast_node, symb_tab_node):
@@ -471,7 +471,8 @@ def parse_routine_part_node(ast_node, symb_tab_node):
         proc_id, var_val_para_type_list = parse_procedure_decl_node(ast_node, symb_tab_node)
         proc_info_list.append((proc_id, var_val_para_type_list))
     elif ast_node.type == 'routine_part':
-        traverse_skew_tree(ast_node, 'procedure_decl')
+        flatten_proc_decl_nodes = traverse_skew_tree(ast_node, 'procedure_decl')
+        ast_node._children = flatten_proc_decl_nodes
         proc_info_list = []
         for child in ast_node.children:
             proc_id, var_val_para_type_list = parse_procedure_decl_node(child, symb_tab_node)

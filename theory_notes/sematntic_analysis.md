@@ -231,7 +231,8 @@ together according to the semantic rules
         - [x] look up 操作需要更改
     - [x] 先考虑只有一个 procedure 的情况
     - [x] scope 机制需要实现了
-    - [ ] 开始两个 procedure 的情况
+    - [x] 开始两个 procedure 的情况
+    - [x] 三个
     - [ ] procedure 嵌套 procedure 的情况
     - [ ] 暂时仅支持 param passing by value, 不支持 param passing by reference
 - [ ] array type 也继承 symboltab item  

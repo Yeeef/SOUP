@@ -546,7 +546,7 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/simple.pas'
+    test_file = 'test_yacc/proc.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)

@@ -12,12 +12,12 @@ procedure subtract(var s: real; x, y: integer);
 begin
     s := x * x - y * y;
 end;
-{procedure mul(var s: real; x, y: integer);
+procedure mul(var s: real; x, y: integer);
 begin
     s := x * y;
-end;}
+end;
 begin
-	{x := -4;
+	x := -4;
 	y := x + 1;
-	add(s, x, y);}
+	{add(s, x, y);}
 end.
