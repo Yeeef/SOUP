@@ -233,10 +233,45 @@ together according to the semantic rules
     - [x] scope 机制需要实现了
     - [x] 开始两个 procedure 的情况
     - [x] 三个
-    - [ ] procedure 嵌套 procedure 的情况
-    - [ ] 暂时仅支持 param passing by value, 不支持 param passing by reference
+    - [x] param declare 不需要 chain lookup, 在 rountine 中的也要分开看
+        - [x] procedure head (参数声明部分)：做重复定义检查，*同级检查*, 函数名称同级检查
+            - [x] 声明变量名做 *重复定义* 检查，*lookup*
+                - [x] 发现之前这部分逻辑在 name_list, 抽离，抽到外面
+            - [x] 函数名称做 *重复定义* 检查, *lookup*
+            - [x] 变量类型做 *是否定义* 检查，*chain_lookup*
+                - [ ] 这部分逻辑直接在 parse_type_decl 中，也许有机会可以抽离
+        - [ ] routine
+            - [x] routine_head （定义声明部分）
+                - [x] const
+                    - [x] 是否 *重复定义*， *lookup*
+                - [x] type
+                    - [x] 右边的 type, 是否定义过 *chain_lookup*
+                    - 这部分逻辑直接在 parse_type_decl 中，也许有机会可以抽离
+                - [x] var
+                    - [x] 函数名称是否 *重复定义*，*lookup*
+                    - [x] 类型 *是否定义*，*chain lookup*
+                - [x] proc / func decl: 递归了，见初始部分
+                    
+            - [ ] routine_body stmt 部分，暂时只做了 assign-stmt
+                - [x] assign-stmt
+                    - [x] 左值是否定义过，*lookup*, 且不能是 const 类型
+                    - [x] 右值中出现的变量，
+                        - [x] 如果是 const, 是否定义过 *chain_lookup*
+                        - [x] 如果是 var / arr 呢，是否定义过，*chain_lookup*
+                        - [ ] 如果是 func
+                    - [ ] 右值变量是否和左值变量类型一致，先占个坑
+     
+    - [x] procedure 嵌套 procedure 的情况
 - [ ] array type 也继承 symboltab item  
-- [ ] traverse skew tree 是一个比较好的操作，一定不能随随便就不用了
+- [x] traverse skew tree 是一个比较好的操作，一定不能随随便就不用了
+- [ ] 仔细想想如何讲 type_checking 做成一个 unified api, 而不是没有统一标准的在各个函数里随便检查
+- [ ] 右值变量是否和左值变量类型一致，先占个坑
+- [ ] stmt 语句
+    - [ ] assign-stmt
+        - [x] assign-stmt-[arr]
+        - [ ] record
+        - [ ] func
+    - [ ] proc-stmt
 
 constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__
 
@@ -244,9 +279,13 @@ constant folding 的一些感觉, __对所有的 expression node 做了 constant
 - 最底下的一般是 factor, 如果直接是常数的话
 
 
-### type checking
+### type checking 需要做的事情
 
-- arr 索引是否在范围之内，索引是否是定义类型
+- [ ] 是否重复定义
+- [ ] 是否没有定义
+- [ ] 赋值语句左右是否 type 一致（ weak consistency 即可）
+- [ ] arr 索引是否在范围之内，索引是否是定义类型
+- 
 
 ### symbol table 对于 scope 的支持
 

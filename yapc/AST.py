@@ -143,7 +143,7 @@ def parse_type_decl_node(type_decl_node, symbol_table):
     elif type_decl_node.type == 'alias':
         # check whether the alias type exits
         alias_type = type_decl_node.children[0]
-        ret_val = symbol_table.lookup(alias_type)
+        ret_val = symbol_table.chain_look_up(alias_type)
         if not ret_val:
             raise Exception('alias type: `{}` used before defined'.format(alias_type))
         # return the true type
@@ -183,16 +183,7 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
     assert var_decl_node.type == 'var_decl', var_decl_node.type
     maybe_name_list_node, type_decl_node = var_decl_node.children
 
-    flatten_name_list = parse_name_list(maybe_name_list_node, symbol_table)
-    # get name_list
-    # if isinstance(maybe_name_list_node, Node):
-    #     # traverse name_list
-    #     flatten_name_list = traverse_skew_tree(maybe_name_list_node)
-    #     # flatten the subtree for future use
-    #     maybe_name_list_node._children = flatten_name_list
-    # else:
-    #     # just a leaf node
-    #     flatten_name_list = [maybe_name_list_node]
+    flatten_name_list = parse_name_list(maybe_name_list_node)
 
     # get the var type
     assert type_decl_node.type in ['sys_type', 'array', 'alias'], type_decl_node.type
@@ -220,13 +211,13 @@ def constant_folding(node, symbol_table):
 
     if not isinstance(node, Node):  # id (一般是 constant 的名字或者 function 的名字 / variable)
         id_ = node
-        # 去 symbol table 查找
-        ret_val = symbol_table.lookup(id_)
+        # 去 symbol table 查找, 这里需要 chain_lookup, 右值可存在于之前的 scope
+        ret_val = symbol_table.chain_look_up(id_)
         if not ret_val:
             raise Exception('{} is not a function or a constant'.format(id_))
         assert ret_val.type in ['const', 'var'], ret_val.type
         if ret_val.type == 'const':
-            return ret_val.value
+            return ret_val.value['const_val']
         else:
             return None
 
@@ -251,7 +242,8 @@ def constant_folding(node, symbol_table):
     elif node.type == 'factor-arr':
 
         arr_id, right_child = node.children
-        arr_id_lookup = symbol_table.lookup(arr_id)
+        # 需要进行 chain look up
+        arr_id_lookup = symbol_table.chain_look_up(arr_id)
         if arr_id_lookup is None:
             raise Exception('{} used before declaration'.format(arr_id))
         right_val = constant_folding(right_child, symbol_table)
@@ -305,21 +297,22 @@ def constant_folding(node, symbol_table):
             return None
 
 
-def parse_para_decl_list(proc_id, ast_node, symb_tab_node):
+def parse_para_decl_list(ast_node, symb_tab_node):
     """
     需要建一个新的 symbol table
     :param node: ast node
     :param symbol_table_node: symb_tab node
     :return:
     """
-    new_symb_tab_node = SymbolTableNode(proc_id, None, None)
-    make_parent_and_child(symb_tab_node, new_symb_tab_node)
     if ast_node.type == 'para_decl_list':
-        left_child, right_child = ast_node.children
-        return [parse_var_val_para_type_list(left_child, new_symb_tab_node),
-               parse_var_val_para_type_list(right_child, new_symb_tab_node)]
+        # flatten
+        ast_node._children = traverse_skew_tree(ast_node, ['val_para_type_list', 'var_para_type_list'])
+        var_val_declare_list = []
+        for child in ast_node.children:
+            var_val_declare_list.append(parse_var_val_para_type_list(child, symb_tab_node))
+        return var_val_declare_list
     else:  # 只有一个 para_decl 的情况
-        return [parse_var_val_para_type_list(ast_node, new_symb_tab_node)]
+        return [parse_var_val_para_type_list(ast_node, symb_tab_node)]
 
 
 def parse_var_val_para_type_list(ast_node, symb_tab_node):
@@ -331,10 +324,12 @@ def parse_var_val_para_type_list(ast_node, symb_tab_node):
     :return:
     """
     left_child, right_child = ast_node.children
-    name_list = parse_name_list(left_child, symb_tab_node)
+    name_list = parse_name_list(left_child)
     type_ = parse_type_decl_node(right_child, symb_tab_node)
     for name in name_list:
         # TODO: 暂时把所有参数在新的 scope 下存成 var 型
+        if symb_tab_node.lookup(name):
+            raise Exception("parameter `{}` is already defined".format(name))
         symb_tab_item = SymbolTableItem('var', {'var_type': type_})
         symb_tab_node.insert(name, symb_tab_item)
     if ast_node.type == 'var_para_type_list':  # var_para_type_list
@@ -344,18 +339,19 @@ def parse_var_val_para_type_list(ast_node, symb_tab_node):
         return 'val', name_list, type_
 
 
-def parse_name_list(ast_node, symb_tab_node):
+# TODO: traverse_skew version
+def parse_name_list(ast_node):
     """
     maybe name_list or just a str
     """
     if isinstance(ast_node, str):
-        if symb_tab_node.lookup(ast_node) is not None:
-            raise Exception('variable {} is already defined'.format(ast_node))
+        # if symb_tab_node.lookup(ast_node) is not None:
+        #     raise Exception('variable {} is already defined'.format(ast_node))
         return [ast_node]
 
     elif ast_node.type == 'name_list':
         left_child, right_child = ast_node.children
-        name_list = parse_name_list(left_child, symb_tab_node) + parse_name_list(right_child, symb_tab_node)
+        name_list = parse_name_list(left_child) + parse_name_list(right_child)
         return name_list
 
     else:
@@ -369,12 +365,19 @@ def parse_procedure_decl_node(ast_node, symb_tab_node):
     proc_head_node, routine_node = ast_node.children
     proc_id, para_decl_list_node = proc_head_node.children
     ret_val = symb_tab_node.lookup(proc_id)
-    if ret_val is not None:
+    if ret_val is not None:  # 是否定义
         raise Exception('procedure `{}` is already defined'.format(proc_id))
 
     # parse para_decl_list
 
-    var_val_para_type_list = parse_para_decl_list(proc_id, para_decl_list_node, symb_tab_node)
+    new_symb_tab_node = SymbolTableNode(proc_id, None, None)
+    make_parent_and_child(symb_tab_node, new_symb_tab_node)
+
+    var_val_para_type_list = parse_para_decl_list(para_decl_list_node, new_symb_tab_node)
+
+    # parse routine_node
+
+    parse_routine_node(routine_node, new_symb_tab_node)
 
     return proc_id, var_val_para_type_list
 
@@ -408,7 +411,6 @@ def parse_const_node(ast_node, symb_tab_node):
         # flatten the sub tree
         ast_node._children = traverse_skew_tree(ast_node, 'const_expr')
         const_expr_node_list.extend(ast_node.children)
-        print(const_expr_node_list)
 
     for child in const_expr_node_list:
         id_, const_val_node = child.children
@@ -538,7 +540,6 @@ def parse_stmt_list_node(ast_node, symb_tab_node):
     确保一定不为 None
     哪怕只有一个 stmt, 还是会有 stmt_list 作为一个父节点
     """
-    # TODO: make a flatten version
     flatten_stmt_node_list = traverse_skew_tree(ast_node, [
         'assign_stmt', 'assign_stmt-arr', 'assign_stmt-record',
         'proc_stmt', 'proc_stmt-simple',
@@ -606,6 +607,14 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
     else:  # ID  DOT  ID  ASSIGN  expression
         raise NotImplementedError
         pass
+
+
+def parse_expression_node(ast_node, symb_table):
+    """
+    parse expression node and constant folding at the same time
+    :return:
+    """
+    return constant_folding(ast_node, symb_table)
 
 
 def graph(node, filename):

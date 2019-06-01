@@ -14,6 +14,9 @@ class ArrayType(object):
         self.index_range = index_range
         self.element_type = element_type
 
+    def __repr__(self):
+        return self.__str__()
+
     def __str__(self):
         return str(self.to_dict())
 
@@ -145,7 +148,7 @@ class SymbolTableNode(SymbolTable):
             if self.parent is None:
                 return None
             else:
-                return self.parent.lookup(key)
+                return self.parent.chain_look_up(key)
         else:
             return val
 
@@ -159,6 +162,7 @@ class SymbolTableNode(SymbolTable):
         if len(self.children) == 0:
             edges.append((str(self), "no child"))
         for child in self.children:
+            assert child.parent == self
             edges.append((str(self), str(child)))
             edges += child._descend()
         return edges
