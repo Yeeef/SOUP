@@ -12,6 +12,7 @@ def traverse_skew_tree(node, stop_node_type=None):
     """
     遍历一种很特殊但是在我们的 parse tree 中频繁出现的一种结构（左递归导致的）
     能不能顺便做一个 compress ✅
+    :param stop_node_type:
     :param node:
     :return: flattened subtree
     """
@@ -27,6 +28,25 @@ def traverse_skew_tree(node, stop_node_type=None):
                 descending_leaves.extend(traverse_skew_tree(child, stop_node_type))
         elif child is None:
             pass
+        else:
+            # reach the leaf node
+            descending_leaves.append(child)
+
+    return tuple(descending_leaves)
+
+
+def traverse_skew_tree_bool(node, stop_node_type, target_node_type):
+    descending_leaves = []
+    children = node.children
+    if node.type != target_node_type:
+        descending_leaves.append(node)
+        return tuple(descending_leaves)
+    for child in children:
+        if isinstance(child, Node):
+            if child.type.startswith(stop_node_type):
+                descending_leaves.append(child)
+            else:
+                descending_leaves.extend(traverse_skew_tree_bool(child, stop_node_type, target_node_type))
         else:
             # reach the leaf node
             descending_leaves.append(child)
@@ -81,6 +101,7 @@ def parse_range_from_range_node(Node):
 def parse_type_definition_from_type_node(node, symbol_table):
     """
     parse type_definition node, only return information
+    :param symbol_table:
     :param node:
     :return:
     """
@@ -97,7 +118,7 @@ def parse_type_definition_from_type_node(node, symbol_table):
         sys_type, *_ = type_node.children
         return 'sys_type', id_, sys_type
     else:
-        # 1d array, compicated
+        # 1d array, complicated
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_node, symbol_table)
         return 'array', id_, index_type, element_type, left_val, right_val
 
@@ -112,6 +133,7 @@ def parse_type_decl_node(type_decl_node, symbol_table):
                             |  const_value  DOTDOT  const_value (range)
                             |  ID
         * array_type_decl   :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl
+    :param symbol_table:
     :param type_decl_node:
     :return: type(sys_type from [integer, real, char]) / array_type(Array Type instance)
     """
@@ -140,7 +162,6 @@ def parse_type_decl_node(type_decl_node, symbol_table):
 
 def parse_array_from_array_node(arr_node, symbol_table):
     """
-
     :param arr_node:
     :param symbol_table:
     :return: symb_tab_item to be inserted
@@ -195,7 +216,7 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
 
 
 def constant_folding(node, symbol_table):
-    global bin_op_to_func, type_to_bin_op, bool_dict
+    # global bin_op_to_func, type_to_bin_op, bool_dict, bool_op_to_func
 
     if not isinstance(node, Node):  # id (一般是 constant 的名字或者 function 的名字 / variable)
         id_ = node
@@ -208,6 +229,17 @@ def constant_folding(node, symbol_table):
             return ret_val.value
         else:
             return None
+
+    elif node.type == 'expression':  # bool const
+        if len(node.children) == 1:
+            return constant_folding(node.children[0], symbol_table)
+        else:
+            left_val = constant_folding(node.children[0], symbol_table)
+            right_val = constant_folding(node.children[2], symbol_table)
+            if left_val is not None and right_val is not None:
+                return bool_op_to_func[node.children[1]](left_val, right_val)
+            else:
+                return None
 
     elif node.type in ['integer', 'real', 'char', 'sys_con']:  # 直接的常数 1, 1.3, c, true
 

@@ -17,3 +17,7 @@ type_to_bin_op = dict([
 bool_dict = {'true': True, 'false': False}
 _sys_type_set = {'real', 'integer', 'char'}
 SYS_TYPE_SET = _sys_type_set
+
+bool_op_to_func = {'>=': lambda x, y: x >= y, '>': lambda x, y: x > y,
+                   '<=': lambda x, y: x <= y, '<': lambda x, y: x < y,
+                   '=': lambda x, y: x == y, '<>': lambda x, y: x != y}

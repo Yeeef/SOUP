@@ -2,7 +2,7 @@ from ply import yacc, lex
 import sys
 import logging
 from lex_pas import tokens
-import lex_pas
+from yapc import lex_pas
 from AST import *
 from CodeGenerator import CodeGenerator
 
@@ -319,16 +319,16 @@ def p_non_label_stmt(p):
 
 
 def p_assign_stmt_arr(p):
-    """
+    '''
     assign_stmt : ID LB expression RB ASSIGN expression
-    """
+    '''
     p[0] = Node("assign_stmt-arr", p[1], p[3], p[6])
 
 
 def p_assign_stmt_record(p):
-    """
+    '''
     assign_stmt : ID  DOT  ID  ASSIGN  expression
-    """
+    '''
     p[0] = Node("assign_stmt-record", p[1], p[3], p[5])
 
 
@@ -385,7 +385,7 @@ def p_direction(p):
 
 
 def p_case_stmt(p):
-    """case_stmt : kCASE expression kOF case_expr_list kEND"""
+    '''case_stmt : kCASE expression kOF case_expr_list kEND'''
     p[0] = Node("case_stmt", p[2], p[4])
 
 
@@ -428,12 +428,13 @@ def p_expression(p):
                     |  expression  UNEQUAL  expr  
                     |  expr'''
     if len(p) == 4:
-        p[0] = Node("expression", p[1], p[3])
+        p[0] = Node("expression", p[1], p[2], p[3])
     else:
         # TODO: 这个地方可以直接 p[0] = p[1] 吗？
+        # FIXME: 不可以，否则单独针对bool的结点获取会出问题
         # yeeef: make the tree smaller
-        p[0] = p[1]
-        # p[0] = Node("expression", p[1])
+        # p[0] = p[1]
+        p[0] = Node("expression", p[1])
 
 
 def p_expr(p):
@@ -473,17 +474,17 @@ def p_term(p):
 
 
 def p_factor_func(p):
-    """
+    '''
     factor  : ID  LP  args_list  RP
             | SYS_FUNCT  LP  args_list  RP
-    """
+    '''
     p[0] = Node('factor-func', p[1], p[3])
 
 
 def p_factor_arr(p):
-    """
+    '''
     factor  : ID  LB  expression  RB
-    """
+    '''
     p[0] = Node('factor-arr', p[1], p[3])
 
 
@@ -507,14 +508,14 @@ def p_factor_2(p):
     p[0] = p[2]
 
 
-def p_factor3(p):
+def p_factor_3(p):
     'factor : ID  DOT  ID'
     p[0] = Node("factor-member", p[1], p[3])
 
 
 def p_args_list(p):
-    """args_list :  args_list  COMMA  expression  
-            |  expression"""
+    '''args_list :  args_list  COMMA  expression  
+            |  expression'''
     if len(p) == 4:
         p[0] = Node("args_list", p[1], p[3])
     elif len(p) == 2:

@@ -103,7 +103,7 @@ class SymbolTable(object):
     def insert(self, key, value):
         val = self._symb_tab.setdefault(key, value)
         if val != value:
-            # conflit
+            # conflict
             return True, val
         else:
             return False, val
