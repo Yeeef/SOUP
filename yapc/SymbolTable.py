@@ -58,6 +58,9 @@ class SymbolTableItem(object):
         self._type = type
         self._value = value
 
+    def val_query(self, query):
+        return self._value[query]
+
     @property
     def type(self):
         return self._type
@@ -95,7 +98,6 @@ class SymbolTable(object):
     def __init__(self, name):
         self._symb_tab = dict()
         self._name = name
-        # self._construct_tab()
 
     def __str__(self):
         info = 'Symbol Table: <{}>\n'.format(self._name)

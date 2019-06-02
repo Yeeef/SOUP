@@ -21,3 +21,16 @@ SYS_TYPE_SET = _sys_type_set
 bool_op_to_func = {'>=': lambda x, y: x >= y, '>': lambda x, y: x > y,
                    '<=': lambda x, y: x <= y, '<': lambda x, y: x < y,
                    '=': lambda x, y: x == y, '<>': lambda x, y: x != y}
+
+SYS_PROC = {'write', 'writeln'}
+
+SYS_FUNC = {"abs", "chr", "odd", "ord", "pred", "sqr", "sqrt", "succ"}
+
+CONST_VALUE_TYPE = {'integer', 'real', 'char', 'syc_con'}
+
+SYS_CON = {'true', 'false', 'maxint'}
+
+CONST_TYPE_TO_FUNC = {'integer': int, 'real': float, 'sys_con': bool, 'char': str}
+
+PYTHOH_TYPE_TO_TYPE = {type(int): 'integer', type(float): 'real', type(bool): 'sys_con', type(str): 'char'}
+

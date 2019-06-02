@@ -271,7 +271,18 @@ together according to the semantic rules
         - [x] assign-stmt-[arr]
         - [ ] record
         - [ ] func
-    - [ ] proc-stmt
+    - [x] proc-stmt
+        - [x] user defined
+        - [ ] read
+        - [ ] write, writeln
+- [ ] procedure 可以递归调用吗？
+- [ ] constant folding 要进行变量类型检查 + const folding，改成 parse expression node, 做一个完整的版本
+    - [ ] constant folding 其实做的不是类型检查，而是变量定义检查，真正做左右类型检查的是 stmt 节点
+    - [ ] 也可以做一部分小的类型检查，在我们这里集中于 char? 因为我想把 bool int real 之间不需要检查的很严格
+        - [ ] 基本集中在 char
+    - [ ] 很大一部分的 type checking 实际上都是在 expression node 上做的，所以这一点至关重要
+- [ ] 对于变量声明部分，我做的已经差不多了，函数的坑还没有填
+    - [ ] record 的坑没有填
 
 constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__
 

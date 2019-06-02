@@ -1,5 +1,5 @@
 program Simple;
-const aa = 1; bb = 1.5;
+const aa = 1; bb = 1.5; flag=true;
 type
     real_arr=array[2..10] of real;
 var x, y, s: integer; arr1: real_arr;
@@ -13,6 +13,7 @@ begin
 
 	s := x * x + y * y + aa;
 end;
+{
 procedure subtract(var s: real; x, y: integer);
 begin
     s := x * x - y * y;
@@ -22,9 +23,16 @@ const ab = 1;
 var arrarr: array[1..10] of real_arr;
 begin
     s := x * y;
+end;}
+procedure hello;
+var a,b,c : real_arr;
+begin
+    writeln(aa, bb);
+    read(a[1]);
 end;
 begin
 	x := -4;
-	y := x + 1;
-	{add(s, x, y);}
+	y := aa + 1;
+	hello;
+	add(s + 1, x, y div (aa * bb), 1, 1, 1);
 end.

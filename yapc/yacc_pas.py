@@ -333,18 +333,18 @@ def p_assign_stmt_record(p):
 
 
 def p_assign_stmt(p):
-    '''assign_stmt :  ID  ASSIGN  expression '''
+    """assign_stmt :  ID  ASSIGN  expression """
     p[0] = Node("assign_stmt", p[1], p[3])
 
 
-# [TODO: resolved]: ID, ID LP args_list RP 是什么蛇皮操作？    
-# 函数调用
 def p_proc_stmt(p):
-    '''proc_stmt :  ID
-                    |  ID  LP  args_list  RP
-                    |  SYS_PROC
-                    |  SYS_PROC  LP  expression_list  RP
-                    |  kREAD  LP  factor  RP'''
+    """
+    proc_stmt :  ID
+              |  ID  LP  args_list  RP
+              |  SYS_PROC
+              |  SYS_PROC  LP  expression_list  RP
+              |  kREAD  LP  factor  RP
+    """
     if len(p) == 2:
         p[0] = Node("proc_stmt-simple", p[1])
     elif len(p) == 5:
@@ -405,13 +405,17 @@ def p_case_expr(p):
 
 
 def p_goto_stmt(p):
-    'goto_stmt :  kGOTO  INTEGER'
+    """
+    goto_stmt :  kGOTO  INTEGER
+    """
     p[0] = Node("goto_stmt", p[2])
 
 
 def p_expression_list(p):
-    '''expression_list :  expression_list  COMMA  expression
-                    |  expression'''
+    """
+    expression_list :  expression_list  COMMA  expression
+                    |  expression
+    """
     if len(p) == 4:
         p[0] = Node("expression_list", p[1], p[3])
     elif len(p) == 2:
@@ -419,29 +423,28 @@ def p_expression_list(p):
 
 
 def p_expression(p):
-    # FIXME: 不同符号要建不同的树？是的
-    '''expression :  expression  GE  expr  
-                    |  expression  GT  expr  
-                    |  expression  LE  expr
-                    |  expression  LT  expr  
-                    |  expression  EQUAL  expr  
-                    |  expression  UNEQUAL  expr  
-                    |  expr'''
+    """
+    expression :  expression  GE  expr
+               |  expression  GT  expr
+               |  expression  LE  expr
+               |  expression  LT  expr
+               |  expression  EQUAL  expr
+               |  expression  UNEQUAL  expr
+               |  expr
+    """
     if len(p) == 4:
         p[0] = Node("expression", p[1], p[2], p[3])
     else:
-        # TODO: 这个地方可以直接 p[0] = p[1] 吗？
-        # FIXME: 不可以，否则单独针对bool的结点获取会出问题
-        # yeeef: make the tree smaller
-        # p[0] = p[1]
         p[0] = Node("expression", p[1])
 
 
 def p_expr(p):
-    '''expr :  expr  ADD  term  
-                    |  expr  SUBTRACT  term  
-                    |  expr  kOR  term  
-                    |  term'''
+    """
+    expr :  expr  ADD  term
+         |  expr  SUBTRACT  term
+         |  expr  kOR  term
+         |  term
+    """
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '+':
@@ -453,12 +456,13 @@ def p_expr(p):
 
 
 def p_term(p):
-    '''term :  term  MUL  factor
-                    |  term  kDIV factor
-                    |  term  DIV  factor  
-                    |  term  kMOD  factor
-                    |  term  kAND  factor  
-                    |  factor'''
+    """term :  term  MUL  factor
+            |  term  kDIV factor
+            |  term  DIV  factor
+            |  term  kMOD  factor
+            |  term  kAND  factor
+            |  factor
+    """
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '*':
@@ -474,28 +478,28 @@ def p_term(p):
 
 
 def p_factor_func(p):
-    '''
+    """
     factor  : ID  LP  args_list  RP
             | SYS_FUNCT  LP  args_list  RP
-    '''
+    """
     p[0] = Node('factor-func', p[1], p[3])
 
 
 def p_factor_arr(p):
-    '''
+    """
     factor  : ID  LB  expression  RB
-    '''
+    """
     p[0] = Node('factor-arr', p[1], p[3])
 
 
 def p_factor_1(p):
     # factor : ID  LB  expression  RB // for array
-    '''factor :  ID
+    """factor :  ID
                     |  SYS_FUNCT
                     |  const_value
                     |  kNOT  factor
                     |  SUBTRACT  factor  
-    '''
+    """
     if len(p) == 2:
         # yeeef: make the tree smaller
         p[0] = p[1]
@@ -504,7 +508,7 @@ def p_factor_1(p):
 
 
 def p_factor_2(p):
-    'factor : LP  expression  RP'
+    """factor : LP  expression  RP"""
     p[0] = p[2]
 
 
@@ -514,13 +518,14 @@ def p_factor_3(p):
 
 
 def p_args_list(p):
-    '''args_list :  args_list  COMMA  expression  
-            |  expression'''
+    """
+    args_list :  args_list  COMMA  expression
+              |  expression
+    """
     if len(p) == 4:
         p[0] = Node("args_list", p[1], p[3])
     elif len(p) == 2:
-        # FIXME: 这里不应该是 expression node, 应该是 args_list node, 或者不建立 node
-        p[0] = Node("expression", p[1])
+        p[0] = p[1]
 
 
 # 空产生式
