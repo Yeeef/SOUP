@@ -672,11 +672,21 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             raise Exception('const {} cannot be assigned!'.format(id_))
 
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
+        # 检查 type
+        var_declare_type = ret_val.value['var_type']
+        if constant_fold_type != var_declare_type:
+            if var_declare_type == 'char':
+                raise Exception("cannot cast `{}` type to char type in variable `{}`".format(constant_fold_type, id_))
+        # 进行 type casting
+        if constant_fold_ret is not None:
+            new_constant_fold_ret = CONST_TYPE_TO_FUNC[var_declare_type](constant_fold_ret)
+            if constant_fold_type != var_declare_type:
+                print("Warning: cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
+            constant_fold_ret = new_constant_fold_ret
         if constant_fold_ret is not None:
             ast_node._children = (id_, constant_fold_ret)
 
     elif ast_node.type == 'assign_stmt-arr':  # ID LB expression RB ASSIGN expression
-        # TODO: 检查 index
         id_, index_expression_node, expression_node = children
         ret_val = symb_tab_node.lookup(id_)
         if ret_val is None:
@@ -685,6 +695,22 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
+        # index type 可以直接进行检查
+        if index_fold_type != ret_val.value['index_type']:
+            raise Exception('arr `{}` expect `{}` index, but got `{}`'.
+                            format(id_, ret_val.value['index_type'], index_fold_type))
+        # element type 可以直接进行检查
+        if ret_val.value['element_type'] != constant_fold_type:
+            raise Exception('arr `{}` expect `{}` element but got `{}`'
+                            .format(id_, ret_val.value['element_type'], constant_fold_type))
+        # 如果 index_fold_ret 有效，可以进行范围检查
+        if index_fold_ret is not None:
+            left_range, right_range = ret_val.value['index_range']
+            if index_fold_ret < left_range or index_fold_ret > right_range:
+                raise Exception("arr `{}` has range `{}`, but got index {}"
+                                .format(id_, (left_range, right_range), index_fold_ret))
+
+        # 替换孩子
         ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
                                expression_node if constant_fold_ret is None else constant_fold_ret)
     else:  # ID  DOT  ID  ASSIGN  expression
@@ -735,11 +761,11 @@ def parse_expression_node(ast_node, symb_table):
         if expression_type == 'char' or expr_type == 'char':
             raise Exception("char value is not supported for relation op `{}`".format(bool_op))
 
-        # 返回值的类型一定是 sys_con
-        ret_type = 'sys_con'
-        if expression_val:
+        # 返回值的类型一定是 boolean
+        ret_type = 'boolean'
+        if expression_val is not None:
             new_chilren[0] = expression_val
-        if expr_val:
+        if expr_val is not None:
             new_chilren[2] = expr_val
 
         if expression_val is not None and expr_val is not None:
@@ -775,7 +801,7 @@ def parse_expr_node(ast_node, symb_table):
 
         # 判断节点返回值类型
         if ast_node.type == 'expr-OR':
-            ret_val_type = 'sys_con'
+            ret_val_type = 'boolean'
         else:
             # 只要有一个是 real 类型，结果就是 real 类型，不然就是 int 类型
             if term_type == 'real' or expr_val == 'real':
@@ -783,11 +809,11 @@ def parse_expr_node(ast_node, symb_table):
             else:
                 ret_val_type = 'integer'
                 # 进行类型转化
-        if expr_val:  # not None, const-foldable
+        if expr_val is not None:  # not None, const-foldable
             new_children.append(expr_val)
         else:
             new_children.append(left_expr_child)
-        if term_val:
+        if term_val is not None:
             new_children.append(term_val)
         else:
             new_children.append(right_term_child)
@@ -836,7 +862,7 @@ def parse_term_node(ast_node, symb_table):
         # 先把类型判断好
         if ast_node.type == 'term-AND':
             # 返回值一定是 sys_con 类型
-            ret_val_type = 'sys_con'
+            ret_val_type = 'boolean'
         elif ast_node.type == 'term-INTDIV' or ast_node.type == 'term-MOD':
             # 返回值一定是整数，且要求两个数字都是整数
             if term_type != 'integer' or factor_type != 'integer':
@@ -853,11 +879,11 @@ def parse_term_node(ast_node, symb_table):
                 ret_val_type = 'integer'
 
         # 进行类型转化
-        if term_val:  # not None, const-foldable
+        if term_val is not None:  # not None, const-foldable
             new_children.append(term_val)
         else:
             new_children.append(left_term_child)
-        if factor_val:
+        if factor_val is not None:
             new_children.append(factor_val)
         else:
             new_children.append(right_factor_child)
@@ -925,7 +951,7 @@ def parse_factor_node(ast_node, symb_table):
                 raise Exception('char value `{}` is not supported for `-` op'.format(const_val))
             if const_val is not None:
                 if unary_op == '-':
-                    if val_type == 'sys_con':
+                    if val_type == 'boolean':
                         # const_val = ConstantFoldItem.eval_val_by_type(const_val, 'integer')
                         const_val = -const_val
                         val_type = 'integer'
@@ -933,9 +959,8 @@ def parse_factor_node(ast_node, symb_table):
                         const_val = -const_val
                         # val type remains same
                 else:  # not
-                    if val_type != 'sys_con':  # integer / real
-                        val_type = 'sys_con'
-                        # const_val = ConstantFoldItem.eval_val_by_type(const_val, 'sys_con')
+                    if val_type != 'boolean':  # integer / real
+                        val_type = 'boolean'
                         const_val = not const_val
                     else:
                         const_val = not const_val
@@ -943,12 +968,12 @@ def parse_factor_node(ast_node, symb_table):
                 ast_node._children = (const_val,)
             else:  # 只需要根据 unary op 来改变 val_type
                 if unary_op == '-':
-                    if val_type == 'sys_con':
+                    if val_type == 'boolean':
                         val_type = 'integer'
                         # val type remains same
                 else:  # not
-                    if val_type != 'sys_con':  # integer / real
-                        val_type = 'sys_con'
+                    if val_type != 'boolean':  # integer / real
+                        val_type = 'boolean'
             return const_val, val_type
 
         else:  # factor-member
@@ -1027,7 +1052,7 @@ class ConstantFoldItem(object):
     """
     utility class for constant folding
     """
-    _type_to_func = {'integer': int, 'real': float, 'sys_con': bool, 'char': str}
+    _type_to_func = {'integer': int, 'real': float, 'sys_con': bool, 'char': str, 'boolean': bool}
 
     def __init__(self, val, type):
         assert type in ['integer', 'real', 'sys_con', 'char'], type

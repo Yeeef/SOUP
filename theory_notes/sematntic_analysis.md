@@ -268,7 +268,10 @@ together according to the semantic rules
 - [ ] 右值变量是否和左值变量类型一致，先占个坑
 - [ ] stmt 语句
     - [ ] assign-stmt
+        - [ ] assign-stmt
+            - [ ] 检查 type, 进行 type casting
         - [x] assign-stmt-[arr]
+            - 检查 index_type, index_range, element_type
         - [ ] record
         - [ ] func
     - [x] proc-stmt
@@ -280,7 +283,7 @@ together according to the semantic rules
     - [ ] constant folding 其实做的不是类型检查，而是变量定义检查，真正做左右类型检查的是 stmt 节点
     - [x] 也可以做一部分小的类型检查，在我们这里集中于 char? 因为我想把 bool int real 之间不需要检查的很严格
         - [x] 基本集中在 char
-    - [ ] 很大一部分的 type checking 实际上都是在 expression node 上做的，所以这一点至关重要
+    - [x] 很大一部分的 type checking 实际上都是在 expression node 上做的，所以这一点至关重要
         - [x] array 的 index 对不对，范围对不对也进行了检查
     - [x] 中途计算直接利用 Python 的机制进行计算，计算完成后的结果，再根据需要的 ret_type 进行转化
         - [x] 中途计算结果模拟 python 的行为

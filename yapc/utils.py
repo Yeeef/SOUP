@@ -32,7 +32,7 @@ CONST_VALUE_TYPE = {'integer', 'real', 'char', 'sys_con'}
 
 SYS_CON = {'true', 'false', 'maxint'}
 
-CONST_TYPE_TO_FUNC = {'integer': int, 'real': float, 'sys_con': bool, 'char': str}
+CONST_TYPE_TO_FUNC = {'integer': int, 'real': float, 'sys_con': bool, 'char': str, 'boolean': bool}
 
 PYTHOH_TYPE_TO_TYPE = {type(int): 'integer', type(float): 'real', type(bool): 'sys_con', type(str): 'char'}
 
