@@ -7,7 +7,7 @@ import pydot
 
 class ArrayType(object):
     def __init__(self, index_type, index_range, element_type):
-        assert isinstance(element_type, (ArrayElementType, str, ArrayType)), type(element_type)
+        assert isinstance(element_type, (ArrayElementType, str, ArrayType, dict)), type(element_type)
         if isinstance(element_type, ArrayType):
             element_type = ArrayElementType(element_type)
         self.index_type = index_type
@@ -24,7 +24,7 @@ class ArrayType(object):
         ret_dict = dict()
         ret_dict['index_type'] = self.index_type
         ret_dict['index_range'] = self.index_range
-        if isinstance(self.element_type, str):
+        if isinstance(self.element_type, (str, dict)):
             ret_dict['element_type'] = self.element_type
         else:
             ret_dict['element_type'] = self.element_type.to_dict()

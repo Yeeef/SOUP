@@ -194,7 +194,7 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
     elif type_decl_node.type == 'array':
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
         array_type = ArrayType(index_type, (left_val, right_val), element_type)
-        symb_tab_item = SymbolTableItem('arr_var',
+        symb_tab_item = SymbolTableItem('var',
                                         {'var_type': array_type.to_dict()})
     else:  # alias
         alias_type = type_decl_node.children[0]
@@ -467,7 +467,7 @@ def parse_type_part_node(ast_node, symb_tab_node):
         elif type_ == 'array':  # array type
             index_type, element_type, left_val, right_val = attributes
             array_type = ArrayType(index_type, (left_val, right_val), element_type)
-            symb_tab_item = SymbolTableItem('arr_var',
+            symb_tab_item = SymbolTableItem('arr_type',
                                             array_type.to_dict())
         else:  # TODO: add record support
             raise NotImplementedError
