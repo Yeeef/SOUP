@@ -28,7 +28,7 @@ SYS_PROC = {'write', 'writeln'}
 
 SYS_FUNC = {"abs", "chr", "odd", "ord", "pred", "sqr", "sqrt", "succ"}
 
-CONST_VALUE_TYPE = {'integer', 'real', 'char', 'syc_con'}
+CONST_VALUE_TYPE = {'integer', 'real', 'char', 'sys_con'}
 
 SYS_CON = {'true', 'false', 'maxint'}
 

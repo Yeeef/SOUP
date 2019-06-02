@@ -278,9 +278,16 @@ together according to the semantic rules
 - [ ] procedure 可以递归调用吗？
 - [ ] constant folding 要进行变量类型检查 + const folding，改成 parse expression node, 做一个完整的版本
     - [ ] constant folding 其实做的不是类型检查，而是变量定义检查，真正做左右类型检查的是 stmt 节点
-    - [ ] 也可以做一部分小的类型检查，在我们这里集中于 char? 因为我想把 bool int real 之间不需要检查的很严格
-        - [ ] 基本集中在 char
+    - [x] 也可以做一部分小的类型检查，在我们这里集中于 char? 因为我想把 bool int real 之间不需要检查的很严格
+        - [x] 基本集中在 char
     - [ ] 很大一部分的 type checking 实际上都是在 expression node 上做的，所以这一点至关重要
+        - [x] array 的 index 对不对，范围对不对也进行了检查
+    - [x] 中途计算直接利用 Python 的机制进行计算，计算完成后的结果，再根据需要的 ret_type 进行转化
+        - [x] 中途计算结果模拟 python 的行为
+            - [x] 除法一定返回 `real`（这也是 pascal 的行为）
+            - [x] 乘法/加法/减法 由两个乘数决定返回 `real`, `type`
+            - [x] // 计算结果一定是一个整数，但是类型不一定是整数，在我们这里强制为整数, 要求两个数都是整数
+            - [x] mod 运算要求两个数一定是整数
 - [ ] 对于变量声明部分，我做的已经差不多了，函数的坑还没有填
     - [ ] record 的坑没有填
 

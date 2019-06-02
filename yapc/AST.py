@@ -194,7 +194,7 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
         array_type = ArrayType(index_type, (left_val, right_val), element_type)
         symb_tab_item = SymbolTableItem('arr_var',
-                                        array_type)
+                                        array_type.to_dict())
     else:  # alias
         alias_type = type_decl_node.children[0]
         ret_val = symbol_table.chain_look_up(alias_type)
@@ -467,7 +467,7 @@ def parse_type_part_node(ast_node, symb_tab_node):
             index_type, element_type, left_val, right_val = attributes
             array_type = ArrayType(index_type, (left_val, right_val), element_type)
             symb_tab_item = SymbolTableItem('arr_var',
-                                            array_type)
+                                            array_type.to_dict())
         else:  # TODO: add record support
             raise NotImplementedError
 
@@ -671,24 +671,24 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         if ret_val.type == 'const':
             raise Exception('const {} cannot be assigned!'.format(id_))
 
-        constant_fold_ret = constant_folding(expression_node, symb_tab_node)
+        constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         if constant_fold_ret is not None:
             ast_node._children = (id_, constant_fold_ret)
 
     elif ast_node.type == 'assign_stmt-arr':  # ID LB expression RB ASSIGN expression
+        # TODO: 检查 index
         id_, index_expression_node, expression_node = children
         ret_val = symb_tab_node.lookup(id_)
         if ret_val is None:
             raise Exception('var {} assigned before declared'.format(id_))
         if ret_val.type == 'const':
             raise Exception('const {} cannot be assigned!'.format(id_))
-        constant_fold_ret = constant_folding(expression_node, symb_tab_node)
-        index_fold_ret = constant_folding(index_expression_node, symb_tab_node)
+        constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
+        index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
         ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
                                expression_node if constant_fold_ret is None else constant_fold_ret)
     else:  # ID  DOT  ID  ASSIGN  expression
         raise NotImplementedError
-        pass
 
 
 def parse_expression_list(ast_node, symb_table):
@@ -736,16 +736,13 @@ def parse_expression_node(ast_node, symb_table):
             raise Exception("char value is not supported for relation op `{}`".format(bool_op))
 
         # 返回值的类型一定是 sys_con
-        # 将两边用于比较的值均转为 real 类型
         ret_type = 'sys_con'
         if expression_val:
-            expression_val = ConstantFoldItem.eval_val_by_type(expression_val, 'real')
             new_chilren[0] = expression_val
         if expr_val:
-            expr_val = ConstantFoldItem.eval_val_by_type(expr_val, 'real')
             new_chilren[2] = expr_val
 
-        if expression_val and expr_val:
+        if expression_val is not None and expr_val is not None:
             bin_op_func = bin_op_to_func[bool_op]
             ret_val = bin_op_func(expression_val, expr_val)
         else:
@@ -763,7 +760,9 @@ def parse_expr_node(ast_node, symb_table):
     前三种情况会建一个 expr node, 最后一种情况直接是 term node
     """
     # TODO: add constant folding support
-    if ast_node.type.startswith('expr'):  # expr node
+    if not isinstance(ast_node, Node):
+        return parse_term_node(ast_node, symb_table)
+    elif ast_node.type.startswith('expr'):  # expr node
         left_expr_child, right_term_child = ast_node.children
         expr_val, expr_type = parse_expr_node(left_expr_child, symb_table)
         term_val, term_type = parse_term_node(right_term_child, symb_table)
@@ -785,20 +784,19 @@ def parse_expr_node(ast_node, symb_table):
                 ret_val_type = 'integer'
                 # 进行类型转化
         if expr_val:  # not None, const-foldable
-            expr_val = ConstantFoldItem.eval_val_by_type(expr_val, ret_val_type)
             new_children.append(expr_val)
         else:
             new_children.append(left_expr_child)
         if term_val:
-            term_val = ConstantFoldItem.eval_val_by_type(term_val, ret_val_type)
             new_children.append(term_val)
         else:
             new_children.append(right_term_child)
 
         # 如果可以 const fold, 进行计算
-        if expr_val and term_val:
+        if expr_val is not None and term_val is not None:
             bin_op_func = bin_op_to_func[node_op]
             ret_val = bin_op_func(expr_val, term_val)
+            ret_val = CONST_TYPE_TO_FUNC[ret_val_type](ret_val)
         else:
             ret_val = None
         # 替换孩子
@@ -820,7 +818,9 @@ def parse_term_node(ast_node, symb_table):
             |  factor
     最后一种情况直接是 factor node
     """
-    if ast_node.type.startswith('term'):
+    if not isinstance(ast_node, Node):
+        return parse_factor_node(ast_node, symb_table)
+    elif ast_node.type.startswith('term'):
         new_children = []
         left_term_child, right_factor_child = ast_node.children
         term_val, term_type = parse_term_node(left_term_child, symb_table)
@@ -837,29 +837,36 @@ def parse_term_node(ast_node, symb_table):
         if ast_node.type == 'term-AND':
             # 返回值一定是 sys_con 类型
             ret_val_type = 'sys_con'
-        else:  # 返回值由两个 value 一起决定
+        elif ast_node.type == 'term-INTDIV' or ast_node.type == 'term-MOD':
+            # 返回值一定是整数，且要求两个数字都是整数
+            if term_type != 'integer' or factor_type != 'integer':
+                raise Exception("div and mod expect 2 integer, but got `{}` and `{}`".format(term_type, factor_type))
+            ret_val_type = 'integer'
+        elif ast_node.type == 'term-DIV':
+            ret_val_type = 'real'
+        else:  # 返回值由两个 value 一起决定, MUL 乘法
             # 只要有一个是 real 类型，结果就是 real 类型，不然就是 int 类型
 
             if term_type == 'real' or factor_type == 'real':
                 ret_val_type = 'real'
             else:
                 ret_val_type = 'integer'
+
         # 进行类型转化
         if term_val:  # not None, const-foldable
-            term_val = ConstantFoldItem.eval_val_by_type(term_val, ret_val_type)
             new_children.append(term_val)
         else:
             new_children.append(left_term_child)
         if factor_val:
-            factor_val = ConstantFoldItem.eval_val_by_type(factor_val, ret_val_type)
             new_children.append(factor_val)
         else:
             new_children.append(right_factor_child)
 
         # 如果可以 const fold, 进行计算
-        if factor_val and term_val:
+        if factor_val is not None and term_val is not None:
             bin_op_func = bin_op_to_func[node_op]
-            ret_val = bin_op_func(factor_val, term_val)
+            ret_val = bin_op_func(term_val, factor_val)
+            ret_val = CONST_TYPE_TO_FUNC[ret_val_type](ret_val)
         else:
             ret_val = None
         # 替换孩子
@@ -919,7 +926,7 @@ def parse_factor_node(ast_node, symb_table):
             if const_val is not None:
                 if unary_op == '-':
                     if val_type == 'sys_con':
-                        const_val = ConstantFoldItem.eval_val_by_type(const_val, 'integer')
+                        # const_val = ConstantFoldItem.eval_val_by_type(const_val, 'integer')
                         const_val = -const_val
                         val_type = 'integer'
                     else:  # integer / real
@@ -928,7 +935,8 @@ def parse_factor_node(ast_node, symb_table):
                 else:  # not
                     if val_type != 'sys_con':  # integer / real
                         val_type = 'sys_con'
-                        const_val = not ConstantFoldItem.eval_val_by_type(const_val, 'sys_con')
+                        # const_val = ConstantFoldItem.eval_val_by_type(const_val, 'sys_con')
+                        const_val = not const_val
                     else:
                         const_val = not const_val
                 # 替换孩子
