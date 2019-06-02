@@ -285,6 +285,9 @@ together according to the semantic rules
         - [x] 很大一部分代码可以复用 proc-stmt, 唯一特殊点在于 func 有一个返回值
         - [x] 和 procedure 类似的常规检查
         - [x] return value 有没有被赋值, 直接通过符号表检查
+- [ ] 报错处理机制，精确到行
+    - [ ] parser panic mode
+    - [ ] semantic 
 - [ ] procedure 可以递归调用吗？
 - [ ] constant folding 要进行变量类型检查 + const folding，改成 parse expression node, 做一个完整的版本
     - [ ] constant folding 其实做的不是类型检查，而是变量定义检查，真正做左右类型检查的是 stmt 节点

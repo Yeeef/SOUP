@@ -624,8 +624,72 @@ def parse_stmt_node(ast_node, symb_tab_node):
             parse_assign_stmt_node(ast_node, symb_tab_node)
         elif ast_node.type.startswith('proc_stmt'):
             parse_proc_stmt_node(ast_node, symb_tab_node)
+        elif ast_node.type == 'if_stmt':
+            expression_node, stmt_node, else_clause_node = ast_node.children
+            const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
+            parse_stmt_node(stmt_node, symb_tab_node)
+            if else_clause_node is not None:
+                parse_stmt_node(stmt_node, symb_tab_node)
+            if const_fold_ret is not None:
+                ast_node._children = (bool(const_fold_ret), stmt_node, else_clause_node)
+        elif ast_node.type == 'repeat_stmt':
+            stmt_list_node, expression_node = ast_node.children
+            parse_stmt_list_node(stmt_list_node, symb_tab_node)
+            const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
+            if const_fold_ret is not None:
+                ast_node._children = (stmt_list_node, bool(const_fold_ret))
+        elif ast_node.type == 'while_stmt':
+            expression_node, stmt_node = ast_node.children
+            const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
+            parse_stmt_node(expression_node, symb_tab_node)
+            if const_fold_ret is not None:
+                ast_node._children = (bool(const_fold_ret), stmt_node)
+        elif ast_node.type == 'for_stmt':
+            iterator, left_expression_node, direction_node, right_expression_node, stmt_node = ast_node.children
+            ret_val = symb_tab_node.chain_look_up(iterator)
+            if ret_val is None:
+                raise Exception(f"var `{iterator}` used before declared")
+            left_const_val, _ = parse_expression_node(left_expression_node, symb_tab_node)
+            right_const_val, _ = parse_expression_node(right_expression_node, symb_tab_node)
+            new_children = list(ast_node.children)
+            if left_const_val is not None:
+                new_children[1] = bool(left_const_val)
+            if right_const_val is not None:
+                new_children[3] = bool(right_const_val)
+            ast_node._children = tuple(new_children)
+        elif ast_node.type == 'case_stmt':
+            expression_node, case_expr_list_node = ast_node.children
+            const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
+            if const_fold_ret is not None:
+                ast_node._children = (bool(const_fold_ret), case_expr_list_node)
+
         else:
             raise NotImplementedError(ast_node.type)
+
+
+def parse_case_expr_list(ast_node, symb_tab_node):
+    """
+    case_expr_list :  case_expr_list  case_expr
+                    |  case_expr
+    """
+    if ast_node.type == 'case_expr':
+        parse_case_expr(ast_node, symb_tab_node)
+    else:  # case_expr_list
+        # traverse skew tree
+        ast_node._children = traverse_skew_tree(ast_node, 'case_expr')
+        for child in ast_node.children:
+            parse_case_expr(child, symb_tab_node)
+
+
+def parse_case_expr(ast_node, symb_tab_node):
+    maybe_const_or_id, stmt_node = ast_node.children
+    if not isinstance(maybe_const_or_id, Node):
+        # id
+        ret_val = symb_tab_node.chain_look_up(maybe_const_or_id)
+        if ret_val is None:
+            raise Exception('`{}` used before decalared in case statement')
+
+    parse_stmt_node(stmt_node, symb_tab_node)
 
 
 def parse_proc_stmt_node(ast_node, symb_tab_node):

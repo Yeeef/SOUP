@@ -392,8 +392,10 @@ def p_case_stmt(p):
 
 
 def p_case_expr_list(p):
-    '''case_expr_list :  case_expr_list  case_expr  
-                    |  case_expr'''
+    """
+    case_expr_list :  case_expr_list  case_expr
+                    |  case_expr
+    """
     if len(p) == 3:
         p[0] = Node("case_expr_list", p[1], p[2])
     else:
@@ -401,8 +403,10 @@ def p_case_expr_list(p):
 
 
 def p_case_expr(p):
-    '''case_expr :  const_value  COLON  stmt  SEMICON
-                    |  ID  COLON  stmt  SEMICON'''
+    """
+    case_expr :  const_value  COLON  stmt  SEMICON
+              |  ID  COLON  stmt  SEMICON
+    """
     p[0] = Node("case_expr", p[1], p[3])
 
 
@@ -557,7 +561,7 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/const.pas'
+    test_file = 'test_yacc/simple_arithmetic.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
