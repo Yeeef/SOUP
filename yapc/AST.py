@@ -57,9 +57,11 @@ def traverse_skew_tree_bool(node, stop_node_type, target_node_type):
 
 class Node(object):
 
-    def __init__(self, t, *args):
+    def __init__(self, t, lineno, *args):
+        assert isinstance(lineno, int), type(lineno)
         self._type = t
         self._children = args
+        self._lineno = lineno
 
     @property
     def children(self):
@@ -68,6 +70,10 @@ class Node(object):
     @property
     def type(self):
         return self._type
+
+    @property
+    def lineno(self):
+        return self._lineno
 
     # TODO: this __str__ is not clear
     def __str__(self):
@@ -86,16 +92,22 @@ def parse_range_from_range_node(Node):
     left_type, right_type = left_range_node.type, right_range_node.type
     # semantic error
     if left_type != right_type:
-        raise Exception('left range type: `{}`, right range type: `{}`'.format(left_type, right_type))
+        SemanticLogger.error(left_range_node.lineno,
+                             'left range type: `{}`, right range type: `{}`'.format(left_type, right_type))
+        # raise Exception('left range type: `{}`, right range type: `{}`'.format(left_type, right_type))
 
     if left_type not in ['integer', 'char']:
-        raise Exception('arr only supprt integer / char indices, not {}'.format(left_type))
+        SemanticLogger.error(left_range_node.lineno,
+                             'arr only supprt integer / char indices, not {}'.format(left_type))
+        # raise Exception('arr only supprt integer / char indices, not {}'.format(left_type))
 
     left_val, *_ = left_range_node.children
     right_val, *_ = right_range_node.children
 
     if left_val > right_val:
-        raise Exception('left range val `{}` > right range val `{}`'.format(left_val, right_val))
+        SemanticLogger.error(left_range_node.lineno,
+                             'left range val `{}` > right range val `{}`'.format(left_val, right_val))
+        # raise Exception('left range val `{}` > right range val `{}`'.format(left_val, right_val))
     return left_type, left_val, right_val
 
 
@@ -146,7 +158,8 @@ def parse_type_decl_node(type_decl_node, symbol_table):
         alias_type = type_decl_node.children[0]
         ret_val = symbol_table.chain_look_up(alias_type)
         if not ret_val:
-            raise Exception('alias type: `{}` used before defined'.format(alias_type))
+            SemanticLogger.error(type_decl_node.lineno, 'alias type: `{}` used before defined'.format(alias_type))
+            # raise Exception('alias type: `{}` used before defined'.format(alias_type))
         # return the true type
         if ret_val.type == 'sys_type':
             return ret_val.value['sys_type']
@@ -339,7 +352,8 @@ def parse_var_val_para_type_list(ast_node, symb_tab_node):
     for name in name_list:
         # TODO: 暂时把所有参数在新的 scope 下存成 var 型
         if symb_tab_node.lookup(name):
-            raise Exception("parameter `{}` is already defined".format(name))
+            SemanticLogger.error(left_child.lineno, "parameter `{}` is already defined".format(name))
+            # raise Exception("parameter `{}` is already defined".format(name))
         symb_tab_item = SymbolTableItem('var', {'var_type': type_})
         symb_tab_node.insert(name, symb_tab_item)
     if ast_node.type == 'var_para_type_list':  # var_para_type_list
@@ -355,8 +369,6 @@ def parse_name_list(ast_node):
     maybe name_list or just a str
     """
     if isinstance(ast_node, str):
-        # if symb_tab_node.lookup(ast_node) is not None:
-        #     raise Exception('variable {} is already defined'.format(ast_node))
         return [ast_node]
 
     elif ast_node.type == 'name_list':
@@ -376,7 +388,8 @@ def parse_procedure_decl_node(ast_node, symb_tab_node):
     proc_id, para_decl_list_node = proc_head_node.children
     ret_val = symb_tab_node.lookup(proc_id)
     if ret_val is not None:  # 是否定义
-        raise Exception('procedure `{}` is already defined'.format(proc_id))
+        SemanticLogger.error(proc_head_node.lineno, 'procedure `{}` is already defined'.format(proc_id))
+        # raise Exception('procedure `{}` is already defined'.format(proc_id))
 
     # parse para_decl_list
 
@@ -387,6 +400,9 @@ def parse_procedure_decl_node(ast_node, symb_tab_node):
         var_val_para_type_list = parse_para_decl_list(para_decl_list_node, new_symb_tab_node)
     else:
         var_val_para_type_list = []
+
+    symb_tab_item = ProcedureItem(var_val_para_type_list)
+    symb_tab_node.insert(proc_id, symb_tab_item)
     # parse routine_node
 
     parse_routine_node(routine_node, new_symb_tab_node)
@@ -432,7 +448,9 @@ def parse_const_node(ast_node, symb_tab_node):
         symb_tab_item = SymbolTableItem('const', {'const_val': const_val, 'const_type': const_type})
         is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
         if is_conflict:
-            raise ConflictIDError(id_, ret_val)
+            SemanticLogger.error(const_val_node.lineno,
+                                 f'constant {id_} already in the symbol table with value {ret_val}')
+            # raise ConflictIDError(id_, ret_val)
 
 
 def parse_type_part_node(ast_node, symb_tab_node):
@@ -457,7 +475,8 @@ def parse_type_part_node(ast_node, symb_tab_node):
             type_alias = attributes[0]
             ret_val = symb_tab_node.lookup(type_alias)
             if not ret_val:
-                raise Exception('type alias: `{}` used before defined'.format(type_alias))
+                SemanticLogger.error(child.lineno, 'type alias: `{}` used before defined'.format(type_alias))
+                # raise Exception('type alias: `{}` used before defined'.format(type_alias))
             symb_tab_item = copy.deepcopy(ret_val)
 
         elif type_ == 'sys_type':
@@ -476,7 +495,9 @@ def parse_type_part_node(ast_node, symb_tab_node):
         is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
 
         if is_conflict:
-            raise ConflictIDError(id_, symb_tab_item)
+            SemanticLogger.error(child.lineno,
+                                 f"constant {id_} already in the symbol table with value {ret_val.value['const_val']}")
+            # raise ConflictIDError(id_, symb_tab_item)
 
 
 def parse_var_part_node(ast_node, symb_tab_node):
@@ -491,7 +512,9 @@ def parse_var_part_node(ast_node, symb_tab_node):
         for id_ in flatten_name_list:
             is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
             if is_conflict:
-                raise ConflictIDError(id_, symb_tab_item)
+                SemanticLogger.error(ast_node.lineno,
+                        f'constant {id_} already in the symbol table with value {symb_tab_item}')
+                # raise ConflictIDError(id_, symb_tab_item)
     else:
         # flatten var_decl
 
@@ -504,7 +527,9 @@ def parse_var_part_node(ast_node, symb_tab_node):
             for id_ in flatten_name_list:
                 is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
                 if is_conflict:
-                    raise ConflictIDError(id_, symb_tab_item)
+                    SemanticLogger.error(child.lineno,
+                                         f'constant {id_} already in the symbol table with value {symb_tab_item}')
+                    # raise ConflictIDError(id_, symb_tab_item)
 
 
 def parse_routine_part_node(ast_node, symb_tab_node):
@@ -513,29 +538,19 @@ def parse_routine_part_node(ast_node, symb_tab_node):
     return all (proc_id, var_val_para_type_list)
     一个 routine_part 里的 procedure 范围是同级的
     """
-    proc_info_list = []
     # 如果只有一个 procedure, rountine_part 直接为一个 procedure_decl
     if ast_node.type == 'procedure_decl':
-        proc_id, var_val_para_type_list = parse_procedure_decl_node(ast_node, symb_tab_node)
-        proc_info_list.append((proc_id, var_val_para_type_list))
+        parse_procedure_decl_node(ast_node, symb_tab_node)
     elif ast_node.type == 'function_decl':
-        func_id, var_val_para_type_list = parse_func_decl_node(ast_node, symb_tab_node)
-        proc_info_list.append((func_id, var_val_para_type_list))
+        parse_func_decl_node(ast_node, symb_tab_node)
     elif ast_node.type == 'routine_part':
         flatten_proc_decl_nodes = traverse_skew_tree(ast_node, ['procedure_decl', 'function_decl'])
         ast_node._children = flatten_proc_decl_nodes
-        proc_info_list = []
         for child in ast_node.children:
             if child.type == 'procedure_decl':
-                proc_id, var_val_para_type_list = parse_procedure_decl_node(child, symb_tab_node)
+                parse_procedure_decl_node(child, symb_tab_node)
             else:  # function_decl
-                proc_id, var_val_para_type_list = parse_func_decl_node(child, symb_tab_node)
-
-            proc_info_list.append((proc_id, var_val_para_type_list))
-
-    for proc_id, var_val_para_type_list in proc_info_list:
-        symb_tab_item = ProcedureItem(var_val_para_type_list, [])
-        symb_tab_node.insert(proc_id, symb_tab_item)
+                parse_func_decl_node(child, symb_tab_node)
 
 
 def parse_func_decl_node(ast_node, symb_tab_node):
@@ -547,25 +562,27 @@ def parse_func_decl_node(ast_node, symb_tab_node):
     func_ret_type = parse_type_decl_node(ret_type_decl_node, symb_tab_node)
     ret_val = symb_tab_node.lookup(func_id)
     if ret_val is not None:  # 是否定义
-        raise Exception('procedure `{}` is already defined'.format(func_id))
+        SemanticLogger.error(ret_type_decl_node.lineno, 'procedure `{}` is already defined'.format(func_id))
+        # raise Exception('procedure `{}` is already defined'.format(func_id))
 
     # parse para_decl_list
 
     new_symb_tab_node = SymbolTableNode(func_id, None, None)
     make_parent_and_child(symb_tab_node, new_symb_tab_node)
-    # 插入 return type
-    ret_type_symb_tab_node = SymbolTableItem('ret_type', {'ret_type': func_ret_type})
-    new_symb_tab_node.insert('ret_type', ret_type_symb_tab_node)
 
     # 插入 func id 作为一个 var
     ret_var_symb_tab_node = SymbolTableItem('var', {'var_type': func_ret_type})
     new_symb_tab_node.insert(func_id, ret_var_symb_tab_node)
+
     if para_decl_list_node:
         var_val_para_type_list = parse_para_decl_list(para_decl_list_node, new_symb_tab_node)
     else:
         var_val_para_type_list = []
-    # parse routine_node
 
+    old_symb_tab_item = FunctionItem(var_val_para_type_list, func_ret_type)
+    symb_tab_node.insert(func_id, old_symb_tab_item)
+
+    # parse routine_node
     parse_routine_node(routine_node, new_symb_tab_node)
 
     return func_id, var_val_para_type_list
@@ -648,7 +665,8 @@ def parse_stmt_node(ast_node, symb_tab_node):
             iterator, left_expression_node, direction_node, right_expression_node, stmt_node = ast_node.children
             ret_val = symb_tab_node.chain_look_up(iterator)
             if ret_val is None:
-                raise Exception(f"var `{iterator}` used before declared")
+                SemanticLogger.error(iterator.lineno, f"var `{iterator}` used before declared")
+                # raise Exception(f"var `{iterator}` used before declared")
             left_const_val, _ = parse_expression_node(left_expression_node, symb_tab_node)
             right_const_val, _ = parse_expression_node(right_expression_node, symb_tab_node)
             new_children = list(ast_node.children)
@@ -687,7 +705,9 @@ def parse_case_expr(ast_node, symb_tab_node):
         # id
         ret_val = symb_tab_node.chain_look_up(maybe_const_or_id)
         if ret_val is None:
-            raise Exception('`{}` used before decalared in case statement')
+            SemanticLogger.error(ast_node.lineno,
+                                 '`{}` used before decalared in case statement'.format(maybe_const_or_id))
+            # raise Exception('`{}` used before decalared in case statement')
 
     parse_stmt_node(stmt_node, symb_tab_node)
 
@@ -709,7 +729,8 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
             # 检查该 procedure 是否定义过，chain look up
             ret_val = symb_tab_node.chain_look_up(proc_id_or_sys_func)
             if ret_val is None:
-                raise Exception("procedure `{}` used before defined".format(proc_id_or_sys_func))
+                SemanticLogger.error(ast_node.lineno, "procedure `{}` used before defined".format(proc_id_or_sys_func))
+                # raise Exception("procedure `{}` used before defined".format(proc_id_or_sys_func))
             # 并且该 procedure 不接受任何参数，事实上 parse 直接替我们做了这件事情，所以不需要额外检查
     else:  # proc_stmt node
         proc_id, right_child = ast_node.children
@@ -722,7 +743,9 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
             # 检查 proc_id 是否定义过, chain_look_up
             ret_val = symb_tab_node.chain_look_up(proc_id)
             if ret_val is None:
-                raise Exception("procedure `{}` used before declared".format(proc_id))
+                SemanticLogger.error(right_child.lineno,
+                                     "procedure `{}` used before declared".format(proc_id))
+                # raise Exception("procedure `{}` used before declared".format(proc_id))
             else:
                 # 检查变量个数是否合适
                 # 用的变量是否定义过, 在 parse_args_list 中会自然调用 constant_folding, 会自动检查
@@ -730,8 +753,12 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
                 args_type_list = parse_args_list(right_child, symb_tab_node)
                 # 检查变量个数是否合适
                 if len(param_list) != len(args_type_list):
-                    raise Exception("procedure `{}` expect {} args, got {} args"
-                                    .format(proc_id, len(param_list), len(args_type_list)))
+                    SemanticLogger.error(right_child.lineno,
+                                         "procedure `{}` expect {} args, got {} args"
+                                         .format(proc_id, len(param_list), len(args_type_list))
+                                         )
+                    # raise Exception("procedure `{}` expect {} args, got {} args"
+                    #                 .format(proc_id, len(param_list), len(args_type_list)))
                 # 检查变量类型是否合适
                 for idx in range(len(param_list)):
                     _, arg_name, expect_type = param_list[idx]
@@ -742,11 +769,19 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
                                 (isinstance(expect_type, dict) and expect_type != given_type):
                             wrong_flag = True
                         if wrong_flag:
-                            raise Exception("procedure `{}` arg `{}` expect `{}` got `{}`"
-                                        .format(proc_id, arg_name, expect_type, given_type))
+                            SemanticLogger.error(right_child.lineno,
+                                                 "procedure `{}` arg `{}` expect `{}` got `{}`"
+                                                 .format(proc_id, arg_name, expect_type, given_type)
+                                                 )
+
+                            # raise Exception("procedure `{}` arg `{}` expect `{}` got `{}`"
+                            #             .format(proc_id, arg_name, expect_type, given_type))
                         else:
-                            print('Warning, procedure `{}` arg `{}` expect `{}` got `{}`'
+                            SemanticLogger.warn(right_child.lineno,
+                                                'procedure `{}` arg `{}` expect `{}` got `{}`'
                                   .format(proc_id, arg_name, expect_type, given_type))
+                            # print('Warning, procedure `{}` arg `{}` expect `{}` got `{}`'
+                            #       .format(proc_id, arg_name, expect_type, given_type))
 
 
 def parse_args_list(ast_node, symb_tab_node):
@@ -787,21 +822,27 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         id_, expression_node = children
         ret_val = symb_tab_node.lookup(id_)
         if ret_val is None:
-            raise Exception('var {} assigned before declared'.format(id_))
+            SemanticLogger.error(ast_node.lineno, 'var {} assigned before declared'.format(id_))
+            # raise Exception('var {} assigned before declared'.format(id_))
         if ret_val.type == 'const':
-            raise Exception('const {} cannot be assigned!'.format(id_))
-
+            SemanticLogger.error(ast_node.lineno, 'const {} cannot be assigned!'.format(id_))
+            # raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         # 检查 type
         var_declare_type = ret_val.value['var_type']
         if constant_fold_type != var_declare_type:
             if var_declare_type == 'char':
-                raise Exception("cannot cast `{}` type to char type in variable `{}`".format(constant_fold_type, id_))
+                SemanticLogger.error(expression_node.lineno,
+                                     "cannot cast `{}` type to char type in variable `{}`"
+                                     .format(constant_fold_type, id_))
+                # raise Exception("cannot cast `{}` type to char type in variable `{}`".format(constant_fold_type, id_))
         # 进行 type casting
         if constant_fold_ret is not None:
             new_constant_fold_ret = CONST_TYPE_TO_FUNC[var_declare_type](constant_fold_ret)
             if constant_fold_type != var_declare_type:
-                print("Warning: cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
+                SemanticLogger.warn(expression_node.lineno,
+                                    "cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
+                # print("Warning: cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
             constant_fold_ret = new_constant_fold_ret
         if constant_fold_ret is not None:
             ast_node._children = (id_, constant_fold_ret)
@@ -810,28 +851,41 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         id_, index_expression_node, expression_node = children
         ret_val = symb_tab_node.lookup(id_)
         if ret_val is None:
-            raise Exception('var {} assigned before declared'.format(id_))
+            SemanticLogger.error(ast_node.lineno, 'var {} assigned before declared'.format(id_))
+            # raise Exception('var {} assigned before declared'.format(id_))
         if ret_val.type == 'const':
-            raise Exception('const {} cannot be assigned!'.format(id_))
+            SemanticLogger.error(ast_node.lineno, 'const {} cannot be assigned!'.format(id_))
+            # raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
-        print(ret_val)
 
         var_type = ret_val.value['var_type']
         # index type 可以直接进行检查
         if index_fold_type != var_type['index_type']:
-            raise Exception('arr `{}` expect `{}` index, but got `{}`'.
-                            format(id_, var_type['index_type'], index_fold_type))
+            SemanticLogger.error(ast_node.lineno,
+                                 'arr `{}` expect `{}` index, but got `{}`'.
+                                 format(id_, var_type['index_type'], index_fold_type)
+                                 )
+            # raise Exception('arr `{}` expect `{}` index, but got `{}`'.
+            #                 format(id_, var_type['index_type'], index_fold_type))
         # element type 可以直接进行检查
         if var_type['element_type'] != constant_fold_type:
-            raise Exception('arr `{}` expect `{}` element but got `{}`'
-                            .format(id_, var_type['element_type'], constant_fold_type))
+            SemanticLogger.error(ast_node.lineno,
+                                 'arr `{}` expect `{}` element but got `{}`'
+                                 .format(id_, var_type['element_type'], constant_fold_type)
+                                 )
+            # raise Exception('arr `{}` expect `{}` element but got `{}`'
+            #                 .format(id_, var_type['element_type'], constant_fold_type))
         # 如果 index_fold_ret 有效，可以进行范围检查
         if index_fold_ret is not None:
             left_range, right_range = var_type['index_range']
             if index_fold_ret < left_range or index_fold_ret > right_range:
-                raise Exception("arr `{}` has range `{}`, but got index {}"
-                                .format(id_, (left_range, right_range), index_fold_ret))
+                SemanticLogger.error(index_expression_node.lineno,
+                                     "arr `{}` has range `{}`, but got index {}"
+                                     .format(id_, (left_range, right_range), index_fold_ret)
+                                     )
+                # raise Exception("arr `{}` has range `{}`, but got index {}"
+                #                 .format(id_, (left_range, right_range), index_fold_ret))
 
         # 替换孩子
         ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
@@ -888,7 +942,9 @@ def parse_expression_node(ast_node, symb_table):
         expr_val, expr_type = parse_expr_node(right_expr_child, symb_table)
         # 依旧不支持 char
         if expression_type == 'char' or expr_type == 'char':
-            raise Exception("char value is not supported for relation op `{}`".format(bool_op))
+            SemanticLogger.error(left_expression_child.lineno,
+                                 "char value is not supported for relation op `{}`".format(bool_op))
+            # raise Exception("char value is not supported for relation op `{}`".format(bool_op))
 
         # 返回值的类型一定是 boolean
         ret_type = 'boolean'
@@ -926,7 +982,9 @@ def parse_expr_node(ast_node, symb_table):
         new_children = []
         # 与 char 无瓜
         if expr_type == 'char' or term_type == 'char':
-            raise Exception("char value is not supported for binary op: `{}`".format(node_op))
+            SemanticLogger.error(left_expr_child.lineno,
+                                 "char value is not supported for binary op: `{}`".format(node_op))
+            # raise Exception("char value is not supported for binary op: `{}`".format(node_op))
 
         # 判断节点返回值类型
         if ast_node.type == 'expr-OR':
@@ -985,7 +1043,9 @@ def parse_term_node(ast_node, symb_table):
 
         # 总之和 char 无瓜
         if term_type == 'char' or factor_type == 'char':
-            raise Exception('char value is not supported for binary op `{}`'.format(node_op))
+            SemanticLogger.error(left_term_child.lineno,
+                                 'char value is not supported for binary op `{}`'.format(node_op))
+            # raise Exception('char value is not supported for binary op `{}`'.format(node_op))
 
         # 以下的判断保证与 char 无瓜
         # 先把类型判断好
@@ -995,7 +1055,10 @@ def parse_term_node(ast_node, symb_table):
         elif ast_node.type == 'term-INTDIV' or ast_node.type == 'term-MOD':
             # 返回值一定是整数，且要求两个数字都是整数
             if term_type != 'integer' or factor_type != 'integer':
-                raise Exception("div and mod expect 2 integer, but got `{}` and `{}`".format(term_type, factor_type))
+                SemanticLogger.error(left_term_child.lineno,
+                                     "div and mod expect 2 integer, but got `{}` and `{}`"
+                                     .format(term_type, factor_type))
+                # raise Exception("div and mod expect 2 integer, but got `{}` and `{}`".format(term_type, factor_type))
             ret_val_type = 'integer'
         elif ast_node.type == 'term-DIV':
             ret_val_type = 'real'
@@ -1053,7 +1116,8 @@ def parse_factor_node(ast_node, symb_table):
             # must be const value or variable value
             ret_val = symb_table.chain_look_up(ast_node)
             if ret_val is None:
-                raise Exception("`{}` is not a const or variable or func".format(ast_node))
+                SemanticLogger.error(ast_node.lineno, "`{}` is not a const or variable or func".format(ast_node))
+                # raise Exception("`{}` is not a const or variable or func".format(ast_node))
             else:
                 if ret_val.type == 'const':
                     const_val = ret_val.value['const_val']
@@ -1072,12 +1136,13 @@ def parse_factor_node(ast_node, symb_table):
             const_val, val_type = parse_factor_arr_node(ast_node, symb_table)
             return const_val, val_type
         elif ast_node.type == 'factor-func' or ast_node.type == 'factor-sys-func':
-            parse_factor_func_node(ast_node, symb_table)
+            return parse_factor_func_node(ast_node, symb_table)
         elif ast_node.type == 'factor':  # - factor / not factor
             unary_op, right_factor_child = ast_node.children
             const_val, val_type = parse_factor_node(right_factor_child, symb_table)
             if val_type == 'char':
-                raise Exception('char value `{}` is not supported for `-` op'.format(const_val))
+                SemanticLogger.error(ast_node.lineno, 'char value `{}` is not supported for `-` op'.format(const_val))
+                # raise Exception('char value `{}` is not supported for `-` op'.format(const_val))
             if const_val is not None:
                 if unary_op == '-':
                     if val_type == 'boolean':
@@ -1126,15 +1191,21 @@ def parse_factor_func_node(ast_node, symb_tab_node):
             func_id = id_or_sys_func
             ret_val = symb_tab_node.chain_look_up(func_id)
             if ret_val is None:
-                raise Exception("func `{}` used before declared")
+                SemanticLogger.error(ast_node.lineno, "func `{}` used before declared")
+                # raise Exception("func `{}` used before declared")
             # 检查变量个数是否合适
             # 用的变量是否定义过, 在 parse_args_list 中会自然调用 constant_folding, 会自动检查
             param_list = ret_val.para_list
             args_type_list = parse_args_list(args_list_node, symb_tab_node)
+            # TODO: 把该压的 args, 压好
             # 检查变量个数是否合适
             if len(param_list) != len(args_type_list):
-                raise Exception("func `{}` expect {} args, got {} args"
-                                .format(func_id, len(param_list), len(args_type_list)))
+                SemanticLogger.error(args_list_node.lineno,
+                                     "func `{}` expect {} args, got {} args"
+                                     .format(func_id, len(param_list), len(args_type_list))
+                                     )
+                # raise Exception("func `{}` expect {} args, got {} args"
+                #                 .format(func_id, len(param_list), len(args_type_list)))
             # 检查变量类型是否合适
             for idx in range(len(param_list)):
                 _, arg_name, expect_type = param_list[idx]
@@ -1145,11 +1216,20 @@ def parse_factor_func_node(ast_node, symb_tab_node):
                             (isinstance(expect_type, dict) and expect_type != given_type):
                         wrong_flag = True
                     if wrong_flag:
-                        raise Exception("func `{}` arg `{}` expect `{}` got `{}`"
-                                        .format(func_id, arg_name, expect_type, given_type))
+                        SemanticLogger.error(args_list_node.lineno,
+                                             "func `{}` arg `{}` expect `{}` got `{}`"
+                                             .format(func_id, arg_name, expect_type, given_type)
+                                             )
+                        # raise Exception("func `{}` arg `{}` expect `{}` got `{}`"
+                        #                 .format(func_id, arg_name, expect_type, given_type))
                     else:
-                        print('Warning, func `{}` arg `{}` expect `{}` got `{}`'
-                              .format(func_id, arg_name, expect_type, given_type))
+                        SemanticLogger.warn(args_list_node.lineno,
+                                             "func `{}` arg `{}` expect `{}` got `{}`"
+                                             .format(func_id, arg_name, expect_type, given_type)
+                                             )
+                        # print('Warning, func `{}` arg `{}` expect `{}` got `{}`'
+                        #       .format(func_id, arg_name, expect_type, given_type))
+            return None, ret_val.ret_type
 
 
 def parse_factor_arr_node(ast_node, symb_tab):
@@ -1162,7 +1242,8 @@ def parse_factor_arr_node(ast_node, symb_tab):
     # arr_id 必须定义过
     ret_val = symb_tab.chain_look_up(arr_id)
     if ret_val is None:
-        raise Exception('array `{}` used before defined'.format(arr_id))
+        SemanticLogger.error(ast_node.lineno, 'array `{}` used before defined'.format(arr_id))
+        # raise Exception('array `{}` used before defined'.format(arr_id))
     else:
         # parse index, 判断是否越界, 只有可以 const fold 的情况，才可以完全判断越界
         const_val, val_type = parse_expression_node(index_expression_node, symb_tab)
@@ -1172,12 +1253,17 @@ def parse_factor_arr_node(ast_node, symb_tab):
             # 检查 index type 是否正确
             index_type = arr_type['index_type']
             if index_type != val_type:
-                raise Exception('illegal index `{}` for array `{}`'.format(const_val, arr_id))
+                SemanticLogger.error(index_expression_node.lineno,
+                                     'illegal index `{}` for array `{}`'.format(const_val, arr_id))
+                # raise Exception('illegal index `{}` for array `{}`'.format(const_val, arr_id))
             # 检查是否越界
             left_range, right_range = arr_type['index_range']
             if const_val < left_range or const_val > right_range:
-                raise Exception('illegal index `{}` for array `{}` with index range: {}'
+                SemanticLogger.error(index_expression_node.lineno,
+                                     'illegal index `{}` for array `{}` with index range: {}'
                                 .format(const_val, arr_id, (left_range, right_range)))
+                # raise Exception('illegal index `{}` for array `{}` with index range: {}'
+                #                 .format(const_val, arr_id, (left_range, right_range)))
             # 替换孩子
             ast_node._children = (arr_id, const_val)
 

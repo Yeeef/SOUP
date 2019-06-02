@@ -10,7 +10,7 @@ var k, sum : integer;
     begin
     end;
 begin
-    perfect := k=sum;
+    {perfect := k=sum;}
 end;
 
 {function not_perfect(x: integer):boolean;
@@ -30,6 +30,6 @@ end;}
 begin
 	{x := -4;
 	y := aa + 1;}
-	x := -4;
-	{s := perfect(1);}
+	{x := -4;}
+	s := perfect(1);
 end.

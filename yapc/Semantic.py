@@ -11,11 +11,12 @@ class SemanticAnalyzer(object):
     """
     static semantic analysis
     """
-    def __init__(self, root_node):
+    def __init__(self, root_node, logger):
         assert isinstance(root_node, Node), type(root_node)
         self._ast = root_node
         # dummy parent, no children
         self._symb_tab = SymbolTableNode('main', None, None)
+        self.logger = logger
 
     @property
     def symbol_table(self):

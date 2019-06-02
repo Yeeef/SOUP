@@ -14,72 +14,85 @@ precedence = (
 
 
 def p_program(p):
-    'program :  program_head  routine  DOT'
-    p[0] = Node('program', p[1], p[2])
+    """
+    program :  program_head  routine  DOT
+    """
+    p[0] = Node('program', p.lexer.lineno, p[1], p[2])
 
 
 def p_program_head(p):
-    'program_head : kPROGRAM ID SEMICON'
+    """
+    program_head : kPROGRAM ID SEMICON
+    """
     p[0] = p[2]
 
 
 def p_routine(p):
-    'routine : routine_head routine_body'
-    p[0] = Node('routine', p[1], p[2])
+    """
+    routine : routine_head routine_body
+    """
+    p[0] = Node('routine', p.lexer.lineno, p[1], p[2])
 
 
 def p_routine_head(p):
-    'routine_head : const_part type_part var_part routine_part'
-    p[0] = Node('routine_head', p[1], p[2], p[3], p[4])
+    """
+    routine_head : const_part type_part var_part routine_part
+    """
+    p[0] = Node('routine_head', p.lexer.lineno, p[1], p[2], p[3], p[4])
 
 
 def p_const_part(p):
-    '''const_part : kCONST const_expr_list
-                  | empty'''
+    """
+    const_part : kCONST const_expr_list
+               | empty
+    """
     if len(p) == 3:
         p[0] = p[2]
 
 
 def p_const_expr_list(p):
-    '''const_expr_list :  const_expr_list  const_expr
-                    |  const_expr'''
+    """
+    const_expr_list :  const_expr_list  const_expr
+                    |  const_expr
+    """
     if len(p) == 3:
-        p[0] = Node("const_expr_list", p[1], p[2])
+        p[0] = Node("const_expr_list", p.lexer.lineno, p[1], p[2])
     elif len(p) == 2:
         p[0] = p[1]
 
 
 def p_const_expr(p):
-    'const_expr : ID EQUAL const_value SEMICON'
-    p[0] = Node('const_expr', p[1], p[3])
+    """
+    const_expr : ID EQUAL const_value SEMICON
+    """
+    p[0] = Node('const_expr', p.lexer.lineno, p[1], p[3])
 
 
-# TODO: maybe we can write these shit up
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
 def p_const_value_1(p):
     'const_value : INTEGER'
-    p[0] = Node('integer', p[1])
+    p[0] = Node('integer', p.lexer.lineno, p[1])
 
 
 def p_const_value_2(p):
     'const_value : REAL'
-    p[0] = Node('real', p[1])
+    p[0] = Node('real', p.lexer.lineno, p[1])
 
 
 def p_const_value_3(p):
     'const_value : CHAR'
-    p[0] = Node('char', p[1])
+    p[0] = Node('char', p.lexer.lineno, p[1])
 
 
 # TODO: just remove it?
 def p_const_value_4(p):
     'const_value : STRING'
-    p[0] = Node('string', p[1])
+    p[0] = Node('string', p.lexer.lineno, p[1])
 
 
 def p_const_value_5(p):
     'const_value : SYS_CON'
-    p[0] = Node('sys_con', p[1])
+    p[0] = Node('sys_con', p.lexer.lineno, p[1])
 
 
 # type_part : TYPE type_decl_list    |    empty
@@ -94,14 +107,14 @@ def p_type_decl_list(p):
     '''type_decl_list :  type_decl_list  type_definition  
                     |  type_definition'''
     if len(p) == 3:
-        p[0] = Node("type_decl_list", p[1], p[2])
+        p[0] = Node("type_decl_list", p.lexer.lineno, p[1], p[2])
     else:
         p[0] = p[1]
 
 
 def p_type_definition(p):
     '''type_definition :  ID  EQUAL  type_decl  SEMICON'''
-    p[0] = Node("type_definition", p[1], p[3])
+    p[0] = Node("type_definition", p.lexer.lineno, p[1], p[3])
 
 
 def p_type_decl(p):
@@ -123,56 +136,54 @@ def p_type_decl(p):
 
 def p_simple_type_decl_1(p):
     'simple_type_decl : SYS_TYPE'
-    p[0] = Node("sys_type", p[1])
+    p[0] = Node("sys_type", p.lexer.lineno, p[1])
 
 
 # TODO: can we just remove it?
 def p_simple_type_decl_2(p):
     'simple_type_decl : LP name_list RP'
-    p[0] = Node('enum', p[2])
+    p[0] = Node('enum', p.lexer.lineno, p[2])
 
 
 def p_simple_type_decl_3(p):
     'simple_type_decl : const_value DOUBLEDOT const_value'
-    p[0] = Node('range', p[1], p[3])
+    p[0] = Node('range', p.lexer.lineno, p[1], p[3])
 
 
-# FIXME: 为什么叫 var?
 def p_simple_type_decl_4(p):
     'simple_type_decl : ID'
-    p[0] = Node("alias", p[1])
+    p[0] = Node("alias", p.lexer.lineno, p[1])
 
 
-# TODO: 我觉得 array_type 中间用不到整个 simple_type_decl?, range 应该就够了   
 def p_array_type_decl(p):
     'array_type_decl :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl'
-    p[0] = Node("array", p[3], p[6])
+    p[0] = Node("array", p.lexer.lineno, p[3], p[6])
 
 
 def p_record_type_decl(p):
     'record_type_decl :  kRECORD  field_decl_list  kEND'
-    p[0] = Node("record", p[2])
+    p[0] = Node("record", p.lexer.lineno, p[2])
 
 
 def p_field_decl_list(p):
     '''field_decl_list :  field_decl_list  field_decl  
                     |  field_decl'''
     if len(p) == 3:
-        p[0] = Node("field_decl_list", p[1], p[2])
+        p[0] = Node("field_decl_list", p.lexer.lineno, p[1], p[2])
     else:
         p[0] = p[1]
 
 
 def p_field_decl(p):
     'field_decl :  name_list  COLON  type_decl  SEMICON'
-    p[0] = Node("field_decl", p[1], p[3])
+    p[0] = Node("field_decl", p.lexer.lineno, p[1], p[3])
 
 
 def p_name_list(p):
     '''name_list :  name_list  COMMA  ID  
                     |  ID'''
     if len(p) == 4:
-        p[0] = Node("name_list", p[1], p[3])
+        p[0] = Node("name_list", p.lexer.lineno, p[1], p[3])
     else:
         p[0] = p[1]
 
@@ -189,14 +200,14 @@ def p_var_decl_list(p):
     '''var_decl_list :  var_decl_list  var_decl  
                     |  var_decl'''
     if len(p) == 3:
-        p[0] = Node("var_decl_list", p[1], p[2])
+        p[0] = Node("var_decl_list", p.lexer.lineno, p[1], p[2])
     else:
         p[0] = p[1]
 
 
 def p_var_decl(p):
     'var_decl :  name_list  COLON  type_decl  SEMICON'
-    p[0] = Node("var_decl", p[1], p[3])
+    p[0] = Node("var_decl", p.lexer.lineno, p[1], p[3])
 
 
 # routine part
@@ -207,12 +218,11 @@ def p_routine_part(p):
                     |  procedure_decl  
                     | empty'''
     if len(p) == 3:
-        p[0] = Node("routine_part", p[1], p[2])
+        p[0] = Node("routine_part", p.lexer.lineno, p[1], p[2])
     elif len(p) == 2:
         p[0] = p[1]
 
 
-# TODO: 这样写会带来问题吗？
 def p_sub_routine(p):
     'sub_routine : routine'
     p[0] = p[1]
@@ -222,22 +232,22 @@ def p_function_decl(p):
     """
     function_decl : function_head  SEMICON  sub_routine  SEMICON
     """
-    p[0] = Node("function_decl", p[1], p[3])
+    p[0] = Node("function_decl", p.lexer.lineno, p[1], p[3])
 
 
 def p_function_head(p):
     'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl '
-    p[0] = Node("function_head", p[2], p[3], p[5])
+    p[0] = Node("function_head", p.lexer.lineno, p[2], p[3], p[5])
 
 
 def p_procedure_decl(p):
     'procedure_decl :  procedure_head  SEMICON  sub_routine  SEMICON'
-    p[0] = Node("procedure_decl", p[1], p[3])
+    p[0] = Node("procedure_decl", p.lexer.lineno, p[1], p[3])
 
 
 def p_procedure_head(p):
     'procedure_head :  kPROCEDURE ID parameters '
-    p[0] = Node("procedure_head", p[2], p[3])
+    p[0] = Node("procedure_head", p.lexer.lineno, p[2], p[3])
 
 
 def p_parameters(p):
@@ -251,19 +261,19 @@ def p_para_decl_list(p):
     '''para_decl_list :  para_decl_list  SEMICON  para_type_list 
                     | para_type_list'''
     if len(p) == 4:
-        p[0] = Node("para_decl_list", p[1], p[3])
+        p[0] = Node("para_decl_list", p.lexer.lineno, p[1], p[3])
     else:
         p[0] = p[1]
 
 
 def p_var_para_type_list(p):
     'para_type_list :  var_para_list COLON  simple_type_decl'
-    p[0] = Node("var_para_type_list", p[1], p[3])
+    p[0] = Node("var_para_type_list", p.lexer.lineno, p[1], p[3])
 
 
 def p_val_para_type_list(p):
     'para_type_list :  val_para_list COLON  simple_type_decl'
-    p[0] = Node("val_para_type_list", p[1], p[3])
+    p[0] = Node("val_para_type_list", p.lexer.lineno, p[1], p[3])
 
 
 def p_var_para_list_0(p):
@@ -290,23 +300,20 @@ def p_stmt_list(p):
     '''stmt_list :  stmt_list  stmt  SEMICON  
                     |  empty'''
     if len(p) == 4:
-        p[0] = Node("stmt_list", p[1], p[2])
+        p[0] = Node("stmt_list", p.lexer.lineno, p[1], p[2])
 
 
-# [TODO: resolved]: just remove INTEGER COLON?
-# 这是给 goto 用的
 def p_stmt(p):
     """
     stmt :  INTEGER  COLON  non_label_stmt
          |  non_label_stmt
     """
     if len(p) > 2:
-        p[0] = Node("stmt-label", p[1], p[3])
+        p[0] = Node("stmt-label", p.lexer.lineno, p[1], p[3])
     else:
         p[0] = p[1]
 
 
-# TODO: remove goto?
 def p_non_label_stmt(p):
     '''non_label_stmt :  assign_stmt 
                     | proc_stmt 
@@ -324,19 +331,19 @@ def p_assign_stmt_arr(p):
     '''
     assign_stmt : ID LB expression RB ASSIGN expression
     '''
-    p[0] = Node("assign_stmt-arr", p[1], p[3], p[6])
+    p[0] = Node("assign_stmt-arr", p.lexer.lineno, p[1], p[3], p[6])
 
 
 def p_assign_stmt_record(p):
     '''
     assign_stmt : ID  DOT  ID  ASSIGN  expression
     '''
-    p[0] = Node("assign_stmt-record", p[1], p[3], p[5])
+    p[0] = Node("assign_stmt-record", p.lexer.lineno, p[1], p[3], p[5])
 
 
 def p_assign_stmt(p):
     """assign_stmt :  ID  ASSIGN  expression """
-    p[0] = Node("assign_stmt", p[1], p[3])
+    p[0] = Node("assign_stmt", p.lexer.lineno, p[1], p[3])
 
 
 def p_proc_stmt(p):
@@ -348,14 +355,14 @@ def p_proc_stmt(p):
               |  kREAD  LP  factor  RP
     """
     if len(p) == 2:
-        p[0] = Node("proc_stmt-simple", p[1])
+        p[0] = Node("proc_stmt-simple", p.lexer.lineno, p[1])
     elif len(p) == 5:
-        p[0] = Node("proc_stmt", p[1], p[3])
+        p[0] = Node("proc_stmt", p.lexer.lineno, p[1], p[3])
 
 
 def p_if_stmt(p):
     'if_stmt :  kIF  expression  kTHEN  stmt  else_clause'
-    p[0] = Node("if_stmt", p[2], p[4], p[5])
+    p[0] = Node("if_stmt", p.lexer.lineno, p[2], p[4], p[5])
 
 
 def p_else_clause(p):
@@ -367,17 +374,17 @@ def p_else_clause(p):
 
 def p_repeat_stmt(p):
     'repeat_stmt :  kREPEAT  stmt_list  kUNTIL  expression'
-    p[0] = Node("repeat_stmt", p[2], p[4])
+    p[0] = Node("repeat_stmt", p.lexer.lineno, p[2], p[4])
 
 
 def p_while_stmt(p):
     'while_stmt :  kWHILE  expression  kDO stmt'
-    p[0] = Node("while_stmt", p[2], p[4])
+    p[0] = Node("while_stmt", p.lexer.lineno, p[2], p[4])
 
 
 def p_for_stmt(p):
     'for_stmt :  kFOR  ID  ASSIGN  expression  direction  expression  kDO stmt'
-    p[0] = Node("for_stmt", p[2], p[4], p[5], p[6], p[8])
+    p[0] = Node("for_stmt", p.lexer.lineno, p[2], p[4], p[5], p[6], p[8])
 
 
 def p_direction(p):
@@ -388,7 +395,7 @@ def p_direction(p):
 
 def p_case_stmt(p):
     '''case_stmt : kCASE expression kOF case_expr_list kEND'''
-    p[0] = Node("case_stmt", p[2], p[4])
+    p[0] = Node("case_stmt", p.lexer.lineno, p[2], p[4])
 
 
 def p_case_expr_list(p):
@@ -397,7 +404,7 @@ def p_case_expr_list(p):
                     |  case_expr
     """
     if len(p) == 3:
-        p[0] = Node("case_expr_list", p[1], p[2])
+        p[0] = Node("case_expr_list", p.lexer.lineno, p[1], p[2])
     else:
         p[0] = p[1]
 
@@ -407,14 +414,14 @@ def p_case_expr(p):
     case_expr :  const_value  COLON  stmt  SEMICON
               |  ID  COLON  stmt  SEMICON
     """
-    p[0] = Node("case_expr", p[1], p[3])
+    p[0] = Node("case_expr", p.lexer.lineno, p[1], p[3])
 
 
 def p_goto_stmt(p):
     """
     goto_stmt :  kGOTO  INTEGER
     """
-    p[0] = Node("goto_stmt", p[2])
+    p[0] = Node("goto_stmt", p.lexer.lineno, p[2])
 
 
 def p_expression_list(p):
@@ -423,7 +430,7 @@ def p_expression_list(p):
                     |  expression
     """
     if len(p) == 4:
-        p[0] = Node("expression_list", p[1], p[3])
+        p[0] = Node("expression_list", p.lexer.lineno, p[1], p[3])
     elif len(p) == 2:
         p[0] = p[1]
 
@@ -439,9 +446,9 @@ def p_expression(p):
                |  expr
     """
     if len(p) == 4:
-        p[0] = Node("expression", p[1], p[2], p[3])
+        p[0] = Node("expression", p.lexer.lineno, p[1], p[2], p[3])
     else:
-        p[0] = Node("expression", p[1])
+        p[0] = Node("expression", p.lexer.lineno, p[1])
 
 
 def p_expr(p):
@@ -454,11 +461,11 @@ def p_expr(p):
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '+':
-        p[0] = Node("expr-ADD", p[1], p[3])
+        p[0] = Node("expr-ADD", p.lexer.lineno, p[1], p[3])
     elif p[2] == '-':
-        p[0] = Node("expr-SUBTRACT", p[1], p[3])
+        p[0] = Node("expr-SUBTRACT", p.lexer.lineno, p[1], p[3])
     elif p[2] == 'or':
-        p[0] = Node("expr-OR", p[1], p[3])
+        p[0] = Node("expr-OR", p.lexer.lineno, p[1], p[3])
 
 
 def p_term(p):
@@ -472,15 +479,15 @@ def p_term(p):
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '*':
-        p[0] = Node("term-MUL", p[1], p[3])
+        p[0] = Node("term-MUL", p.lexer.lineno, p[1], p[3])
     elif p[2] == '/':
-        p[0] = Node("term-DIV", p[1], p[3])
+        p[0] = Node("term-DIV", p.lexer.lineno, p[1], p[3])
     elif p[2] == 'div':
-        p[0] = Node("term-INTDIV", p[1], p[3])
+        p[0] = Node("term-INTDIV", p.lexer.lineno, p[1], p[3])
     elif p[2] == 'mod':
-        p[0] = Node("term-MOD", p[1], p[3])
+        p[0] = Node("term-MOD", p.lexer.lineno, p[1], p[3])
     elif p[2] == 'and':
-        p[0] = Node("term-AND", p[1], p[3])
+        p[0] = Node("term-AND", p.lexer.lineno, p[1], p[3])
 
 
 def p_factor_func(p):
@@ -490,16 +497,16 @@ def p_factor_func(p):
             | SYS_FUNCT  LP  args_list  RP
     """
     if len(p) == 2:
-        p[0] = Node('factor-sys-func', p[1])
+        p[0] = Node('factor-sys-func', p.lexer.lineno, p[1])
     else:
-        p[0] = Node('factor-func', p[1], p[3])
+        p[0] = Node('factor-func', p.lexer.lineno, p[1], p[3])
 
 
 def p_factor_arr(p):
     """
     factor  : ID  LB  expression  RB
     """
-    p[0] = Node('factor-arr', p[1], p[3])
+    p[0] = Node('factor-arr', p.lexer.lineno, p[1], p[3])
 
 
 def p_factor_1(p):
@@ -513,7 +520,7 @@ def p_factor_1(p):
         # yeeef: make the tree smaller
         p[0] = p[1]
     elif len(p) == 3:
-        p[0] = Node("factor", p[1], p[2])  # not和负
+        p[0] = Node("factor", p.lexer.lineno, p[1], p[2])  # not和负
 
 
 def p_factor_2(p):
@@ -523,7 +530,7 @@ def p_factor_2(p):
 
 def p_factor_3(p):
     'factor : ID  DOT  ID'
-    p[0] = Node("factor-member", p[1], p[3])
+    p[0] = Node("factor-member", p.lexer.lineno, p[1], p[3])
 
 
 def p_args_list(p):
@@ -532,7 +539,7 @@ def p_args_list(p):
               |  expression
     """
     if len(p) == 4:
-        p[0] = Node("args_list", p[1], p[3])
+        p[0] = Node("args_list", p.lexer.lineno, p[1], p[3])
     elif len(p) == 2:
         p[0] = p[1]
 
@@ -551,6 +558,8 @@ def p_error(p):
 
 from SymbolTable import *
 from Semantic import SemanticAnalyzer
+from ErrorHandler import SemanticLogger
+from os import path
 
 if __name__ == '__main__':
     logging.basicConfig(
@@ -561,12 +570,13 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/simple_arithmetic.pas'
+    test_file = 'test_yacc/proc.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
     graph(parse_tree_root, "graph")
-    static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
+    semantic_logger = SemanticLogger(path.basename(test_file))
+    static_semantic_analyzer = SemanticAnalyzer(parse_tree_root, semantic_logger)
     static_semantic_analyzer.analyze()
     static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
     # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)

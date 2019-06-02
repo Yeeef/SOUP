@@ -78,11 +78,10 @@ class ProcedureItem(SymbolTableItem):
     """
     procedure
     """
-    def __init__(self, para_list, declare_list):
+    def __init__(self, para_list):
         type_ = 'procedure'
         self.para_list = ProcedureItem.flatten_para_list(para_list)
-        self.declare_list = declare_list
-        super(ProcedureItem, self).__init__(type_, {'para_list': self.para_list, 'declare_list': self.declare_list})
+        super(ProcedureItem, self).__init__(type_, {'para_list': self.para_list})
 
     @staticmethod
     def flatten_para_list(para_list):
@@ -92,6 +91,16 @@ class ProcedureItem(SymbolTableItem):
             for name in name_list:
                 param_val_var_list.append((var_or_val, name, data_type))
         return param_val_var_list
+
+
+class FunctionItem(SymbolTableItem):
+    """
+    function
+    """
+    def __init__(self, para_list, ret_type):
+        self.para_list = ProcedureItem.flatten_para_list(para_list)
+        self.ret_type = ret_type
+        super(FunctionItem, self).__init__('function', {'para_list': self.para_list, 'ret_type': self.ret_type})
 
 
 class SymbolTable(object):

@@ -264,16 +264,14 @@ together according to the semantic rules
     - [x] procedure 嵌套 procedure 的情况
 - [ ] array type 也继承 symboltab item  
 - [x] traverse skew tree 是一个比较好的操作，一定不能随随便就不用了
-- [ ] 仔细想想如何讲 type_checking 做成一个 unified api, 而不是没有统一标准的在各个函数里随便检查
-- [ ] 右值变量是否和左值变量类型一致，先占个坑
-- [ ] stmt 语句
+- [x] stmt 语句
     - [ ] assign-stmt
         - [x] assign-stmt
             - [x] 检查 type, 进行 type casting
         - [x] assign-stmt-[arr]
             - 检查 index_type, index_range, element_type
         - [ ] record
-        - [ ] func
+        - [x] func
     - [x] proc-stmt
         - [x] user defined
             - [x] 检查是否定义过 chain look up
@@ -284,7 +282,8 @@ together according to the semantic rules
     - [x] func-stmt
         - [x] 很大一部分代码可以复用 proc-stmt, 唯一特殊点在于 func 有一个返回值
         - [x] 和 procedure 类似的常规检查
-        - [x] return value 有没有被赋值, 直接通过符号表检查
+        - [x] return value 有没有被赋值, 直接通过符号表检
+    - [x] 所有 stmt
 - [ ] 报错处理机制，精确到行
     - [ ] parser panic mode
     - [ ] semantic 
