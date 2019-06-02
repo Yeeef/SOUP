@@ -1,12 +1,10 @@
 from ply import yacc, lex
-import sys
-import logging
+from AST import Node
 from lex_pas import tokens
-from yapc import lex_pas
-from AST import *
-from CodeGenerator import CodeGenerator
 
-# FIXME: -5 优先级要比乘法高，详见 <http://www.dabeaz.com/ply/ply.html>
+from ErrorHandler import SemanticLogger
+import logging
+
 precedence = (
     ('left', 'ADD', 'SUBTRACT'),
     ('left', 'MUL', 'DIV', 'kDIV', 'kMOD')
@@ -551,37 +549,49 @@ def p_empty(p):
 
 
 # TODO: error handling should be more sophisticated
+# panic mode
 def p_error(p):
-    print("Syntax error")
-    print("invalid token '%s' at line %s. (total Position: %d)" % (p.value, p.lineno, p.lexpos))
+    if p:
+        SemanticLogger.error(p.lineno,
+                             "syntax error at token {}".format(p.value))
+        # Just discard the token and tell the parser it's okay.
+        parser.errok()
+    else:
+        print("Syntax error at EOF")
 
-
-from SymbolTable import *
-from Semantic import SemanticAnalyzer
-from ErrorHandler import SemanticLogger
-from os import path
-
-if __name__ == '__main__':
-    logging.basicConfig(
+logging.basicConfig(
         level=logging.DEBUG,
         filename="parselog.txt",
         filemode="w",
         format="%(filename)10s:%(lineno)4d:%(message)s"
     )
-    log = logging.getLogger()
-    parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/simple_arithmetic.pas'
-    with open(test_file, 'r') as infile:
-        data = infile.read()
-    parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
-    graph(parse_tree_root, "graph")
-    semantic_logger = SemanticLogger(path.basename(test_file))
-    static_semantic_analyzer = SemanticAnalyzer(parse_tree_root, semantic_logger)
-    static_semantic_analyzer.analyze()
-    static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
-    # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-    # code_generator.gen_three_address_code()
+log = logging.getLogger()
 
-    # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+parser = yacc.yacc(debug=True, debuglog=log)
 
-    graph(parse_tree_root, "new_graph")
+
+if __name__ == '__main__':
+    pass
+    # logging.basicConfig(
+    #     level=logging.DEBUG,
+    #     filename="parselog.txt",
+    #     filemode="w",
+    #     format="%(filename)10s:%(lineno)4d:%(message)s"
+    # )
+    # log = logging.getLogger()
+    # parser = yacc.yacc(debug=True, debuglog=log)
+    # test_file = 'test_yacc/simple_arithmetic.pas'
+    # with open(test_file, 'r') as infile:
+    #     data = infile.read()
+    # parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
+    # graph(parse_tree_root, "graph")
+    # semantic_logger = SemanticLogger(path.basename(test_file))
+    # static_semantic_analyzer = SemanticAnalyzer(parse_tree_root, semantic_logger)
+    # static_semantic_analyzer.analyze()
+    # static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
+    # # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
+    # # code_generator.gen_three_address_code()
+    #
+    # # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+    #
+    # graph(parse_tree_root, "new_graph")

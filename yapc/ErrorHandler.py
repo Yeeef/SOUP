@@ -10,12 +10,12 @@ ENDC = '\033[m'
 
 class SemanticLogger(object):
 
-    def __init__(self, file_name):
-        self.file_name = file_name
-
     @staticmethod
     def info(lineno, message):
-        print(TGREEN + f'[line {lineno} INFO] ' + ENDC + message)
+        if lineno is None:
+            print(TGREEN + f'[INFO] ' + ENDC + message)
+        else:
+            print(TGREEN + f'[line {lineno} INFO] ' + ENDC + message)
 
     @staticmethod
     def warn(lineno, message):
