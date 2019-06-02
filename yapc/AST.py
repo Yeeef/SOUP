@@ -9,6 +9,7 @@ import random
 
 def traverse_skew_tree(node, stop_node_type=None):
     # TODO: find bug
+    # FIXME: 改变了原有的顺序
     """
     遍历一种很特殊但是在我们的 parse tree 中频繁出现的一种结构（左递归导致的）
     能不能顺便做一个 compress ✅
@@ -194,14 +195,14 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
         array_type = ArrayType(index_type, (left_val, right_val), element_type)
         symb_tab_item = SymbolTableItem('arr_var',
-                                        array_type.to_dict())
+                                        {'var_type': array_type.to_dict()})
     else:  # alias
         alias_type = type_decl_node.children[0]
         ret_val = symbol_table.chain_look_up(alias_type)
         if not ret_val:
             raise Exception('alias type {} used before defined'.format(alias_type))
         else:
-            symb_tab_item = ret_val
+            symb_tab_item = SymbolTableItem('var', {'var_type': ret_val.value})
 
     return flatten_name_list, symb_tab_item
 
@@ -517,20 +518,57 @@ def parse_routine_part_node(ast_node, symb_tab_node):
     if ast_node.type == 'procedure_decl':
         proc_id, var_val_para_type_list = parse_procedure_decl_node(ast_node, symb_tab_node)
         proc_info_list.append((proc_id, var_val_para_type_list))
+    elif ast_node.type == 'function_decl':
+        func_id, var_val_para_type_list = parse_func_decl_node(ast_node, symb_tab_node)
+        proc_info_list.append((func_id, var_val_para_type_list))
     elif ast_node.type == 'routine_part':
-        flatten_proc_decl_nodes = traverse_skew_tree(ast_node, 'procedure_decl')
+        flatten_proc_decl_nodes = traverse_skew_tree(ast_node, ['procedure_decl', 'function_decl'])
         ast_node._children = flatten_proc_decl_nodes
         proc_info_list = []
         for child in ast_node.children:
-            proc_id, var_val_para_type_list = parse_procedure_decl_node(child, symb_tab_node)
-            proc_info_list.append((proc_id, var_val_para_type_list))
+            if child.type == 'procedure_decl':
+                proc_id, var_val_para_type_list = parse_procedure_decl_node(child, symb_tab_node)
+            else:  # function_decl
+                proc_id, var_val_para_type_list = parse_func_decl_node(child, symb_tab_node)
 
-    else:
-        raise NotImplementedError
+            proc_info_list.append((proc_id, var_val_para_type_list))
 
     for proc_id, var_val_para_type_list in proc_info_list:
         symb_tab_item = ProcedureItem(var_val_para_type_list, [])
         symb_tab_node.insert(proc_id, symb_tab_item)
+
+
+def parse_func_decl_node(ast_node, symb_tab_node):
+    """
+    function_decl : function_head  SEMICON  sub_routine  SEMICON
+    """
+    func_head_node, routine_node = ast_node.children
+    func_id, para_decl_list_node, ret_type_decl_node = func_head_node.children
+    func_ret_type = parse_type_decl_node(ret_type_decl_node, symb_tab_node)
+    ret_val = symb_tab_node.lookup(func_id)
+    if ret_val is not None:  # 是否定义
+        raise Exception('procedure `{}` is already defined'.format(func_id))
+
+    # parse para_decl_list
+
+    new_symb_tab_node = SymbolTableNode(func_id, None, None)
+    make_parent_and_child(symb_tab_node, new_symb_tab_node)
+    # 插入 return type
+    ret_type_symb_tab_node = SymbolTableItem('ret_type', {'ret_type': func_ret_type})
+    new_symb_tab_node.insert('ret_type', ret_type_symb_tab_node)
+
+    # 插入 func id 作为一个 var
+    ret_var_symb_tab_node = SymbolTableItem('var', {'var_type': func_ret_type})
+    new_symb_tab_node.insert(func_id, ret_var_symb_tab_node)
+    if para_decl_list_node:
+        var_val_para_type_list = parse_para_decl_list(para_decl_list_node, new_symb_tab_node)
+    else:
+        var_val_para_type_list = []
+    # parse routine_node
+
+    parse_routine_node(routine_node, new_symb_tab_node)
+
+    return func_id, var_val_para_type_list
 
 
 def parse_routine_node(ast_node, symb_tab_node):
@@ -670,7 +708,7 @@ def parse_args_list(ast_node, symb_tab_node):
         return args_type_list
 
     else:  # ast_node is an expression node
-        const_fold_ret, const_fold_type = parse_expression_node(ast_node.children[0], symb_tab_node)
+        const_fold_ret, const_fold_type = parse_expression_node(ast_node, symb_tab_node)
         return [const_fold_type]
 
 
@@ -713,6 +751,8 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
+        print(ret_val)
+
         var_type = ret_val.value['var_type']
         # index type 可以直接进行检查
         if index_fold_type != var_type['index_type']:
@@ -967,8 +1007,8 @@ def parse_factor_node(ast_node, symb_table):
         if ast_node.type == 'factor-arr':
             const_val, val_type = parse_factor_arr_node(ast_node, symb_table)
             return const_val, val_type
-        elif ast_node.type == 'factor-func':
-            pass
+        elif ast_node.type == 'factor-func' or ast_node.type == 'factor-sys-func':
+            parse_factor_func_node(ast_node, symb_table)
         elif ast_node.type == 'factor':  # - factor / not factor
             unary_op, right_factor_child = ast_node.children
             const_val, val_type = parse_factor_node(right_factor_child, symb_table)
@@ -1009,6 +1049,45 @@ def parse_factor_node(ast_node, symb_table):
         return parse_expression_node(ast_node, symb_table)
 
 
+def parse_factor_func_node(ast_node, symb_tab_node):
+    children = ast_node.children
+    if len(children) == 1:  # factor-sys-func
+        raise NotImplementedError
+    else:  # factor-func
+        id_or_sys_func, args_list_node = children
+        if id_or_sys_func in SYS_FUNC:
+            raise NotImplementedError
+        else:
+            # 检查函数是否定义过，参数是否给对（参数个数，参数类型）
+            func_id = id_or_sys_func
+            ret_val = symb_tab_node.chain_look_up(func_id)
+            if ret_val is None:
+                raise Exception("func `{}` used before declared")
+            # 检查变量个数是否合适
+            # 用的变量是否定义过, 在 parse_args_list 中会自然调用 constant_folding, 会自动检查
+            param_list = ret_val.para_list
+            args_type_list = parse_args_list(args_list_node, symb_tab_node)
+            # 检查变量个数是否合适
+            if len(param_list) != len(args_type_list):
+                raise Exception("func `{}` expect {} args, got {} args"
+                                .format(func_id, len(param_list), len(args_type_list)))
+            # 检查变量类型是否合适
+            for idx in range(len(param_list)):
+                _, arg_name, expect_type = param_list[idx]
+                given_type = args_type_list[idx]
+                if given_type != expect_type:
+                    wrong_flag = False
+                    if (expect_type != 'char' and given_type == 'char') or \
+                            (isinstance(expect_type, dict) and expect_type != given_type):
+                        wrong_flag = True
+                    if wrong_flag:
+                        raise Exception("func `{}` arg `{}` expect `{}` got `{}`"
+                                        .format(func_id, arg_name, expect_type, given_type))
+                    else:
+                        print('Warning, func `{}` arg `{}` expect `{}` got `{}`'
+                              .format(func_id, arg_name, expect_type, given_type))
+
+
 def parse_factor_arr_node(ast_node, symb_tab):
     """
     一定不可能 const fold, 直接返回 None
@@ -1023,13 +1102,15 @@ def parse_factor_arr_node(ast_node, symb_tab):
     else:
         # parse index, 判断是否越界, 只有可以 const fold 的情况，才可以完全判断越界
         const_val, val_type = parse_expression_node(index_expression_node, symb_tab)
+        arr_type = ret_val.value['var_type']
+
         if const_val is not None:  # 可以 const fold
             # 检查 index type 是否正确
-            index_type = ret_val.value['index_type']
+            index_type = arr_type['index_type']
             if index_type != val_type:
                 raise Exception('illegal index `{}` for array `{}`'.format(const_val, arr_id))
             # 检查是否越界
-            left_range, right_range = ret_val.val_query('index_range')
+            left_range, right_range = arr_type['index_range']
             if const_val < left_range or const_val > right_range:
                 raise Exception('illegal index `{}` for array `{}` with index range: {}'
                                 .format(const_val, arr_id, (left_range, right_range)))
@@ -1037,12 +1118,12 @@ def parse_factor_arr_node(ast_node, symb_tab):
             ast_node._children = (arr_id, const_val)
 
             # 找到数组的类型
-            arr_element_type = ret_val.value['element_type']
+            arr_element_type = arr_type['element_type']
             return None, arr_element_type
 
         else:  # 不能 const fold
             # 什么都不做
-            arr_element_type = ret_val.value['element_type']
+            arr_element_type = arr_type['element_type']
             return None, arr_element_type
 
 

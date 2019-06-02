@@ -219,7 +219,9 @@ def p_sub_routine(p):
 
 
 def p_function_decl(p):
-    'function_decl : function_head  SEMICON  sub_routine  SEMICON'
+    """
+    function_decl : function_head  SEMICON  sub_routine  SEMICON
+    """
     p[0] = Node("function_decl", p[1], p[3])
 
 
@@ -555,14 +557,13 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/proc.pas'
+    test_file = 'test_yacc/arithmic.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
     graph(parse_tree_root, "graph")
     static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
-    print(static_semantic_analyzer.symbol_table)
     static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
     # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
     # code_generator.gen_three_address_code()
