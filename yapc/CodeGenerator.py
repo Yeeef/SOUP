@@ -2,7 +2,7 @@
 # File: CodeGenerator.py
 # contains data struct and utility function of code generator(intermediate and target code)
 
-from AST import Node, traverse_skew_tree_bool, traverse_skew_tree
+from AST import Node, traverse_skew_tree_bool, traverse_skew_tree_gen
 from utils import (bin_op_to_func, type_to_bin_op, bool_dict)
 
 """ data structure """
@@ -178,7 +178,7 @@ class CodeGenerator(object):
                         # args_list :  args_list  COMMA  expression
                         #           |  expression
                         self._add_new_quad('begin_args', None)
-                        args_list = traverse_skew_tree(children[1], 'expression')
+                        args_list = traverse_skew_tree_gen(children[1], 'expression')
                         for args in args_list:
                             if isinstance(args, Node):
                                 ret_val = self.gen_quad_list_in_expression_node(args)
@@ -262,7 +262,7 @@ class CodeGenerator(object):
                 # TODO: add ID type checking in case_expr node
                 # case_stmt : kCASE expression kOF case_expr_list kEND
                 case_expression, case_list_node = root_node.children
-                case_list = traverse_skew_tree(case_list_node, 'case_expr')
+                case_list = traverse_skew_tree_gen(case_list_node, 'case_expr')
                 # case_expr :  const_value  COLON  stmt  SEMICON
                 #           |  ID  COLON  stmt  SEMICON
                 #           |  kELSE  COLON  stmt  SEMICON
@@ -376,7 +376,7 @@ class CodeGenerator(object):
                 else:
                     func_name, args_list_node = expression_node.children
                     self._add_new_quad('begin_args', None)
-                    args_list = traverse_skew_tree(args_list_node, 'expression')
+                    args_list = traverse_skew_tree_gen(args_list_node, 'expression')
                     for args in args_list:
                         ret_val = self.gen_quad_list_in_expression_node(args)
                         self._add_new_quad('args', ret_val)
