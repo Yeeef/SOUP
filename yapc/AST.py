@@ -763,11 +763,41 @@ def parse_term_node(ast_node, symb_table):
     最后一种情况直接是 factor node
     """
     if ast_node.type.startswith('term'):
+        new_children = []
         left_term_child, right_factor_child = ast_node.children
-        term_val = parse_term_node(left_term_child, symb_table)
-        factor_val = parse_factor_node(right_factor_child, symb_table)
+        term_val, term_type = parse_term_node(left_term_child, symb_table)
+        factor_val, factor_type = parse_factor_node(right_factor_child, symb_table)
+        # 只要有一个是 real 类型，结果就是 real 类型，不然就是 int 类型
+        # 先把类型判断好
+        if term_type == 'char' or factor_type == 'char':
+            raise Exception('char value is not supported for binory op `*`')
+        if term_type == 'real' or factor_type == 'real':
+            ret_val_type = 'real'
+        else:
+            ret_val_type = 'integer'
+
+        # 进行类型转化
+        if term_val:  # not None, const-foldable
+            term_val = ConstantFoldItem.eval_val_by_type(term_val, ret_val_type)
+            new_children.append(term_val)
+        else:
+            new_children.append(left_term_child)
+        if factor_val:
+            factor_val = ConstantFoldItem.eval_val_by_type(factor_val, ret_val_type)
+            new_children.append(factor_val)
+        else:
+            new_children.append(right_factor_child)
+
+        if factor_val and term_val:
+            ret_val = factor_val * term_val
+        else:
+            ret_val = None
+        # 替换孩子
+        ast_node._children = tuple(new_children)
+        return ret_val, ret_val_type
+
     else:  # factor node
-        factor_val = parse_factor_node(ast_node, symb_table)
+        return parse_factor_node(ast_node, symb_table)
 
 
 def parse_factor_node(ast_node, symb_table):
