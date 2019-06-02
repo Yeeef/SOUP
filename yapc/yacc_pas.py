@@ -400,7 +400,8 @@ def p_case_expr_list(p):
 
 def p_case_expr(p):
     '''case_expr :  const_value  COLON  stmt  SEMICON
-                    |  ID  COLON  stmt  SEMICON'''
+                 |  ID  COLON  stmt  SEMICON
+                 |  kELSE  COLON  stmt  SEMICON'''
     p[0] = Node("case_expr", p[1], p[3])
 
 
@@ -550,18 +551,18 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/proc.pas'
+    test_file = 'test_yacc/routine.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
     graph(parse_tree_root, "graph")
-    static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
-    static_semantic_analyzer.analyze()
-    print(static_semantic_analyzer.symbol_table)
-    static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
-    # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-    # code_generator.gen_three_address_code()
+    # static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
+    # static_semantic_analyzer.analyze()
+    # print(static_semantic_analyzer.symbol_table)
+    # static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
+    code_generator = CodeGenerator(parse_tree_root, None)
+    code_generator.gen_three_address_code()
 
-    # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+    _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
 
-    graph(parse_tree_root, "new_graph")
+    # graph(parse_tree_root, "new_graph")

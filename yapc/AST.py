@@ -18,6 +18,8 @@ def traverse_skew_tree(node, stop_node_type=None):
     """
     if not isinstance(stop_node_type, list):
         stop_node_type = [stop_node_type]
+    if node.type in stop_node_type:
+        return [node]
     descending_leaves = []
     children = node.children
     for child in children:
