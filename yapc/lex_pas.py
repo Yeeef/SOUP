@@ -135,7 +135,8 @@ def t_newline(t):
 @TOKEN(comment)
 def t_comment(t):
     # escape the comment
-    pass
+    matches = list(re.findall(r'\n', t.value))
+    t.lexer.lineno += len(matches)
 
 
 def t_error(t):
