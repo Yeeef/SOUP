@@ -601,7 +601,7 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
     """
     if ast_node.type == 'proc_stmt-simple':
         proc_id_or_sys_func, = ast_node.children
-        if proc_id_or_sys_func in SYS_PROC:  # sys func
+        if proc_id_or_sys_func in SYS_PROC:  # sys proc
             pass
         else:
             # 检查该 procedure 是否定义过，chain look up
@@ -612,7 +612,7 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
     else:  # proc_stmt node
         proc_id, right_child = ast_node.children
         if proc_id == 'read':
-            parse_expression_node(ast_node, symb_tab_node)
+            _ = parse_factor_node(right_child, symb_tab_node)
         elif proc_id in SYS_PROC:  # write/writeln
             parse_expression_list(right_child, symb_tab_node)
         else:  # user defind proc
@@ -624,11 +624,27 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
             else:
                 # 检查变量个数是否合适
                 # 用的变量是否定义过, 在 parse_args_list 中会自然调用 constant_folding, 会自动检查
-                # TODO 用的变量类型是否合适
                 param_list = ret_val.para_list
-                n_args = parse_args_list(right_child, symb_tab_node)
-                if len(param_list) != n_args:
-                    raise Exception("procedure `{}` expect {} args, got {}".format(proc_id, len(param_list), n_args))
+                args_type_list = parse_args_list(right_child, symb_tab_node)
+                # 检查变量个数是否合适
+                if len(param_list) != len(args_type_list):
+                    raise Exception("procedure `{}` expect {} args, got {} args"
+                                    .format(proc_id, len(param_list), len(args_type_list)))
+                # 检查变量类型是否合适
+                for idx in range(len(param_list)):
+                    _, arg_name, expect_type = param_list[idx]
+                    given_type = args_type_list[idx]
+                    if given_type != expect_type:
+                        wrong_flag = False
+                        if (expect_type != 'char' and given_type == 'char') or \
+                                (isinstance(expect_type, dict) and expect_type != given_type):
+                            wrong_flag = True
+                        if wrong_flag:
+                            raise Exception("procedure `{}` arg `{}` expect `{}` got `{}`"
+                                        .format(proc_id, arg_name, expect_type, given_type))
+                        else:
+                            print('Warning, procedure `{}` arg `{}` expect `{}` got `{}`'
+                                  .format(proc_id, arg_name, expect_type, given_type))
 
 
 def parse_args_list(ast_node, symb_tab_node):
@@ -641,19 +657,21 @@ def parse_args_list(ast_node, symb_tab_node):
         # traverse skew tree
         ast_node._children = traverse_skew_tree(ast_node, 'expression')
         new_children = []
+        args_type_list = []
         for child in ast_node.children:
             # fold constant
-            val = constant_folding(child, symb_tab_node)
-            if val is not None:
-                new_children.append(val)
+            const_fold_ret, const_fold_type = parse_expression_node(child, symb_tab_node)
+            args_type_list.append(const_fold_type)
+            if const_fold_ret is not None:
+                new_children.append(const_fold_ret)
             else:
                 new_children.append(child)
         ast_node._children = tuple(new_children)
-        return len(ast_node.children)
+        return args_type_list
 
-    else:
-        constant_folding(ast_node.children[0], symb_tab_node)
-        return 1
+    else:  # ast_node is an expression node
+        const_fold_ret, const_fold_type = parse_expression_node(ast_node.children[0], symb_tab_node)
+        return [const_fold_type]
 
 
 def parse_assign_stmt_node(ast_node, symb_tab_node):
@@ -695,17 +713,18 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
+        var_type = ret_val.value['var_type']
         # index type 可以直接进行检查
-        if index_fold_type != ret_val.value['index_type']:
+        if index_fold_type != var_type['index_type']:
             raise Exception('arr `{}` expect `{}` index, but got `{}`'.
-                            format(id_, ret_val.value['index_type'], index_fold_type))
+                            format(id_, var_type['index_type'], index_fold_type))
         # element type 可以直接进行检查
-        if ret_val.value['element_type'] != constant_fold_type:
+        if var_type['element_type'] != constant_fold_type:
             raise Exception('arr `{}` expect `{}` element but got `{}`'
-                            .format(id_, ret_val.value['element_type'], constant_fold_type))
+                            .format(id_, var_type['element_type'], constant_fold_type))
         # 如果 index_fold_ret 有效，可以进行范围检查
         if index_fold_ret is not None:
-            left_range, right_range = ret_val.value['index_range']
+            left_range, right_range = var_type['index_range']
             if index_fold_ret < left_range or index_fold_ret > right_range:
                 raise Exception("arr `{}` has range `{}`, but got index {}"
                                 .format(id_, (left_range, right_range), index_fold_ret))
@@ -723,11 +742,17 @@ def parse_expression_list(ast_node, symb_table):
                     |  expression
     """
     if ast_node.type == 'expression':
-        parse_expression_node(ast_node, symb_table)
+        _ = parse_expression_node(ast_node, symb_table)
     else:
         ast_node._children = traverse_skew_tree(ast_node, 'expression')
+        new_children = []
         for child in ast_node.children:
-            parse_expression_node(child, symb_table)
+            const_fold_ret, const_fold_type = parse_expression_node(child, symb_table)
+            if const_fold_ret is not None:
+                new_children.append(const_fold_ret)
+            else:
+                new_children.append(child)
+        ast_node._children = tuple(new_children)
 
 
 def parse_expression_node(ast_node, symb_table):

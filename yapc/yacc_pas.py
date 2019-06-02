@@ -480,9 +480,13 @@ def p_term(p):
 def p_factor_func(p):
     """
     factor  : ID  LP  args_list  RP
+            |  SYS_FUNCT
             | SYS_FUNCT  LP  args_list  RP
     """
-    p[0] = Node('factor-func', p[1], p[3])
+    if len(p) == 2:
+        p[0] = Node('factor-sys-func', p[1])
+    else:
+        p[0] = Node('factor-func', p[1], p[3])
 
 
 def p_factor_arr(p):
@@ -495,7 +499,6 @@ def p_factor_arr(p):
 def p_factor_1(p):
     # factor : ID  LB  expression  RB // for array
     """factor :  ID
-                    |  SYS_FUNCT
                     |  const_value
                     |  kNOT  factor
                     |  SUBTRACT  factor  
@@ -552,7 +555,7 @@ if __name__ == '__main__':
     )
     log = logging.getLogger()
     parser = yacc.yacc(debug=True, debuglog=log)
-    test_file = 'test_yacc/arithmic.pas'
+    test_file = 'test_yacc/proc.pas'
     with open(test_file, 'r') as infile:
         data = infile.read()
     parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)

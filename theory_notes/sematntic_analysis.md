@@ -268,14 +268,17 @@ together according to the semantic rules
 - [ ] 右值变量是否和左值变量类型一致，先占个坑
 - [ ] stmt 语句
     - [ ] assign-stmt
-        - [ ] assign-stmt
-            - [ ] 检查 type, 进行 type casting
+        - [x] assign-stmt
+            - [x] 检查 type, 进行 type casting
         - [x] assign-stmt-[arr]
             - 检查 index_type, index_range, element_type
         - [ ] record
         - [ ] func
     - [x] proc-stmt
         - [x] user defined
+            - [x] 检查是否定义过 chain look up
+            - [x] 检查参数个数是否对
+            - [x] 检查参数类型是否对
         - [ ] read
         - [ ] write, writeln
 - [ ] procedure 可以递归调用吗？
