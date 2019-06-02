@@ -745,10 +745,48 @@ def parse_expr_node(ast_node, symb_table):
     # TODO: add constant folding support
     if ast_node.type.startswith('expr'):  # expr node
         left_expr_child, right_term_child = ast_node.children
-        expr_val = parse_expr_node(left_expr_child, symb_table)
-        term_val = parse_term_node(right_term_child, symb_table)
+        expr_val, expr_type = parse_expr_node(left_expr_child, symb_table)
+        term_val, term_type = parse_term_node(right_term_child, symb_table)
+
+        node_op = type_to_bin_op[ast_node.type]
+        new_children = []
+        # 与 char 无瓜
+        if expr_type == 'char' or term_type == 'char':
+            raise Exception("char value is not supported for binary op: `{}`".format(node_op))
+
+        # 判断节点返回值类型
+        if ast_node.type == 'expr-OR':
+            ret_val_type = 'sys_con'
+        else:
+            # 只要有一个是 real 类型，结果就是 real 类型，不然就是 int 类型
+            if term_type == 'real' or expr_val == 'real':
+                ret_val_type = 'real'
+            else:
+                ret_val_type = 'integer'
+                # 进行类型转化
+        if expr_val:  # not None, const-foldable
+            expr_val = ConstantFoldItem.eval_val_by_type(expr_val, ret_val_type)
+            new_children.append(expr_val)
+        else:
+            new_children.append(left_expr_child)
+        if term_val:
+            term_val = ConstantFoldItem.eval_val_by_type(term_val, ret_val_type)
+            new_children.append(term_val)
+        else:
+            new_children.append(right_term_child)
+
+        # 如果可以 const fold, 进行计算
+        if expr_val and term_val:
+            bin_op_func = bin_op_to_func[node_op]
+            ret_val = bin_op_func(expr_val, term_val)
+        else:
+            ret_val = None
+        # 替换孩子
+        ast_node._children = tuple(new_children)
+        return ret_val, ret_val_type
+
     else:  # term node
-        term_val = parse_term_node(ast_node, symb_table)
+        return parse_term_node(ast_node, symb_table)
 
 
 def parse_term_node(ast_node, symb_table):
@@ -768,9 +806,11 @@ def parse_term_node(ast_node, symb_table):
         term_val, term_type = parse_term_node(left_term_child, symb_table)
         factor_val, factor_type = parse_factor_node(right_factor_child, symb_table)
 
+        node_op = type_to_bin_op[ast_node.type]
+
         # 总之和 char 无瓜
         if term_type == 'char' or factor_type == 'char':
-            raise Exception('char value is not supported for binory op `*`')
+            raise Exception('char value is not supported for binary op `{}`'.format(node_op))
 
         # 以下的判断保证与 char 无瓜
         # 先把类型判断好
@@ -798,7 +838,7 @@ def parse_term_node(ast_node, symb_table):
 
         # 如果可以 const fold, 进行计算
         if factor_val and term_val:
-            bin_op_func = bin_op_to_func[type_to_bin_op[ast_node.type]]
+            bin_op_func = bin_op_to_func[node_op]
             ret_val = bin_op_func(factor_val, term_val)
         else:
             ret_val = None
