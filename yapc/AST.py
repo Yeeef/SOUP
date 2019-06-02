@@ -719,18 +719,38 @@ def parse_expression_node(ast_node, symb_table):
     # 即便是 expr node, 也会建一个 expression 节点，也就是保证了 expression 节点一定出现
     children = ast_node.children
     if len(children) == 1:  # expr node
-        expr_val = parse_expr_node(children[0], symb_table)
+        return parse_expr_node(children[0], symb_table)
+
     else:
         # TODO traverse skew tree first
         # ast_node._chilren = traverse_skew_tree(ast_node, [
         #     'expr', 'term', ''
         # ])
         left_expression_child, bool_op, right_expr_child = ast_node.children
+        new_chilren = [left_expression_child, bool_op, right_expr_child]
         # TODO: add const folidng support
-        expression_val = parse_expression_node(left_expression_child, symb_table)
-        expr_val = parse_expr_node(right_expr_child, symb_table)
+        expression_val, expression_type = parse_expression_node(left_expression_child, symb_table)
+        expr_val, expr_type = parse_expr_node(right_expr_child, symb_table)
+        # 依旧不支持 char
+        if expression_type == 'char' or expr_type == 'char':
+            raise Exception("char value is not supported for relation op `{}`".format(bool_op))
 
-    return constant_folding(ast_node, symb_table)
+        # 返回值的类型一定是 sys_con
+        # 将两边用于比较的值均转为 real 类型
+        ret_type = 'sys_con'
+        if expression_val:
+            expression_val = ConstantFoldItem.eval_val_by_type(expression_val, 'real')
+            new_chilren[0] = expression_val
+        if expr_val:
+            expr_val = ConstantFoldItem.eval_val_by_type(expr_val, 'real')
+            new_chilren[2] = expr_val
+
+        if expression_val and expr_val:
+            bin_op_func = bin_op_to_func[bool_op]
+            ret_val = bin_op_func(expression_val, expr_val)
+        else:
+            ret_val = None
+        return ret_val, ret_type
 
 
 def parse_expr_node(ast_node, symb_table):
