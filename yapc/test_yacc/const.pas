@@ -7,6 +7,11 @@ type
     int_arr=array[1..3] of int;
     int_mat=array[1..4] of int_arr;
     int_cube=array[1..5] of int_mat;
+    people=record
+        score: integer;
+        sex: char;
+        name: char_arr;
+    end;
 var x, y, z: integer;
     m: real;
     ch: char;

@@ -130,7 +130,7 @@ def parse_type_definition_from_type_node(node, symbol_table):
         sys_type, *_ = type_node.children
         return 'sys_type', id_, sys_type
     elif type_node.type == 'record':
-        name_and_type_list = parse_record_node(node, symbol_table)
+        name_and_type_list = parse_record_node(type_node, symbol_table)
         return 'record', id_, name_and_type_list
     else:
         # 1d array, complicated
@@ -182,10 +182,12 @@ def parse_type_decl_node(type_decl_node, symbol_table):
 
 
 def parse_record_node(ast_node, symb_tab):
-    return parse_field_decl_list_node(ast_node, symb_tab)
+    return parse_field_decl_list_node(ast_node.children[0], symb_tab)
 
 
 def parse_field_decl_list_node(ast_node, symb_tab):
+    # SemanticLogger.info(None, ast_node.type)
+
     children = ast_node.children
     name_and_type_list = []
     if len(children) == 1:  # single field decl
@@ -198,6 +200,7 @@ def parse_field_decl_list_node(ast_node, symb_tab):
 
 
 def parse_field_decl_node(ast_node, symb_tab):
+    # SemanticLogger.info(None, ast_node.type)
     name_list_node, type_decl_node = ast_node.children
     flatten_name_list = parse_name_list(name_list_node)
     parsed_type = parse_type_decl_node(type_decl_node, symb_tab)
