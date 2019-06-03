@@ -271,6 +271,8 @@ together according to the semantic rules
         - [x] assign-stmt-[arr]
             - 检查 index_type, index_range, element_type
         - [ ] record
+            - [ ] 出现在左边
+        - [ ] 数组的 type checking assign 有没有做对
         - [x] func
     - [x] proc-stmt
         - [x] user defined

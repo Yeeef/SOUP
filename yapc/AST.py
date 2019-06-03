@@ -546,8 +546,8 @@ def parse_type_part_node(ast_node, symb_tab_node):
         if symb_tab_item is not None:
             is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
 
-        if is_conflict:
-            SemanticLogger.error(child.lineno,
+            if is_conflict:
+                SemanticLogger.error(child.lineno,
                                  f"constant {id_} already in the symbol table with value {ret_val.value['const_val']}")
 
 
@@ -697,7 +697,7 @@ def parse_stmt_node(ast_node, symb_tab_node):
             const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
             parse_stmt_node(stmt_node, symb_tab_node)
             if else_clause_node is not None:
-                parse_stmt_node(stmt_node, symb_tab_node)
+                parse_stmt_node(else_clause_node, symb_tab_node)
             if const_fold_ret is not None:
                 ast_node._children = (bool(const_fold_ret), stmt_node, else_clause_node)
         elif ast_node.type == 'repeat_stmt':
@@ -733,6 +733,7 @@ def parse_stmt_node(ast_node, symb_tab_node):
                 ast_node._children = (bool(const_fold_ret), case_expr_list_node)
 
         else:
+            # TODO: add goto support
             raise NotImplementedError(ast_node.type)
 
 
@@ -874,9 +875,11 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         ret_val = symb_tab_node.lookup(id_)
         if ret_val is None:
             SemanticLogger.error(ast_node.lineno, 'var {} assigned before declared'.format(id_))
+            return
             # raise Exception('var {} assigned before declared'.format(id_))
         if ret_val.type == 'const':
             SemanticLogger.error(ast_node.lineno, 'const {} cannot be assigned!'.format(id_))
+            return 
             # raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         # 检查 type
@@ -946,7 +949,6 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
                                    expression_node if constant_fold_ret is None else constant_fold_ret)
     else:  # ID  DOT  ID  ASSIGN  expression assign_stmt-record
-        # TODO: add support for record
         record_var, record_field, expression_node = ast_node.children
         # 检查变量是否存在
         ret_val = symb_tab_node.chain_look_up(record_var)
@@ -1022,13 +1024,15 @@ def parse_expression_node(ast_node, symb_table):
         # ])
         left_expression_child, bool_op, right_expr_child = ast_node.children
         new_chilren = [left_expression_child, bool_op, right_expr_child]
-        # TODO: add const folidng support
         expression_val, expression_type = parse_expression_node(left_expression_child, symb_table)
         expr_val, expr_type = parse_expr_node(right_expr_child, symb_table)
-        # 依旧不支持 char
-        if expression_type == 'char' or expr_type == 'char':
+        # 依旧不支持 char, 这里要支持 char
+        if (expression_type == 'char' and expr_type != 'char') or \
+                (expr_type == 'char' and expression_type != 'char'):
             SemanticLogger.error(left_expression_child.lineno,
-                                 "char value is not supported for relation op `{}`".format(bool_op))
+                                 "relation op `{}` is not supported betwwen `{}` and `{}`".
+                                 format(bool_op, expression_type, expr_type))
+            return None, 'real'
             # raise Exception("char value is not supported for relation op `{}`".format(bool_op))
 
         # 返回值的类型一定是 boolean
@@ -1055,7 +1059,6 @@ def parse_expr_node(ast_node, symb_table):
          |  term
     前三种情况会建一个 expr node, 最后一种情况直接是 term node
     """
-    # TODO: add constant folding support
     if not isinstance(ast_node, Node):
         return parse_term_node(ast_node, symb_table)
     elif ast_node.type.startswith('expr'):  # expr node
@@ -1069,6 +1072,7 @@ def parse_expr_node(ast_node, symb_table):
         if expr_type == 'char' or term_type == 'char':
             SemanticLogger.error(left_expr_child.lineno,
                                  "char value is not supported for binary op: `{}`".format(node_op))
+            return None, 'real'
             # raise Exception("char value is not supported for binary op: `{}`".format(node_op))
 
         # 判断节点返回值类型
@@ -1261,7 +1265,6 @@ def parse_factor_node(ast_node, symb_table):
             record_var, record_field = ast_node.children
             ret_val = symb_table.chain_look_up(record_var)
             record_type = ret_val.value['var_type']
-            # TODO array 在左边的时候能保证是 array type 吗
             if not isinstance(record_type, RecordType):
                 SemanticLogger.error(ast_node.lineno,
                                      '`{}` is not a record variable'.format(record_var))
@@ -1301,7 +1304,6 @@ def parse_factor_func_node(ast_node, symb_tab_node):
             # 用的变量是否定义过, 在 parse_args_list 中会自然调用 constant_folding, 会自动检查
             param_list = ret_val.para_list
             args_type_list = parse_args_list(args_list_node, symb_tab_node)
-            # TODO: 把该压的 args, 压好
             # 检查变量个数是否合适
             if len(param_list) != len(args_type_list):
                 SemanticLogger.error(args_list_node.lineno,
@@ -1336,8 +1338,6 @@ def parse_factor_func_node(ast_node, symb_tab_node):
             return None, ret_val.ret_type
 
 
-# TODO: check all semantic logger, because I used to avoid else, due to the exception
-# TODO: check all semantic logger, they must return corresponding value
 def parse_factor_arr_node(ast_node, symb_tab):
     """
     一定不可能 const fold, 直接返回 None

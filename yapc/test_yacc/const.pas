@@ -24,11 +24,18 @@ var x, y, z: integer;
     lyf: people;
 begin
 
-    x := 1 * 5 + 2;
+    {x := 1 * 5 + 2;
     m := 2.5 / 5;
     lyf.score := 100;
     lyf.score := '1';
     lyf.score := lyf.child;
     arr1[1] := x;
     mat1[2] := mat1[2] + 1;
+    x := 'a' + -'a';
+    x := 'a' < 'A' > 'b';
+    x := 1;}
+    {y := -1;
+    y := arr1[1];}
+    if x > 0 then y := arr1[1];
+    else y := -1;
 end.

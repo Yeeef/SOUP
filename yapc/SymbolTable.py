@@ -13,14 +13,15 @@ class ArrayType(object):
         self.index_type = index_type
         self.index_range = index_range
         self.element_type = element_type
+        self.dict_form = self._to_dict()
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return str(self.to_dict())
+        return str(self.dict_form)
 
-    def to_dict(self):
+    def _to_dict(self):
         ret_dict = dict()
         ret_dict['index_type'] = self.index_type
         ret_dict['index_range'] = self.index_range
@@ -30,8 +31,11 @@ class ArrayType(object):
             ret_dict['element_type'] = self.element_type.to_dict()
         return ret_dict
 
+    def to_dict(self):
+        return self.dict_form
+
     def __getitem__(self, item):
-        return self.to_dict()[item]
+        return self.dict_form[item]
 
 
 class ArrayElementType(object):
@@ -41,11 +45,15 @@ class ArrayElementType(object):
     def __init__(self, element_type):
         assert isinstance(element_type, (str, ArrayType)), type(element_type)
         self.element_type = element_type
+        self.dict_form = self._to_dict()
 
     def __str__(self):
-        return str(self.to_dict())
+        return str(self.dict_form)
 
     def to_dict(self):
+        return self.dict_form
+
+    def _to_dict(self):
         if isinstance(self.element_type, str):
             return self.element_type
         else:
@@ -57,18 +65,25 @@ class RecordType(object):
         self.name_and_type_list = name_and_type_list
         self.name_list = [item[0] for item in name_and_type_list]
         self.type_list = [item[1] for item in name_and_type_list]
+        self.dict_form = self._to_dict()
 
-    def to_dict(self):
+    def _to_dict(self):
         ret_dict = dict()
         for name, type in self.name_and_type_list:
             ret_dict[name] = type
         return ret_dict
 
+    def to_dict(self):
+        return self.dict_form
+
     def __str__(self):
-        return str(self.to_dict())
+        return str(self.dict_form)
 
     def __repr__(self):
         return self.__str__()
+
+    def __getitem__(self, item):
+        return self.dict_form[item]
 
 
 class SymbolTableItem(object):
