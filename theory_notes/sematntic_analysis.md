@@ -302,6 +302,26 @@ together according to the semantic rules
             - [x] mod 运算要求两个数一定是整数
 - [ ] 对于变量声明部分，我做的已经差不多了，函数的坑还没有填
     - [ ] record 的坑没有填
+    
+    
+- [x] 换成 semantic logger 后会出现新的问题
+    - 首先明确的一点是这个时候我不用保证 symb table 是对的
+    - 我只需要在需要 return 的地方 return, 让代码能够跑下去
+    - [ ] 有些地方要不要返回 None
+    - 其实很多地方都是 look up 再 insert 的机制，也就是这个 insert 实际上会失败
+        - 因为我用了 set default 机制，也就是他插不进去
+        - 所以对于最后需要 insert 而 id 冲突的 error，只需要注意一下返回值就可以了
+    - 插入符号表的其实只有
+    - 影响从两方面看
+        - 声明
+            - 符号表仅仅与声明有关
+            - 重复声明不会有影响
+            - type 中的无中生有，无论插不插 symb table 都有好坏，不如 let it be
+        - stmt
+    
+- [ ] 将来要重构代码的话一个很重要的点在于在哪里插入 symbtab 的问题
+    - [ ] 如果把错误定义不插入 symb table, 那么之后的饮用错误也会出问题，所以这个处理其实需要很精细的
+    
 
 constant folding 的一些感觉, __对所有的 expression node 做了 constant folding__
 
