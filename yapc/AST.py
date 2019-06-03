@@ -151,7 +151,7 @@ def parse_type_decl_node(type_decl_node, symbol_table):
         * array_type_decl   :  kARRAY  LB  simple_type_decl  RB  kOF  type_decl
     :param symbol_table:
     :param type_decl_node:
-    :return: type(sys_type from [integer, real, char]) / array_type(Array Type instance)
+    :return: type(sys_type from [integer, real, char]) / array_type(Array Type instance) / None if not a valid type
     """
     if type_decl_node.type == 'sys_type':
         sys_type = type_decl_node.children[0]
@@ -162,6 +162,7 @@ def parse_type_decl_node(type_decl_node, symbol_table):
         ret_val = symbol_table.chain_look_up(alias_type)
         if not ret_val:
             SemanticLogger.error(type_decl_node.lineno, 'alias type: `{}` used before defined'.format(alias_type))
+            return alias_type
             # raise Exception('alias type: `{}` used before defined'.format(alias_type))
         # return the true type
         if ret_val.type == 'sys_type':
@@ -384,8 +385,9 @@ def parse_var_val_para_type_list(ast_node, symb_tab_node):
         if symb_tab_node.lookup(name):
             SemanticLogger.error(left_child.lineno, "parameter `{}` is already defined".format(name))
             # raise Exception("parameter `{}` is already defined".format(name))
-        symb_tab_item = SymbolTableItem('var', {'var_type': type_})
-        symb_tab_node.insert(name, symb_tab_item)
+        else:
+            symb_tab_item = SymbolTableItem('var', {'var_type': type_})
+            symb_tab_node.insert(name, symb_tab_item)
     if ast_node.type == 'var_para_type_list':  # var_para_type_list
 
         return 'var', name_list, type_
@@ -507,7 +509,9 @@ def parse_type_part_node(ast_node, symb_tab_node):
             if not ret_val:
                 SemanticLogger.error(child.lineno, 'type alias: `{}` used before defined'.format(type_alias))
                 # raise Exception('type alias: `{}` used before defined'.format(type_alias))
-            symb_tab_item = copy.deepcopy(ret_val)
+                symb_tab_item = None
+            else:
+                symb_tab_item = copy.deepcopy(ret_val)
 
         elif type_ == 'sys_type':
             sys_type = attributes[0]
@@ -526,7 +530,8 @@ def parse_type_part_node(ast_node, symb_tab_node):
             raise NotImplementedError
 
         # insert into symbol table
-        is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
+        if symb_tab_item is not None:
+            is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
 
         if is_conflict:
             SemanticLogger.error(child.lineno,
@@ -595,7 +600,7 @@ def parse_func_decl_node(ast_node, symb_tab_node):
     func_ret_type = parse_type_decl_node(ret_type_decl_node, symb_tab_node)
     ret_val = symb_tab_node.lookup(func_id)
     if ret_val is not None:  # 是否定义
-        SemanticLogger.error(ret_type_decl_node.lineno, 'procedure `{}` is already defined'.format(func_id))
+        SemanticLogger.error(ret_type_decl_node.lineno, 'function `{}` is already defined'.format(func_id))
         # raise Exception('procedure `{}` is already defined'.format(func_id))
 
     # parse para_decl_list
@@ -1092,6 +1097,7 @@ def parse_term_node(ast_node, symb_table):
                 SemanticLogger.error(left_term_child.lineno,
                                      "div and mod expect 2 integer, but got `{}` and `{}`"
                                      .format(term_type, factor_type))
+                return None, 'integer'
                 # raise Exception("div and mod expect 2 integer, but got `{}` and `{}`".format(term_type, factor_type))
             ret_val_type = 'integer'
         elif ast_node.type == 'term-DIV':
@@ -1152,6 +1158,7 @@ def parse_factor_node(ast_node, symb_table):
             if ret_val is None:
                 SemanticLogger.error(ast_node.lineno, "`{}` is not a const or variable or func".format(ast_node))
                 # raise Exception("`{}` is not a const or variable or func".format(ast_node))
+                return None, 'real'
             else:
                 if ret_val.type == 'const':
                     const_val = ret_val.value['const_val']
@@ -1177,6 +1184,7 @@ def parse_factor_node(ast_node, symb_table):
             if val_type == 'char':
                 SemanticLogger.error(ast_node.lineno, 'char value `{}` is not supported for `-` op'.format(const_val))
                 # raise Exception('char value `{}` is not supported for `-` op'.format(const_val))
+                return None, 'integer'
             if const_val is not None:
                 if unary_op == '-':
                     if val_type == 'boolean':
@@ -1226,6 +1234,7 @@ def parse_factor_func_node(ast_node, symb_tab_node):
             ret_val = symb_tab_node.chain_look_up(func_id)
             if ret_val is None:
                 SemanticLogger.error(ast_node.lineno, "func `{}` used before declared")
+                return None, 'real'
                 # raise Exception("func `{}` used before declared")
             # 检查变量个数是否合适
             # 用的变量是否定义过, 在 parse_args_list 中会自然调用 constant_folding, 会自动检查
@@ -1265,6 +1274,7 @@ def parse_factor_func_node(ast_node, symb_tab_node):
                         #       .format(func_id, arg_name, expect_type, given_type))
             return None, ret_val.ret_type
 
+
 # TODO: check all semantic logger, because I used to avoid else, due to the exception
 # TODO: check all semantic logger, they must return corresponding value
 def parse_factor_arr_node(ast_node, symb_tab):
@@ -1278,14 +1288,14 @@ def parse_factor_arr_node(ast_node, symb_tab):
     ret_val = symb_tab.chain_look_up(arr_id)
     if ret_val is None:
         SemanticLogger.error(ast_node.lineno, 'array `{}` used before defined'.format(arr_id))
-        return None, ret_val.value['var_type']
+        return None, 'real'
     else:
         # parse index, 判断是否越界, 只有可以 const fold 的情况，才可以完全判断越界
         const_val, val_type = parse_expression_node(index_expression_node, symb_tab)
         arr_type = ret_val.value['var_type']
         if not isinstance(arr_type, ArrayType):
             SemanticLogger.error(ast_node.lineno, '`{}` is not an array'.format(arr_id))
-            return None, arr_type
+            return None, 'real'
         else:
             if const_val is not None:  # 可以 const fold
                 # 检查 index type 是否正确
