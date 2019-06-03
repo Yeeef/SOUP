@@ -137,7 +137,6 @@ def p_simple_type_decl_1(p):
     p[0] = Node("sys_type", p.lexer.lineno, p[1])
 
 
-# TODO: can we just remove it?
 def p_simple_type_decl_2(p):
     'simple_type_decl : LP name_list RP'
     p[0] = Node('enum', p.lexer.lineno, p[2])

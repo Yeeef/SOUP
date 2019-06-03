@@ -122,7 +122,6 @@ def parse_type_definition_from_type_node(node, symbol_table):
     children = node.children
     assert len(children) == 2, children
     id_, type_node = children
-    assert type_node.type in ['alias', 'sys_type', 'array']
     if type_node.type == 'alias':
         # most simple
         type_alias, *_ = type_node.children
@@ -130,6 +129,9 @@ def parse_type_definition_from_type_node(node, symbol_table):
     elif type_node.type == 'sys_type':
         sys_type, *_ = type_node.children
         return 'sys_type', id_, sys_type
+    elif type_node.type == 'record':
+        name_and_type_list = parse_record_node(node, symbol_table)
+        return 'record', id_, name_and_type_list
     else:
         # 1d array, complicated
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_node, symbol_table)
@@ -141,6 +143,7 @@ def parse_type_decl_node(type_decl_node, symbol_table):
     grammar rule:
         * type_decl         : simple_type_decl
                             | array_type_decl
+                            | record_type_decl
         * simple_type_decl  :  SYS_TYPE
                             |  LP  name_list  RP (enum)
                             |  const_value  DOTDOT  const_value (range)
@@ -170,8 +173,35 @@ def parse_type_decl_node(type_decl_node, symbol_table):
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
         return ArrayType(index_type, (left_val, right_val), element_type)
 
+    elif type_decl_node.type == 'record':
+        name_and_type_list = parse_record_node(type_decl_node, symbol_table)
+        return RecordType(name_and_type_list)
     else:
         raise NotImplementedError('{}'.format(type_decl_node.type))
+
+
+def parse_record_node(ast_node, symb_tab):
+    return parse_field_decl_list_node(ast_node, symb_tab)
+
+
+def parse_field_decl_list_node(ast_node, symb_tab):
+    children = ast_node.children
+    name_and_type_list = []
+    if len(children) == 1:  # single field decl
+        name_and_type_list = parse_field_decl_node(ast_node, symb_tab)
+    else:
+        ast_node._children = traverse_skew_tree(ast_node, 'field_decl')
+        for child in ast_node.children:
+            name_and_type_list.extend(parse_field_decl_node(child, symb_tab))
+    return name_and_type_list
+
+
+def parse_field_decl_node(ast_node, symb_tab):
+    name_list_node, type_decl_node = ast_node.children
+    flatten_name_list = parse_name_list(name_list_node)
+    parsed_type = parse_type_decl_node(type_decl_node, symb_tab)
+    parsed_type_list = [parsed_type] * len(flatten_name_list)
+    return list(zip(flatten_name_list, parsed_type_list))
 
 
 def parse_array_from_array_node(arr_node, symbol_table):
@@ -208,7 +238,7 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
         index_type, element_type, left_val, right_val = parse_array_from_array_node(type_decl_node, symbol_table)
         array_type = ArrayType(index_type, (left_val, right_val), element_type)
         symb_tab_item = SymbolTableItem('var',
-                                        {'var_type': array_type.to_dict()})
+                                        {'var_type': array_type})
     else:  # alias
         alias_type = type_decl_node.children[0]
         ret_val = symbol_table.chain_look_up(alias_type)
@@ -487,8 +517,12 @@ def parse_type_part_node(ast_node, symb_tab_node):
             index_type, element_type, left_val, right_val = attributes
             array_type = ArrayType(index_type, (left_val, right_val), element_type)
             symb_tab_item = SymbolTableItem('arr_type',
-                                            array_type.to_dict())
-        else:  # TODO: add record support
+                                            array_type)
+        elif type_ == 'record':
+            name_and_type_list, = attributes
+            record_type = RecordType(name_and_type_list)
+            symb_tab_item = SymbolTableItem('record_type', record_type.to_dict())
+        else:
             raise NotImplementedError
 
         # insert into symbol table
@@ -497,7 +531,6 @@ def parse_type_part_node(ast_node, symb_tab_node):
         if is_conflict:
             SemanticLogger.error(child.lineno,
                                  f"constant {id_} already in the symbol table with value {ret_val.value['const_val']}")
-            # raise ConflictIDError(id_, symb_tab_item)
 
 
 def parse_var_part_node(ast_node, symb_tab_node):
@@ -842,7 +875,6 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             if constant_fold_type != var_declare_type:
                 SemanticLogger.warn(expression_node.lineno,
                                     "cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
-                # print("Warning: cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
             constant_fold_ret = new_constant_fold_ret
         if constant_fold_ret is not None:
             ast_node._children = (id_, constant_fold_ret)
@@ -891,6 +923,8 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
                                expression_node if constant_fold_ret is None else constant_fold_ret)
     else:  # ID  DOT  ID  ASSIGN  expression
+        # TODO: add support for record
+
         raise NotImplementedError
 
 
@@ -1231,7 +1265,8 @@ def parse_factor_func_node(ast_node, symb_tab_node):
                         #       .format(func_id, arg_name, expect_type, given_type))
             return None, ret_val.ret_type
 
-
+# TODO: check all semantic logger, because I used to avoid else, due to the exception
+# TODO: check all semantic logger, they must return corresponding value
 def parse_factor_arr_node(ast_node, symb_tab):
     """
     一定不可能 const fold, 直接返回 None
@@ -1243,38 +1278,41 @@ def parse_factor_arr_node(ast_node, symb_tab):
     ret_val = symb_tab.chain_look_up(arr_id)
     if ret_val is None:
         SemanticLogger.error(ast_node.lineno, 'array `{}` used before defined'.format(arr_id))
-        # raise Exception('array `{}` used before defined'.format(arr_id))
+        return None, ret_val.value['var_type']
     else:
         # parse index, 判断是否越界, 只有可以 const fold 的情况，才可以完全判断越界
         const_val, val_type = parse_expression_node(index_expression_node, symb_tab)
         arr_type = ret_val.value['var_type']
+        if not isinstance(arr_type, ArrayType):
+            SemanticLogger.error(ast_node.lineno, '`{}` is not an array'.format(arr_id))
+            return None, arr_type
+        else:
+            if const_val is not None:  # 可以 const fold
+                # 检查 index type 是否正确
+                index_type = arr_type['index_type']
+                if index_type != val_type:
+                    SemanticLogger.error(index_expression_node.lineno,
+                                         'illegal index `{}` for array `{}`'.format(const_val, arr_id))
+                    # raise Exception('illegal index `{}` for array `{}`'.format(const_val, arr_id))
+                # 检查是否越界
+                left_range, right_range = arr_type['index_range']
+                if const_val < left_range or const_val > right_range:
+                    SemanticLogger.error(index_expression_node.lineno,
+                                         'illegal index `{}` for array `{}` with index range: {}'
+                                    .format(const_val, arr_id, (left_range, right_range)))
+                    # raise Exception('illegal index `{}` for array `{}` with index range: {}'
+                    #                 .format(const_val, arr_id, (left_range, right_range)))
+                # 替换孩子
+                ast_node._children = (arr_id, const_val)
 
-        if const_val is not None:  # 可以 const fold
-            # 检查 index type 是否正确
-            index_type = arr_type['index_type']
-            if index_type != val_type:
-                SemanticLogger.error(index_expression_node.lineno,
-                                     'illegal index `{}` for array `{}`'.format(const_val, arr_id))
-                # raise Exception('illegal index `{}` for array `{}`'.format(const_val, arr_id))
-            # 检查是否越界
-            left_range, right_range = arr_type['index_range']
-            if const_val < left_range or const_val > right_range:
-                SemanticLogger.error(index_expression_node.lineno,
-                                     'illegal index `{}` for array `{}` with index range: {}'
-                                .format(const_val, arr_id, (left_range, right_range)))
-                # raise Exception('illegal index `{}` for array `{}` with index range: {}'
-                #                 .format(const_val, arr_id, (left_range, right_range)))
-            # 替换孩子
-            ast_node._children = (arr_id, const_val)
+                # 找到数组的类型
+                arr_element_type = arr_type['element_type']
+                return None, arr_element_type
 
-            # 找到数组的类型
-            arr_element_type = arr_type['element_type']
-            return None, arr_element_type
-
-        else:  # 不能 const fold
-            # 什么都不做
-            arr_element_type = arr_type['element_type']
-            return None, arr_element_type
+            else:  # 不能 const fold
+                # 什么都不做
+                arr_element_type = arr_type['element_type']
+                return None, arr_element_type
 
 
 def graph(node, filename):
@@ -1310,46 +1348,6 @@ class ConstantFoldItem(object):
     """
     _type_to_func = {'integer': int, 'real': float, 'sys_con': bool, 'char': str, 'boolean': bool}
 
-    def __init__(self, val, type):
-        assert type in ['integer', 'real', 'sys_con', 'char'], type
-        self._val = val
-        self._type = type
-
     @staticmethod
     def eval_val_by_type(val, type):
         return ConstantFoldItem._type_to_func[type](val)
-
-    @property
-    def val(self):
-        return self._type_to_func[self._type](self._val)
-
-    @property
-    def type(self):
-        return self._type
-
-    def __le__(self, other):
-        if isinstance(other, ConstantFoldItem):
-            other = other.val
-        return self.val <= other
-
-    def __ge__(self, other):
-        if isinstance(other, ConstantFoldItem):
-            other = other.val
-        return self.val >= other
-
-    def __lt__(self, other):
-        if isinstance(other, ConstantFoldItem):
-            other = other.val
-        return self.val < other
-
-    def __gt__(self, other):
-        if isinstance(other, ConstantFoldItem):
-            other = other.val
-        return self.val > other
-
-    def __str__(self):
-        return str(self.val)
-
-    def __add__(self, other):
-        pass
-

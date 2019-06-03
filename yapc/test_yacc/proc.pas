@@ -33,7 +33,7 @@ begin
     read(a[10]);
 end;
 begin
-	x := -4;
+	x := -4 + x[1];
 	y := aa + 1 div 1.0;
 	hello;
 	add(s + 1, x, y div (aa * aa), 1, 1, 1);

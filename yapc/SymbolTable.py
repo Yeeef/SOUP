@@ -30,6 +30,9 @@ class ArrayType(object):
             ret_dict['element_type'] = self.element_type.to_dict()
         return ret_dict
 
+    def __getitem__(self, item):
+        return self.to_dict()[item]
+
 
 class ArrayElementType(object):
     """
@@ -47,6 +50,25 @@ class ArrayElementType(object):
             return self.element_type
         else:
             return self.element_type.to_dict()
+
+
+class RecordType(object):
+    def __init__(self, name_and_type_list):
+        self.name_and_type_list = name_and_type_list
+        self.name_list = [item[0] for item in name_and_type_list]
+        self.type_list = [item[1] for item in name_and_type_list]
+
+    def to_dict(self):
+        ret_dict = dict()
+        for name, type in self.name_and_type_list:
+            ret_dict[name] = type
+        return ret_dict
+
+    def __str__(self):
+        return str(self.to_dict())
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class SymbolTableItem(object):
@@ -72,6 +94,7 @@ class SymbolTableItem(object):
     def __str__(self):
         info = '<SymbolTableItem type: {}, value: {}>'.format(self._type, self._value)
         return info
+
 
 
 class ProcedureItem(SymbolTableItem):
