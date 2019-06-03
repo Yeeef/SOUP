@@ -36,6 +36,26 @@ def traverse_skew_tree(node, stop_node_type=None):
     return tuple(descending_leaves)
 
 
+def traverse_skew_tree_gen(node, stop_node_type=None):
+    if node.type == stop_node_type:
+        return [node]
+    descending_leaves = []
+    children = node.children
+    for child in children:
+        if isinstance(child, Node):
+            if child.type == stop_node_type:
+                descending_leaves.append(child)
+            else:
+                descending_leaves.extend(traverse_skew_tree(child, stop_node_type))
+        elif child is None:
+            pass
+        else:
+            # reach the leaf node
+            descending_leaves.append(child)
+
+    return tuple(descending_leaves)
+
+
 def traverse_skew_tree_bool(node, stop_node_type, target_node_type):
     descending_leaves = []
     children = node.children

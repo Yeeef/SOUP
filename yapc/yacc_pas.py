@@ -213,7 +213,7 @@ def p_routine_part(p):
                     |  routine_part  procedure_decl
                     |  function_decl  
                     |  procedure_decl  
-                    | empty'''
+                    |  empty'''
     if len(p) == 3:
         p[0] = Node("routine_part", p.lexer.lineno, p[1], p[2])
     elif len(p) == 2:
@@ -233,7 +233,7 @@ def p_function_decl(p):
 
 
 def p_function_head(p):
-    'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl '
+    'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl'
     p[0] = Node("function_head", p.lexer.lineno, p[2], p[3], p[5])
 
 
@@ -243,7 +243,7 @@ def p_procedure_decl(p):
 
 
 def p_procedure_head(p):
-    'procedure_head :  kPROCEDURE ID parameters '
+    'procedure_head :  kPROCEDURE ID parameters'
     p[0] = Node("procedure_head", p.lexer.lineno, p[2], p[3])
 
 
@@ -294,7 +294,7 @@ def p_compound_stmt(p):
 
 
 def p_stmt_list(p):
-    '''stmt_list :  stmt_list  stmt  SEMICON  
+    '''stmt_list :  stmt_list  stmt  SEMICON
                     |  empty'''
     if len(p) == 4:
         p[0] = Node("stmt_list", p.lexer.lineno, p[1], p[2])
@@ -339,7 +339,7 @@ def p_assign_stmt_record(p):
 
 
 def p_assign_stmt(p):
-    """assign_stmt :  ID  ASSIGN  expression """
+    """assign_stmt :  ID  ASSIGN  expression"""
     p[0] = Node("assign_stmt", p.lexer.lineno, p[1], p[3])
 
 
@@ -410,7 +410,9 @@ def p_case_expr(p):
     """
     case_expr :  const_value  COLON  stmt  SEMICON
               |  ID  COLON  stmt  SEMICON
+              |  kELSE  COLON  stmt  SEMICON
     """
+
     p[0] = Node("case_expr", p.lexer.lineno, p[1], p[3])
 
 
@@ -486,17 +488,17 @@ def p_term(p):
     elif p[2] == 'and':
         p[0] = Node("term-AND", p.lexer.lineno, p[1], p[3])
 
-
+# TODO: check factor-func
 def p_factor_func(p):
-    """
-    factor  : ID  LP  args_list  RP
-            |  SYS_FUNCT
+    '''
+    factor  : SYS_FUNCT
+            | ID  LP  args_list  RP
             | SYS_FUNCT  LP  args_list  RP
-    """
+    '''
     if len(p) == 2:
-        p[0] = Node('factor-sys-func', p.lexer.lineno, p[1])
+        p[0] = Node('factor-func', p[1])
     else:
-        p[0] = Node('factor-func', p.lexer.lineno, p[1], p[3])
+        p[0] = Node('factor-func', p[1], p[3])
 
 
 def p_factor_arr(p):
@@ -509,9 +511,9 @@ def p_factor_arr(p):
 def p_factor_1(p):
     # factor : ID  LB  expression  RB // for array
     """factor :  ID
-                    |  const_value
-                    |  kNOT  factor
-                    |  SUBTRACT  factor  
+              |  const_value
+              |  kNOT  factor
+              |  SUBTRACT  factor
     """
     if len(p) == 2:
         # yeeef: make the tree smaller
@@ -564,6 +566,8 @@ logging.basicConfig(
         filemode="w",
         format="%(filename)10s:%(lineno)4d:%(message)s"
     )
+
+
 log = logging.getLogger()
 
 parser = yacc.yacc(debug=True, debuglog=log)
