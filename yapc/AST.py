@@ -538,7 +538,7 @@ def parse_type_part_node(ast_node, symb_tab_node):
         elif type_ == 'record':
             name_and_type_list, = attributes
             record_type = RecordType(name_and_type_list)
-            symb_tab_item = SymbolTableItem('record_type', record_type.to_dict())
+            symb_tab_item = SymbolTableItem('record_type', record_type)
         else:
             raise NotImplementedError
 
@@ -910,40 +910,73 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
 
         var_type = ret_val.value['var_type']
-        # index type 可以直接进行检查
-        if index_fold_type != var_type['index_type']:
+        if not isinstance(var_type, ArrayType):
             SemanticLogger.error(ast_node.lineno,
-                                 'arr `{}` expect `{}` index, but got `{}`'.
-                                 format(id_, var_type['index_type'], index_fold_type)
-                                 )
-            # raise Exception('arr `{}` expect `{}` index, but got `{}`'.
-            #                 format(id_, var_type['index_type'], index_fold_type))
-        # element type 可以直接进行检查
-        if var_type['element_type'] != constant_fold_type:
-            SemanticLogger.error(ast_node.lineno,
-                                 'arr `{}` expect `{}` element but got `{}`'
-                                 .format(id_, var_type['element_type'], constant_fold_type)
-                                 )
-            # raise Exception('arr `{}` expect `{}` element but got `{}`'
-            #                 .format(id_, var_type['element_type'], constant_fold_type))
-        # 如果 index_fold_ret 有效，可以进行范围检查
-        if index_fold_ret is not None:
-            left_range, right_range = var_type['index_range']
-            if index_fold_ret < left_range or index_fold_ret > right_range:
-                SemanticLogger.error(index_expression_node.lineno,
-                                     "arr `{}` has range `{}`, but got index {}"
-                                     .format(id_, (left_range, right_range), index_fold_ret)
+                                 "`{}` is not an array variable".format(id_))
+        else:
+
+            # index type 可以直接进行检查
+            if index_fold_type != var_type['index_type']:
+                SemanticLogger.error(ast_node.lineno,
+                                     'arr `{}` expect `{}` index, but got `{}`'.
+                                     format(id_, var_type['index_type'], index_fold_type)
                                      )
-                # raise Exception("arr `{}` has range `{}`, but got index {}"
-                #                 .format(id_, (left_range, right_range), index_fold_ret))
+                # raise Exception('arr `{}` expect `{}` index, but got `{}`'.
+                #                 format(id_, var_type['index_type'], index_fold_type))
+            # element type 可以直接进行检查
+            if var_type['element_type'] != constant_fold_type:
+                SemanticLogger.error(ast_node.lineno,
+                                     'arr `{}` expect `{}` element but got `{}`'
+                                     .format(id_, var_type['element_type'], constant_fold_type)
+                                     )
+                # raise Exception('arr `{}` expect `{}` element but got `{}`'
+                #                 .format(id_, var_type['element_type'], constant_fold_type))
+            # 如果 index_fold_ret 有效，可以进行范围检查
+            if index_fold_ret is not None:
+                left_range, right_range = var_type['index_range']
+                if index_fold_ret < left_range or index_fold_ret > right_range:
+                    SemanticLogger.error(index_expression_node.lineno,
+                                         "arr `{}` has range `{}`, but got index {}"
+                                         .format(id_, (left_range, right_range), index_fold_ret)
+                                         )
+                    # raise Exception("arr `{}` has range `{}`, but got index {}"
+                    #                 .format(id_, (left_range, right_range), index_fold_ret))
 
-        # 替换孩子
-        ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
-                               expression_node if constant_fold_ret is None else constant_fold_ret)
-    else:  # ID  DOT  ID  ASSIGN  expression
+            # 替换孩子
+            ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
+                                   expression_node if constant_fold_ret is None else constant_fold_ret)
+    else:  # ID  DOT  ID  ASSIGN  expression assign_stmt-record
         # TODO: add support for record
+        record_var, record_field, expression_node = ast_node.children
+        # 检查变量是否存在
+        ret_val = symb_tab_node.chain_look_up(record_var)
+        if ret_val is None:
+            SemanticLogger.error(ast_node.lineno, '`{}` is not a record variable'.format(record_var))
+        else:
+            # 检查是否是 record 类型
+            var_type = ret_val.value['var_type']
+            if not isinstance(var_type, RecordType):
+                SemanticLogger.error(ast_node.lineno, '`{}` is not a record variable'.format(record_var))
+            else:
+                # 检查 field 是否存在
+                var_type_dict = var_type.to_dict()
+                field_dtype = var_type_dict.get(record_field, None)
+                if field_dtype is not None:
+                    constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
+                    if field_dtype == 'char' and constant_fold_type != 'char' or \
+                        field_dtype != 'char' and constant_fold_type == 'char':
+                        SemanticLogger.error(ast_node.lineno, 'cannot cast char type to `{}` type in field `{}`'
+                                             .format(field_dtype, record_field))
+                    else:
+                        if constant_fold_ret is not None:  # 可以 const fold
+                            const_fold_val = CONST_TYPE_TO_FUNC[constant_fold_type](constant_fold_ret)
+                            ast_node._children = (record_var, record_field, const_fold_val)
+                        else:  # 不能 const fold, 啥都不做
+                            pass
 
-        raise NotImplementedError
+                else:
+                    SemanticLogger.error(ast_node.lineno, '`{}` is not a valid field for record variable `{}`'
+                                         .format(record_field, ret_val))
 
 
 def parse_expression_list(ast_node, symb_table):
@@ -1196,7 +1229,6 @@ def parse_factor_node(ast_node, symb_table):
             const_val, val_type = parse_factor_node(right_factor_child, symb_table)
             if val_type == 'char':
                 SemanticLogger.error(ast_node.lineno, 'char value `{}` is not supported for `-` op'.format(const_val))
-                # raise Exception('char value `{}` is not supported for `-` op'.format(const_val))
                 return None, 'integer'
             if const_val is not None:
                 if unary_op == '-':
@@ -1226,8 +1258,24 @@ def parse_factor_node(ast_node, symb_table):
             return const_val, val_type
 
         else:  # factor-member
-            raise NotImplementedError
-
+            record_var, record_field = ast_node.children
+            ret_val = symb_table.chain_look_up(record_var)
+            record_type = ret_val.value['var_type']
+            # TODO array 在左边的时候能保证是 array type 吗
+            if not isinstance(record_type, RecordType):
+                SemanticLogger.error(ast_node.lineno,
+                                     '`{}` is not a record variable'.format(record_var))
+                return None, 'real'
+            else:
+                # 检查 field
+                record_type_dict = record_type.to_dict()
+                field_dtype = record_type_dict.get(record_field, None)
+                if field_dtype is None:
+                    SemanticLogger.error(ast_node.lineno,
+                                         "`{}` is not a field for variable `{}`".format(record_field, record_var))
+                    return None, 'real'
+                else:
+                    return None, field_dtype
     else:  # LP expression RP 加了括号代表了优先级而已
         # 直接是一个 expression node
         return parse_expression_node(ast_node, symb_table)

@@ -21,8 +21,14 @@ var x, y, z: integer;
     mat1: int_mat;
     cube1: int_cube;
     quantum1 : array[1..10] of int_cube;
+    lyf: people;
 begin
 
     x := 1 * 5 + 2;
     m := 2.5 / 5;
+    lyf.score := 100;
+    lyf.score := '1';
+    lyf.score := lyf.child;
+    arr1[1] := x;
+    mat1[2] := mat1[2] + 1;
 end.

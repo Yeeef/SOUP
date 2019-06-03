@@ -10,6 +10,9 @@ ENDC = '\033[m'
 
 class SemanticLogger(object):
 
+    n_warn = 0
+    n_error = 0
+
     @staticmethod
     def info(lineno, message):
         if lineno is None:
@@ -20,10 +23,12 @@ class SemanticLogger(object):
     @staticmethod
     def warn(lineno, message):
         print(TYELLOW + f'[line {lineno} WARN] ' + ENDC + message)
+        SemanticLogger.n_warn += 1
 
     @staticmethod
     def error(lineno, message):
         print(TRED + f'[line {lineno} ERROR] ' + ENDC + message)
+        SemanticLogger.n_error += 1
 
     # def info(self, lineno, message):
     #     print(TGREEN + f'[{self.file_name} line {lineno} INFO]' + ENDC + message)
