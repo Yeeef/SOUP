@@ -182,12 +182,14 @@ def parse_type_decl_node(type_decl_node, symbol_table):
 
 
 def parse_record_node(ast_node, symb_tab):
-    return parse_field_decl_list_node(ast_node.children[0], symb_tab)
+    name_and_type_list = parse_field_decl_list_node(ast_node.children[0], symb_tab)
+    # 看看有无重复定义的 type
+    return name_and_type_list
 
 
 def parse_field_decl_list_node(ast_node, symb_tab):
     # SemanticLogger.info(None, ast_node.type)
-
+    name_set = set()
     children = ast_node.children
     name_and_type_list = []
     if len(children) == 1:  # single field decl
@@ -195,7 +197,15 @@ def parse_field_decl_list_node(ast_node, symb_tab):
     else:
         ast_node._children = traverse_skew_tree(ast_node, 'field_decl')
         for child in ast_node.children:
-            name_and_type_list.extend(parse_field_decl_node(child, symb_tab))
+            child_name_and_type_list = parse_field_decl_node(child, symb_tab)
+            child_names = [item[0] for item in child_name_and_type_list]
+            for child_name in child_names:
+                if child_name in name_set:
+                    SemanticLogger.error(child.lineno,
+                                         '`{}` field is already declared'.format(child_name))
+                else:
+                    name_set.add(child_name)
+            name_and_type_list.extend(child_name_and_type_list)
     return name_and_type_list
 
 

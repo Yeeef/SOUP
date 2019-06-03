@@ -11,6 +11,7 @@ type
         score: integer;
         sex: char;
         name: char_arr;
+        name: int_arr;
     end;
 var x, y, z: integer;
     m: real;
