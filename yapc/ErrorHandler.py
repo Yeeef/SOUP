@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 # File: ErrorHandler.py
 # define Error class and a generic handler
+import os
 
-TGREEN = '\033[32m'
-TRED = '\033[31m'
-TYELLOW = '\033[33m'
-ENDC = '\033[m'
+_operating_system = os.name  # `nt` for windows and `posix` for macos/ linux
+
+
+TGREEN = '\033[32m' if _operating_system == 'posix' else ''
+TRED = '\033[31m' if _operating_system == 'posix' else ''
+TYELLOW = '\033[33m' if _operating_system == 'posix' else ''
+ENDC = '\033[m' if _operating_system == 'posix' else ''
 
 
 class SemanticLogger(object):
