@@ -277,7 +277,10 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
         alias_type = type_decl_node.children[0]
         ret_val = symbol_table.chain_look_up(alias_type)
         if not ret_val:
-            raise Exception('alias type {} used before defined'.format(alias_type))
+            SemanticLogger.error(var_decl_node.lineno,
+                                 'alias type {} used before defined'.format(alias_type))
+            symb_tab_item = None
+            # raise Exception('alias type {} used before defined'.format(alias_type))
         else:
             symb_tab_item = SymbolTableItem('var', {'var_type': ret_val.value})
 
@@ -729,7 +732,7 @@ def parse_stmt_node(ast_node, symb_tab_node):
         elif ast_node.type == 'while_stmt':
             expression_node, stmt_node = ast_node.children
             const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
-            parse_stmt_node(expression_node, symb_tab_node)
+            parse_stmt_node(stmt_node, symb_tab_node)
             if const_fold_ret is not None:
                 ast_node._children = (bool(const_fold_ret), stmt_node)
         elif ast_node.type == 'for_stmt':
@@ -751,7 +754,8 @@ def parse_stmt_node(ast_node, symb_tab_node):
             const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
             if const_fold_ret is not None:
                 ast_node._children = (bool(const_fold_ret), case_expr_list_node)
-
+        elif ast_node.type == 'stmt_list':
+            parse_stmt_list_node(ast_node, symb_tab_node)
         else:
             # TODO: add goto support
             raise NotImplementedError(ast_node.type)
@@ -925,9 +929,11 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
         ret_val = symb_tab_node.lookup(id_)
         if ret_val is None:
             SemanticLogger.error(ast_node.lineno, 'var {} assigned before declared'.format(id_))
+            return
             # raise Exception('var {} assigned before declared'.format(id_))
         if ret_val.type == 'const':
             SemanticLogger.error(ast_node.lineno, 'const {} cannot be assigned!'.format(id_))
+            return
             # raise Exception('const {} cannot be assigned!'.format(id_))
         constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
         index_fold_ret, index_fold_type = parse_expression_node(index_expression_node, symb_tab_node)
@@ -1226,7 +1232,7 @@ def parse_factor_node(ast_node, symb_table):
             # must be const value or variable value
             ret_val = symb_table.chain_look_up(ast_node)
             if ret_val is None:
-                SemanticLogger.error(ast_node.lineno, "`{}` is not a const or variable or func".format(ast_node))
+                SemanticLogger.error(None, "`{}` is not a const or variable or func".format(ast_node))
                 # raise Exception("`{}` is not a const or variable or func".format(ast_node))
                 return None, 'real'
             else:

@@ -379,7 +379,9 @@ def p_repeat_stmt(p):
 
 
 def p_while_stmt(p):
-    'while_stmt :  kWHILE  expression  kDO stmt'
+    """
+    while_stmt :  kWHILE  expression  kDO stmt
+    """
     p[0] = Node("while_stmt", p.lexer.lineno, p[2], p[4])
 
 

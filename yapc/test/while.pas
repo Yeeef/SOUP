@@ -7,7 +7,7 @@ begin
 	while  x < 15 do
 	begin
 		if ( x = 15) then
-	  		writeln(x);
+	  		writeln(x)
 	  	else
 	  		z := z + y;
 	  	x := x + y;
