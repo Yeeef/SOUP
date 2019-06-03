@@ -36,6 +36,6 @@ begin
     x := 1;}
     {y := -1;
     y := arr1[1];}
-    if x > 0 then y := arr1[1];
+    if (x > y) or true then y := arr1[1];
     else y := -1;
 end.

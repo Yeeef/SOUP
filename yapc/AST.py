@@ -1081,7 +1081,7 @@ def parse_expr_node(ast_node, symb_table):
     """
     if not isinstance(ast_node, Node):
         return parse_term_node(ast_node, symb_table)
-    elif ast_node.type.startswith('expr'):  # expr node
+    elif ast_node.type.startswith('expr') and ast_node.type != 'expression':  # expr node
         left_expr_child, right_term_child = ast_node.children
         expr_val, expr_type = parse_expr_node(left_expr_child, symb_table)
         term_val, term_type = parse_term_node(right_term_child, symb_table)
@@ -1246,7 +1246,7 @@ def parse_factor_node(ast_node, symb_table):
         if ast_node.type == 'factor-arr':
             const_val, val_type = parse_factor_arr_node(ast_node, symb_table)
             return const_val, val_type
-        elif ast_node.type == 'factor-func' or ast_node.type == 'factor-sys-func':
+        elif ast_node.type == 'factor-func':
             return parse_factor_func_node(ast_node, symb_table)
         elif ast_node.type == 'factor':  # - factor / not factor
             unary_op, right_factor_child = ast_node.children
@@ -1303,6 +1303,9 @@ def parse_factor_node(ast_node, symb_table):
         # 直接是一个 expression node
         return parse_expression_node(ast_node, symb_table)
 
+# TODO: param val 归为 const
+# TODO: var 归为 var
+
 
 def parse_factor_func_node(ast_node, symb_tab_node):
     children = ast_node.children
@@ -1316,8 +1319,8 @@ def parse_factor_func_node(ast_node, symb_tab_node):
             # 检查函数是否定义过，参数是否给对（参数个数，参数类型）
             func_id = id_or_sys_func
             ret_val = symb_tab_node.chain_look_up(func_id)
-            if ret_val is None:
-                SemanticLogger.error(ast_node.lineno, "func `{}` used before declared")
+            if ret_val is None or ret_val.type != 'function':
+                SemanticLogger.error(ast_node.lineno, "func `{}` used before declared".format(func_id))
                 return None, 'real'
                 # raise Exception("func `{}` used before declared")
             # 检查变量个数是否合适

@@ -358,13 +358,17 @@ def p_proc_stmt(p):
 
 
 def p_if_stmt(p):
-    'if_stmt :  kIF  expression  kTHEN  stmt  else_clause'
+    """
+    if_stmt :  kIF  expression  kTHEN  stmt  else_clause
+    """
     p[0] = Node("if_stmt", p.lexer.lineno, p[2], p[4], p[5])
 
 
 def p_else_clause(p):
-    '''else_clause :  kELSE stmt 
-                    |  empty'''
+    """
+    else_clause :  kELSE stmt
+                |  empty
+    """
     if len(p) == 3:
         p[0] = p[2]
 
@@ -446,8 +450,10 @@ def p_expression(p):
     """
     if len(p) == 4:
         p[0] = Node("expression", p.lexer.lineno, p[1], p[2], p[3])
-    else:
+    elif len(p) == 2:
         p[0] = Node("expression", p.lexer.lineno, p[1])
+    else:
+        raise Exception
 
 
 def p_expr(p):
@@ -488,17 +494,17 @@ def p_term(p):
     elif p[2] == 'and':
         p[0] = Node("term-AND", p.lexer.lineno, p[1], p[3])
 
-# TODO: check factor-func
+
 def p_factor_func(p):
-    '''
+    """
     factor  : SYS_FUNCT
             | ID  LP  args_list  RP
             | SYS_FUNCT  LP  args_list  RP
-    '''
+    """
     if len(p) == 2:
-        p[0] = Node('factor-func', p[1])
+        p[0] = Node('factor-func', p.lexer.lineno, p[1])
     else:
-        p[0] = Node('factor-func', p[1], p[3])
+        p[0] = Node('factor-func', p.lexer.lineno, p[1], p[3])
 
 
 def p_factor_arr(p):
@@ -545,7 +551,7 @@ def p_args_list(p):
 
 # 空产生式
 def p_empty(p):
-    'empty :'
+    """empty :"""
     pass
 
 
@@ -559,6 +565,7 @@ def p_error(p):
         parser.errok()
     else:
         print("Syntax error at EOF")
+
 
 logging.basicConfig(
         level=logging.DEBUG,
