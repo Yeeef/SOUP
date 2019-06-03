@@ -745,9 +745,9 @@ def parse_stmt_node(ast_node, symb_tab_node):
             right_const_val, _ = parse_expression_node(right_expression_node, symb_tab_node)
             new_children = list(ast_node.children)
             if left_const_val is not None:
-                new_children[1] = bool(left_const_val)
+                new_children[1] = left_const_val
             if right_const_val is not None:
-                new_children[3] = bool(right_const_val)
+                new_children[3] = right_const_val
             ast_node._children = tuple(new_children)
         elif ast_node.type == 'case_stmt':
             expression_node, case_expr_list_node = ast_node.children
