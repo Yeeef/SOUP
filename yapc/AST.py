@@ -685,7 +685,8 @@ def parse_stmt_list_node(ast_node, symb_tab_node):
     flatten_stmt_node_list = traverse_skew_tree(ast_node, [
         'assign_stmt', 'assign_stmt-arr', 'assign_stmt-record',
         'proc_stmt', 'proc_stmt-simple',
-        'if_stmt', 'repeat_stmt', 'while_stmt', 'for_stmt'
+        'if_stmt', 'repeat_stmt', 'while_stmt', 'for_stmt',
+        'case_stmt'
     ])
     ast_node._children = flatten_stmt_node_list
     for child in ast_node.children:

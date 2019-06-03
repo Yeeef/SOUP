@@ -14,7 +14,7 @@ from Semantic import SemanticAnalyzer
 from CodeGenerator import CodeGenerator
 from ErrorHandler import SemanticLogger
 
-test_file = 'test/for.pas'
+test_file = 'test/switch.pas'
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--input', help='input pascal file', default=test_file)
 arg_parser.add_argument('--output', help='output intermediate code path', default='./yapc.out')
@@ -30,8 +30,8 @@ SemanticLogger.info(None, 'compiling {}'.format(path.basename(test_file)))
 
 parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
 graph(parse_tree_root, "graphs/graph")
-static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
 if parse_tree_root:
+    static_semantic_analyzer = SemanticAnalyzer(parse_tree_root)
     static_semantic_analyzer.analyze()
     static_semantic_analyzer.symbol_table.to_graph("graphs/symb_tab.png")
     SemanticLogger.info(None,
