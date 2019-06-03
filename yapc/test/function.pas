@@ -6,7 +6,7 @@ var
 	var A : integer; 
 		begin
 		A := 10; 
-		writeln(A) 
+		writeln(A) ;
 	end; 
 
 	function Summation(num : integer) : integer;

@@ -1,5 +1,5 @@
 program types;
-vara
+var
    i : real;
 begin
 	i := 3.2;
