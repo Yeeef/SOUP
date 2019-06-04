@@ -39,9 +39,9 @@ if parse_tree_root:
                         "Find {} warnings and {} errors".format(SemanticLogger.n_warn, SemanticLogger.n_error))
     if SemanticLogger.n_error == 0:
         SemanticLogger.info(None, 'producing three address code')
-        # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-        # code_generator.gen_three_address_code()
-        # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+        code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
+        code_generator.gen_three_address_code()
+        _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
         SemanticLogger.info(None, 'done')
 
 end = time.clock()
