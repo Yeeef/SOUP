@@ -58,21 +58,13 @@ def traverse_skew_tree_gen(node, stop_node_type=None):
 
 def traverse_skew_tree_bool(node, stop_node_type, target_node_type):
     descending_leaves = []
-    children = node.children
-    if node.type != target_node_type:
-        descending_leaves.append(node)
+    if not isinstance(node, Node) or node.type != target_node_type or node.type.startswith(stop_node_type):
+        return [node]
+    else:
+        children = node.children
+        descending_leaves.extend(traverse_skew_tree_bool(children[0], stop_node_type, target_node_type))
+        descending_leaves.append(children[1])
         return tuple(descending_leaves)
-    for child in children:
-        if isinstance(child, Node):
-            if child.type.startswith(stop_node_type):
-                descending_leaves.append(child)
-            else:
-                descending_leaves.extend(traverse_skew_tree_bool(child, stop_node_type, target_node_type))
-        else:
-            # reach the leaf node
-            descending_leaves.append(child)
-
-    return tuple(descending_leaves)
 
 
 class Node(object):
@@ -385,8 +377,8 @@ def constant_folding(node, symbol_table):
 def parse_para_decl_list(ast_node, symb_tab_node):
     """
     需要建一个新的 symbol table
-    :param node: ast node
-    :param symbol_table_node: symb_tab node
+    :param symb_tab_node:
+    :param ast_node:
     :return:
     """
     if ast_node.type == 'para_decl_list':
@@ -851,7 +843,7 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
                         else:
                             SemanticLogger.warn(right_child.lineno,
                                                 'procedure `{}` arg `{}` expect `{}` got `{}`'
-                                  .format(proc_id, arg_name, expect_type, given_type))
+                                                .format(proc_id, arg_name, expect_type, given_type))
                             # print('Warning, procedure `{}` arg `{}` expect `{}` got `{}`'
                             #       .format(proc_id, arg_name, expect_type, given_type))
 
@@ -915,7 +907,8 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
             new_constant_fold_ret = CONST_TYPE_TO_FUNC[var_declare_type](constant_fold_ret)
             if constant_fold_type != var_declare_type:
                 SemanticLogger.warn(expression_node.lineno,
-                                    "cast `{}` to `{}` for variable `{}`".format(constant_fold_ret, new_constant_fold_ret, id_))
+                                    "cast `{}` to `{}` for variable `{}`".format(constant_fold_ret,
+                                                                                 new_constant_fold_ret, id_))
             constant_fold_ret = new_constant_fold_ret
         if constant_fold_ret is not None:
             ast_node._children = (id_, constant_fold_ret)
@@ -969,7 +962,7 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
 
             # 替换孩子
             ast_node._children = (id_, index_expression_node if index_fold_ret is None else index_fold_ret,
-                                   expression_node if constant_fold_ret is None else constant_fold_ret)
+                                  expression_node if constant_fold_ret is None else constant_fold_ret)
     else:  # ID  DOT  ID  ASSIGN  expression assign_stmt-record
         record_var, record_field, expression_node = ast_node.children
         # 检查变量是否存在
@@ -988,7 +981,7 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
                 if field_dtype is not None:
                     constant_fold_ret, constant_fold_type = parse_expression_node(expression_node, symb_tab_node)
                     if field_dtype == 'char' and constant_fold_type != 'char' or \
-                        field_dtype != 'char' and constant_fold_type == 'char':
+                       field_dtype != 'char' and constant_fold_type == 'char':
                         SemanticLogger.error(ast_node.lineno, 'cannot cast char type to `{}` type in field `{}`'
                                              .format(field_dtype, record_field))
                     else:
@@ -1358,9 +1351,9 @@ def parse_factor_func_node(ast_node, symb_tab_node):
                         #                 .format(func_id, arg_name, expect_type, given_type))
                     else:
                         SemanticLogger.warn(args_list_node.lineno,
-                                             "func `{}` arg `{}` expect `{}` got `{}`"
-                                             .format(func_id, arg_name, expect_type, given_type)
-                                             )
+                                            "func `{}` arg `{}` expect `{}` got `{}`"
+                                            .format(func_id, arg_name, expect_type, given_type)
+                                            )
                         # print('Warning, func `{}` arg `{}` expect `{}` got `{}`'
                         #       .format(func_id, arg_name, expect_type, given_type))
             return None, ret_val.ret_type
@@ -1398,7 +1391,7 @@ def parse_factor_arr_node(ast_node, symb_tab):
                 if const_val < left_range or const_val > right_range:
                     SemanticLogger.error(index_expression_node.lineno,
                                          'illegal index `{}` for array `{}` with index range: {}'
-                                    .format(const_val, arr_id, (left_range, right_range)))
+                                         .format(const_val, arr_id, (left_range, right_range)))
                     # raise Exception('illegal index `{}` for array `{}` with index range: {}'
                     #                 .format(const_val, arr_id, (left_range, right_range)))
                 # 替换孩子

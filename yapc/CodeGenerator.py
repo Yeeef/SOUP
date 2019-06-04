@@ -305,6 +305,8 @@ class CodeGenerator(object):
     """ util funcs"""
 
     def gen_quad_list_in_expression_node(self, expression_node):
+        if not isinstance(expression_node, Node):
+            return expression_node
         if len(expression_node.children) == 1:
             return self.gen_quad_list_from_expression_node(expression_node.children[0])
         else:
