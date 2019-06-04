@@ -76,6 +76,11 @@ class RecordType(object):
     def to_dict(self):
         return self.dict_form
 
+    def __eq__(self, other):
+        if isinstance(other, RecordType):
+            other = other.dict_form
+        return self.dict_form == other
+
     def __str__(self):
         return str(self.dict_form)
 

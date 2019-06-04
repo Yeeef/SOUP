@@ -506,6 +506,8 @@ def parse_const_node(ast_node, symb_tab_node):
     for child in const_expr_node_list:
         id_, const_val_node = child.children
         const_type = const_val_node.type
+        if const_type == 'sys_con':
+            const_type = 'boolean'
         const_val, *_ = const_val_node.children
         const_val = CONST_TYPE_TO_FUNC[const_type](const_val)
         symb_tab_item = SymbolTableItem('const', {'const_val': const_val, 'const_type': const_type})
@@ -832,7 +834,7 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
                     # raise Exception("procedure `{}` expect {} args, got {} args"
                     #                 .format(proc_id, len(param_list), len(args_type_list)))
                 # 检查变量类型是否合适
-                for idx in range(len(param_list)):
+                for idx in range(min(len(param_list), len(args_type_list))):
                     _, arg_name, expect_type = param_list[idx]
                     given_type = args_type_list[idx]
                     if given_type != expect_type:
@@ -1000,7 +1002,7 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
 
                 else:
                     SemanticLogger.error(ast_node.lineno, '`{}` is not a valid field for record variable `{}`'
-                                         .format(record_field, ret_val))
+                                         .format(record_field, record_var))
 
 
 def parse_expression_list(ast_node, symb_table):
@@ -1241,7 +1243,7 @@ def parse_factor_node(ast_node, symb_table):
                     return None, var_type
     elif ast_node.type in CONST_VALUE_TYPE:  # const value / true / false / maxint
         const_val, = ast_node.children
-        const_type = ast_node.type
+        const_type = 'boolean' if ast_node.type == 'sys_con' else ast_node.type
         return const_val, const_type
         # return ConstantFoldItem(const_val, ast_node.type)
     elif ast_node.type.startswith('factor'):

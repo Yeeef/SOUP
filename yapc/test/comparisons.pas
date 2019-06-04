@@ -10,7 +10,7 @@ begin
 	writeln(3);
 	
 	
-	writeln("----");
+	{writeln("----");
 	for	a := 1 to 10 do
 		writeln(a);
 	writeln("----");		
@@ -25,6 +25,6 @@ begin
 	begin
 		writeln(a);
 		a := a * 2;
-	end until a > 100;
+	end until a > 100;}
 	
 end.

@@ -432,7 +432,9 @@ def p_else_clause(p):
 
 
 def p_repeat_stmt(p):
-    'repeat_stmt :  kREPEAT  stmt_list  kUNTIL  expression'
+    """
+    repeat_stmt :  kREPEAT  stmt_list  kUNTIL  expression
+    """
     p[0] = Node("repeat_stmt", p.lexer.lineno, p[2], p[4])
 
 
@@ -444,18 +446,23 @@ def p_while_stmt(p):
 
 
 def p_for_stmt(p):
-    'for_stmt :  kFOR  ID  ASSIGN  expression  direction  expression  kDO stmt'
+    """
+    for_stmt :  kFOR  ID  ASSIGN  expression  direction  expression  kDO stmt
+    """
     p[0] = Node("for_stmt", p.lexer.lineno, p[2], p[4], p[5], p[6], p[8])
 
 
 def p_direction(p):
-    '''direction :  kTO 
-                    | kDOWNTO'''
+    """direction :  kTO
+                 | kDOWNTO
+    """
     p[0] = p[1]
 
 
 def p_case_stmt(p):
-    '''case_stmt : kCASE expression kOF case_expr_list kEND'''
+    """
+    case_stmt : kCASE expression kOF case_expr_list kEND
+    """
     p[0] = Node("case_stmt", p.lexer.lineno, p[2], p[4])
 
 

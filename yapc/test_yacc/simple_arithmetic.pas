@@ -2,10 +2,10 @@ program Simple_Arithmetic;
 const a = 2; b = 3.4; c = 'l'; flag=true;
 var x, y, z: integer;
 begin
-    x := 2;;
-    {x := true and true and true and not 1;
+    x := 2;
+    x := true and true and true and not 1;
     x := true and false;
-    x := not flag and not (not flag or false);}
+    x := not flag and not (not flag or false);
     x := 2 / 1;
     x := (a + 13) div 5 mod 2;
     z := -3 * 2 + -5 * -3;
