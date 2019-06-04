@@ -1,6 +1,6 @@
 ## 编译原理实验报告  
 
-（封面或许最后再改下
+
 
 ------
 
@@ -28,11 +28,11 @@
 
 
 
-## 一、词法分析
+## 1、词法分析
 
 ### 1.1 关键字 
 
-根据我们定义的pascal语法子集，对所需关键字进行了如下分类并将它们保存在reserved中。
+​	根据我们定义的pascal语法子集，对所需关键字进行了如下分类并将它们保存在reserved中。
 
 ```python
 sys_con = ("false", "maxint", "true")
@@ -47,7 +47,7 @@ key_word = (
 
 ### 1.2 符号标记
 
-根据ply的语法规则，将语法中所用到的符号定义对应的标记符号TOKENS。标记TOKENS定义在最前面，以列表的形式存储。每种TOKEN用一个正则表达式规则来表示，每个规则需要以"t\_"开头声明，表示该声明是对标记的规则定义。对于简单的标记，可以直接定义：
+​	根据ply的语法规则，将语法中所用到的符号定义对应的标记符号TOKENS。标记TOKENS定义在最前面，以列表的形式存储。每种TOKEN用一个正则表达式规则来表示，每个规则需要以"t\_"开头声明，表示该声明是对标记的规则定义。对于简单的标记，可以直接定义：
 
 ```python
 t_STRING = r'\".*\"'
@@ -74,9 +74,9 @@ t_DOUBLEDOT = r'\.\.'
 t_ignore = ' \t\r'
 ```
 
-对于需要执行动作的符号标记，如整数、实数、字符串和ID等TOKENS，将规则写成一个方法。方法总是需要接受一个LexToken实例的参数，该实例有一个t.type的属性（字符串表示）来表示标记的类型名称，t.value是标记值（匹配的实际的字符串）。方法可以在方法体里面修改这些属性。但是，如果这样做，应该返回结果token，否则，标记将被丢弃。在这里我们使用了@TOKEN装饰器来引用已有的变量并定义规则。
+​	对于需要执行动作的符号标记，如整数、实数、字符串和ID等TOKENS，将规则写成一个方法。方法总是需要接受一个LexToken实例的参数，该实例有一个t.type的属性（字符串表示）来表示标记的类型名称，t.value是标记值（匹配的实际的字符串）。方法可以在方法体里面修改这些属性。但是，如果这样做，应该返回结果token，否则，标记将被丢弃。在这里我们使用了@TOKEN装饰器来引用已有的变量并定义规则。
 
-定义如下：
+​	定义如下：
 
 ```python
 char = r'(\'([^\\\'\.]?)\')|(\"([^\\\"\.]?)\")'
@@ -127,7 +127,7 @@ def t_eof(t):
 
 ### 1.3 匹配规则顺序
 
-在lex内部，lex.py用re模块处理匹配模式，匹配顺序如下：
+​	在lex内部，lex.py用re模块处理匹配模式，匹配顺序如下：
 
 1\. 所有由方法定义的标记规则，按照他们的出现顺序依次加入
 
@@ -135,11 +135,11 @@ def t_eof(t):
 
 
 
-## 二、语法分析
+## 2、语法分析
 
 ### 2.1 语法规则
 
-我们对pascal定义了一个语法子集，下面是主要的文法规则：
+​	我们对pascal定义了一个语法子集，下面是主要的文法规则：
 
 #### 2.1.1 程序整体框架
 
@@ -152,9 +152,9 @@ routine_body ： compound_stmt
 compound_stmt ： BEGIN  stmt_list  END
 ```
 
-我们用下面这个例子来解释上面的文法:
+​	我们用下面这个例子来解释上面的文法:
 
-program由program_head和routine构成，其中Program_head包括程序第一行的program关键字和ID信息(例子中是“if_statement”)。routine则又包括routine_head和routine_body。其中routine_head可能包有const_part, type_part, var_part和routine_part这四个部分中的一个或多个，之后会对这几个部分进行进一步的文法规则阐释（例子中包含了var_part）。routine_body则是begin开始end结束的程序过程。
+​	program由program_head和routine构成，其中Program_head包括程序第一行的program关键字和ID信息(例子中是“if_statement”)。routine则又包括routine_head和routine_body。其中routine_head可能包有const_part, type_part, var_part和routine_part这四个部分中的一个或多个，之后会对这几个部分进行进一步的文法规则阐释（例子中包含了var_part）。routine_body则是begin开始end结束的程序过程。
 
 ```pascal
 program if_statement;
@@ -175,7 +175,7 @@ const_value ： INTEGER  |  REAL  |  CHAR  |  SYS_CON
 
 ```
 
-常量部分可能为空，非空时由const关键字开头，一串常量定义由分号连接，支持整数、实数、字符等类型，实例如下：
+​	常量部分可能为空，非空时由const关键字开头，一串常量定义由分号连接，支持整数、实数、字符等类型，实例如下：
 
 ```pascal
 const
@@ -198,7 +198,7 @@ field_decl ： name_list  COLON  type_decl  SEMI
 name_list ： name_list  COMMA  ID  |  ID
 ```
 
-type部分可以为空，非空时由关键字type开头，后面是一串type定义。type定义的格式为 “变量名 = 类型声明”。类型声明又分为简单类型，array和record。其中简单类型包括系统已有类型，enum类型，range和自定义的ID。下面是一个array_type的实例：
+​	type部分可以为空，非空时由关键字type开头，后面是一串type定义。type定义的格式为 “变量名 = 类型声明”。类型声明又分为简单类型，array和record。其中简单类型包括系统已有类型，enum类型，range和自定义的ID。下面是一个array_type的实例：
 
 ```pascal
 type
@@ -215,7 +215,7 @@ var_decl :  name_list  COLON  type_decl  SEMI
 
 ```
 
-变量部分可以为空，非空时由var关键字开头，后面是一串变量定义，格式为" 变量名 : 类型名 " ，实例如下：
+​	变量部分可以为空，非空时由var关键字开头，后面是一串变量定义，格式为" 变量名 : 类型名 " ，实例如下：
 
 ```pascal
 var
@@ -242,7 +242,7 @@ val_para_list ： name_list
 
 ```
 
-routine_part可以为空，非空时主要包括函数和过程。下面的函数和过程格式可以对应上面的文法。
+​	routine_part可以为空，非空时主要包括函数和过程。下面的函数和过程格式可以对应上面的文法。
 
 ```pascal
 function <函数名> (<形式参数表>):<类型>;
@@ -268,7 +268,7 @@ end;
 
 #### 2.1.6 语句
 
-语句是一种执行一串操作但是没有返回值的语法元素。我们的语言中，语句包含这几类：条件语句，while语句，repeat语句，for语句，赋值语句，case语句，goto语句。
+​	语句是一种执行一串操作但是没有返回值的语法元素。我们的语言中，语句包含这几类：条件语句，while语句，repeat语句，for语句，赋值语句，case语句，goto语句。
 
 ```
 stmt_list ： stmt_list  stmt  SEMI  |  ε
@@ -279,7 +279,7 @@ non_label_stmt ： assign_stmt | proc_stmt | compound_stmt | if_stmt | repeat_st
 
 ##### 赋值语句
 
-赋值语句的左边是一个标识符，右边是一个表达式，左边可以是普通的ID、array或record的成员。
+​	赋值语句的左边是一个标识符，右边是一个表达式，左边可以是普通的ID、array或record的成员。
 
 ```
 assign_stmt ： ID  ASSIGN  expression
@@ -290,7 +290,7 @@ assign_stmt ： ID  ASSIGN  expression
 
 ##### proc语句
 
-proc语句包括系统的函数和自定义的过程调用。
+​	proc语句包括系统的函数和自定义的过程调用。
 
 ```
 proc_stmt ： ID
@@ -370,7 +370,7 @@ end;
 
 #### 2.1.7 表达式
 
-表达式list由一系列的表达式构成
+​	表达式list由一系列的表达式构成
 
 ```
 expression_list ： expression_list  COMMA  expression  |  expression
@@ -379,7 +379,7 @@ expression_list ： expression_list  COMMA  expression  |  expression
 
 ##### 比较表达式
 
-表达式可以细化到两个表达式之间的比较关系
+​	表达式可以细化到两个表达式之间的比较关系
 
 ```
 expression ： expression  GE  expr  |  expression  GT  expr  |  expression  LE  expr   |  expression  LT  expr  |  expression  EQUAL  expr  
@@ -389,7 +389,7 @@ expression ： expression  GE  expr  |  expression  GT  expr  |  expression  LE 
 
 ##### 二元表达式
 
-再进一步，表达式可以细化到加减乘除，取模等二元运算
+​	再进一步，表达式可以细化到加减乘除，取模等二元运算
 
 ```
 expr ： expr  PLUS  term  |  expr  MINUS  term  |  expr  OR  term  |  term
@@ -400,7 +400,7 @@ term ： term  MUL  factor  |  term  DIV  factor  |  term  MOD  factor
 
 ##### facor
 
-factor是表达式的最小单位，包括常量、变量、record的成员、函数调用的返回值等。
+​	factor是表达式的最小单位，包括常量、变量、record的成员、函数调用的返回值等。
 
 ```
 factor ： ID  |  ID  LP  args_list  RP  |  SYS_FUNCT |
@@ -414,11 +414,11 @@ SYS_FUNCT  LP  args_list  RP  |  const_value  |  LP  expression  RP
 
 ### 2.2 实现方法
 
-默认情况下，yacc.py 依赖 lex.py 产生的标记，默认的分析方法是 LALR，在 yacc 中的第一条规则是起始语法规则（在我们的程序中是program规则）。一旦起始规则被分析器归约，而且再无其他输入，分析器终止，最后的值将返回（这个值将是起始规则的p[0]）。
+​	默认情况下，yacc.py 依赖 lex.py 产生的标记，默认的分析方法是 LALR，在 yacc 中的第一条规则是起始语法规则（在我们的程序中是program规则）。一旦起始规则被分析器归约，而且再无其他输入，分析器终止，最后的值将返回（这个值将是起始规则的p[0]）。
 
 #### 2.2.1 语法树结点
 
-为了构建语法树，我们创建了一个通用的树节点结构：
+​	为了构建语法树，我们创建了一个通用的树节点结构：
 
 ```python
 class Node(object):
@@ -431,7 +431,7 @@ class Node(object):
 
 #### 2.2.2 文法实现
 
-每个语法规则被定义为一个python的方法，方法的文档字符串描述了相应的上下文无关文法，方法的语句实现了对应规则的语义行为。每个方法接受一个单独的 p 参数，p 是一个包含有当前匹配语法的符号的序列，p[i] 与语法符号一一对应。其中，p[i] 的值相当于词法分析模块中对 p.value 属性赋的值，对于非终结符的值，将在归约时由 p[0] 的赋值决定。如下，我们就建立了一个'program'的Node。
+​	每个语法规则被定义为一个python的方法，方法的文档字符串描述了相应的上下文无关文法，方法的语句实现了对应规则的语义行为。每个方法接受一个单独的 p 参数，p 是一个包含有当前匹配语法的符号的序列，p[i] 与语法符号一一对应。其中，p[i] 的值相当于词法分析模块中对 p.value 属性赋的值，对于非终结符的值，将在归约时由 p[0] 的赋值决定。如下，我们就建立了一个'program'的Node。
 
 ```python
 def p_program(p):
@@ -440,7 +440,7 @@ def p_program(p):
 
 ```
 
-对于产生式右边只有一个所需参数的文法，我们也可以不建立Node，而是直接赋值，如下：
+​	对于产生式右边只有一个所需参数的文法，我们也可以不建立Node，而是直接赋值，如下：
 
 ```python
 def p_program_head(p):
@@ -449,7 +449,7 @@ def p_program_head(p):
 
 ```
 
-如果所有的规则都有相似的结构，那么我们可以将语法规则合并（比如，产生式的项数相同）。不然，语义动作可能会变得复杂。简单情况下，可以使用`len()`方法区分，复杂情况下则可以根据语法的具体内容进行区分，比如：
+​	如果所有的规则都有相似的结构，那么我们可以将语法规则合并（比如，产生式的项数相同）。不然，语义动作可能会变得复杂。简单情况下，可以使用`len()`方法区分，复杂情况下则可以根据语法的具体内容进行区分，比如：
 
 ```python
 def p_term(p):
@@ -476,7 +476,7 @@ def p_term(p):
 
 #### 2.2.3 二义性
 
-如果在 yacc.py 中存在二义文法，会输出"移进归约冲突"或者"归约归约冲突"。在分析器无法确定是将下一个符号移进栈还是将当前栈中的符号归约时会产生移进归约冲突。为了解决二义文法，尤其是对表达式文法，yacc.py 允许为标记单独指定优先级和结合性。我们像下面这样增加一个 precedence 变量，这样的定义说明 ADD/SUBTRACT 标记具有相同的优先级和左结合性，MUL/DIV/kDIV/kMOD 具有相同的优先级和左结合性。在 precedence 声明中，标记的优先级从低到高。因此，这个声明表明 MUL/DIV/kDIV/kMOD（他们较晚加入 precedence）的优先级高于 ADD/SUBTRACT，这样就解决了算术运算中的二义性问题。
+​	如果在 yacc.py 中存在二义文法，会输出"移进归约冲突"或者"归约归约冲突"。在分析器无法确定是将下一个符号移进栈还是将当前栈中的符号归约时会产生移进归约冲突。为了解决二义文法，尤其是对表达式文法，yacc.py 允许为标记单独指定优先级和结合性。我们像下面这样增加一个 precedence 变量，这样的定义说明 ADD/SUBTRACT 标记具有相同的优先级和左结合性，MUL/DIV/kDIV/kMOD 具有相同的优先级和左结合性。在 precedence 声明中，标记的优先级从低到高。因此，这个声明表明 MUL/DIV/kDIV/kMOD（他们较晚加入 precedence）的优先级高于 ADD/SUBTRACT，这样就解决了算术运算中的二义性问题。
 
 ```python
 precedence = (
@@ -488,11 +488,11 @@ precedence = (
 
 ### 2.3 错误处理 
 
-对于文法规则部分出现的错误，一般而言，最简单的处理方式就是在遇到错误的时候就抛出异常并终止。但我们希望它能报告错误并尽可能的恢复并继续分析。
+​	对于文法规则部分出现的错误，一般而言，最简单的处理方式就是在遇到错误的时候就抛出异常并终止。但我们希望它能报告错误并尽可能的恢复并继续分析。
 
 #### 2.3.1 panic mode
 
-一种处理方式是panic mode，该模式下，开始放弃剩余的标记，直到能够达到一个合适的恢复机会。我们一开始实现的panic mode如下，它会简单的抛弃错误的标记，并告知分析器错误被接受了。
+​	一种处理方式是panic mode，该模式下，开始放弃剩余的标记，直到能够达到一个合适的恢复机会。我们一开始实现的panic mode如下，它会简单的抛弃错误的标记，并告知分析器错误被接受了。
 
 ```python
 def p_error(p):
@@ -507,7 +507,7 @@ def p_error(p):
 
 #### 2.3.2 resynchronization
 
-优化后采用的错误处理方式是根据 error 规则恢复和再同步，通过在语法规则中包含 error 标记来实现，例如：
+​	优化后采用的错误处理方式是根据 error 规则恢复和再同步，通过在语法规则中包含 error 标记来实现，例如：
 
 ```python
 def p_type_definition(p):
@@ -521,11 +521,11 @@ def p_type_definition_error(p):
                         f"Syntax error at token `{p[3].value}` in type definition.")
 ```
 
-当type中有内容出错时，error 标记会匹配任意多个分号之前的标记（分号是`SEMI`指代的字符）。一旦找到分号，规则将被匹配，这样 error 标记就被归约了。我们针对不同的文法规则添加了类似的error标记，优化错误处理。
+​	当type中有内容出错时，error 标记会匹配任意多个分号之前的标记（分号是`SEMI`指代的字符）。一旦找到分号，规则将被匹配，这样 error 标记就被归约了。我们针对不同的文法规则添加了类似的error标记，优化错误处理。
 
 #### 2.3.3 错误处理实例
 
-通过下面这个例子可以看到我们的错误处理方式resynchronization的优势：
+​	通过下面这个例子可以看到我们的错误处理方式resynchronization的优势：
 
 ```pascal
 type
@@ -536,15 +536,15 @@ type
     	Address: string;
 ```
 
-对于上面的内容，type中的arr定义出错，但后面的record定义完全正确。
+​	对于上面的内容，type中的arr定义出错，但后面的record定义完全正确。
 
-如果是panic mode处理模式，出现的结果是从出错位置一直到最后的程序都会被标记错误，最终无法建立分析树。因为程序始终无法找到合理的同步点，导致丢弃了大量的输入：
+​	如果是panic mode处理模式，出现的结果是从出错位置一直到最后的程序都会被标记错误，最终无法建立分析树。因为程序始终无法找到合理的同步点，导致丢弃了大量的输入：
 
 ![panicmode](imgs/panicmode.PNG)
 
 
 
-然而，当采用resynchronization错误恢复模式时，只要从出错位置开始匹配到下一个分号，我们就能将error规约并继续分析输入，语法树也将成功建立，唯一的不同只是少了出错的arr：
+​	然而，当采用resynchronization错误恢复模式时，只要从出错位置开始匹配到下一个分号，我们就能将error规约并继续分析输入，语法树也将成功建立，唯一的不同只是少了出错的arr：
 
 ![resyne](imgs/resyne.PNG)
 
@@ -925,17 +925,609 @@ end.
 
 
 
-## 四、优化考虑
+## 4、优化考虑
 
-（每个阶段的优化考虑）
+### 4.1 错误处理优化
 
-## 五、代码生成
+​	在语法分析部分，我们用resynchronization错误恢复机制对错误处理进行了优化，这样可以将语法设计成在一个相对容易恢复和继续分析的点捕获错误。相对于panic mode更有优势。具体细节在语法分析部分的2.3节错误处理进行了详细阐述。
 
-（所有语句的代码生成的处理）
 
-## 六、测试案例
 
-（每个语句成分的测试案例，至少两个复杂语句组合后的测试案例）
+## 5、代码生成
+
+### 5.1  Overview
+
+&emsp;&emsp;为了考虑开发效率，我们将语义分析和代码生成完全分开，语义分析负责所有的正确性检测和常数折叠。代码生成则是基于语义分析后新产生的语法树进行的，主要分为几大部分`control statement`、`assignment statement`、`routine statement`、`expression statement`，分别对应条件语句、赋值语句、函数及过程语句、算术表达式语句。
+
+&emsp;&emsp;我们使用的语言为`Pascal`语法子集，代码生成为`three-address code`中间代码，符号基本沿用教材定义，对于支持的功能、语法原生不支持的功能、语法支持但未实现的功能，会在以下展示出来，报告顺序基本按照我们定义的`yacc`语句顺序展开。
+
+&emsp;&emsp;关于主要类和函数：
+
+- **class Quadruple(object)** — 四元组数据结构，存储形如(op, target, right_1, right_2)四元组，根据需要任何一个都可以为`None`。
+
+- **class CodeGenerator(object)**  — 供主函数调用的类。
+
+- **def _add_new_quad(...)** — 添加新的四元组。
+
+- **def _traverse_ast_gen_code(self, root_node)** — 主循环，几乎所有的判断都在这里实现，不断被递归调用。
+
+- **def gen_quad_list_in_expression_node(self, expression_node)** — 专门为`expression`结点设计处理函数，这是由于其他语句不需要返回值，但这里作为算术运算部分，自成生态，这里面的所有语句都需要拥有返回值，要么直接是值本身，要么是存储这个值的临时变量名，供其他语句调用，这个函数使用非常频繁。
+
+- **def gen_quad_list_from_expression_node(self, expression_node)** — 为`expression`结点下设计的处理函数，主要包含`expr/term/factor`语句。被上面的函数调用。
+
+- **def traverse_skew_tree_gen(node, stop_node_type=None)** — 将`node`结点左递归展平，按照`stop_node_type`为准则决定何时停止进程。
+
+- **def traverse_skew_tree_bool(node, stop_node_type, target_node_type)** — 此处和上面不同，专用于`term-AND/expr-OR`条件语句，这里是为了辅助从左至右只要有一个语句满足了退出条件，则需要退出，因此，此处是按照连续的同名结点展开，当结点为下一级或同级非同名时，需要退出递归过程。
+
+  
+
+### 5.2  Routine Statement
+
+&emsp;&emsp;此部分展示关于`function/procedure`部分，包含了定义和调用模块，实现严格按照教材示例用法，由于只生成中间代码，因此此处没有考虑返回值及返回地址的传递和堆栈。
+
+
+
+#### 5.2.1  定义部分
+
+**宏观调度**
+
+```python
+# routine : routine_head routine_body
+```
+
+```python
+            if root_node.type == 'routine':
+                self._traverse_ast_gen_code(root_node.children[0])
+                self._traverse_ast_gen_code(root_node.children[1])
+                if len(self._routine_stack) > 0:
+                    if self._routine_stack[-1][1]:
+                        self._add_new_quad('return', self._routine_stack[-1][0])
+                    self._add_new_quad('end_define', self._routine_stack[-1][0])
+                    self._routine_stack.pop()
+```
+
+> `routine`是声明与执行语句的连接点，Pascal语言要求声明和定义必须在执行语句之前，而`routine_head`则包含了基本声明（名称、参数、返回值？，局部临时变量？），`routine_body`则是执行代码部分，如果`routine_head`的儿子全为空，则说明这是主函数，而非声明或定义。
+
+​	此处由于函数嵌套定义的存在，因此必须借助堆栈来记录函数名称，这是由于Pascal语言没有`return`这样的保留字，默认为将函数名称视为返回值，因此，我必须记录返回值（即函数名）来完成返回语句。加上嵌套，因此选用堆栈，处理完声明部分，再处理执行语句，最后加一个返回语句。
+
+**声明部分**
+
+```python
+# function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl
+```
+
+```python
+            elif root_node.type == 'function_head':
+                self._add_new_quad('entry', root_node.children[0])
+                self._routine_stack.append((root_node.children[0], True))
+```
+
+```python
+# procedure_head :  kPROCEDURE ID parameters
+```
+
+```python
+            elif root_node.type == 'procedure_head':
+                self._add_new_quad('entry', root_node.children[0])
+                self._routine_stack.append((root_node.children[0], False))
+```
+
+> 此部分就是输出函数入口语句，然后将函数名堆栈，这里只存在声明，不存在执行语句，因此与生成代码无关，主要是语义分析需要使用。
+>
+> - True -- 表示函数声明，需要加返回语句。
+> - False -- 表示过程声明，不需要返回语句。
+
+
+
+#### 5.2.2  调用部分
+
+**procedure**
+
+```python
+# proc_stmt :  ID
+#           |  SYS_PROC
+```
+
+```python
+                if root_node.type == 'proc_stmt-simple':
+                    self._add_new_quad('call', children[0])
+```
+
+> 此处直接产生`call+name`即可，表示无条件跳转到procedure执行代码部分。
+
+```python
+# proc_stmt :  ID  LP  args_list  RP
+#           |  SYS_PROC  LP  expression_list  RP
+#           |  kREAD  LP  factor  RP
+```
+
+```python
+              if children[0] == 'read':
+                  self._add_new_quad('begin_args', None)
+                  args_val = self.gen_quad_list_from_expression_node(children[1])
+                  self._add_new_quad('read', args_val)
+```
+
+> 这是专门给`read`函数的执行语句，形式为`read args`，由于这个语法本身拥有这个语句，所以单独处理了。
+
+```python
+# expression_list :  expression_list  COMMA  expression
+#                 |  expression
+# args_list :  args_list  COMMA  expression
+#           |  expression
+```
+
+```python
+                else:
+                    self._add_new_quad('begin_args', None)
+                    args_list = traverse_skew_tree_gen(children[1], 'expression')
+                    for args in args_list:
+                        if isinstance(args, Node):
+                            ret_val = self.gen_quad_list_in_expression_node(args)
+                            self._add_new_quad('args', ret_val)
+                        else:
+                            self._add_new_quad('args', args)
+                    self._add_new_quad('call', children[0])
+```
+
+> 这里主要处理前两种语句，由于`args_list`和`expression_list`本质是一样的，因此可以联合处理。先计算参数值，这里通过将左递归语法树展平，再来从左至右逐一扫描，每一个`expression`均代表一个参数的计算，最后调用即可，不存在返回值。
+
+
+
+**function**
+
+```python
+# factor  : SYS_FUNCT
+#         | ID  LP  args_list  RP
+#         | SYS_FUNCT  LP  args_list  RP
+```
+
+```python
+        elif expression_node.type == 'factor-func':
+            target = self.new_tmp_var
+            if len(expression_node.children) == 1:
+                self._add_new_quad('call', expression_node.children[0], target)
+            else:
+                func_name, args_list_node = expression_node.children
+                self._add_new_quad('begin_args', None)
+                args_list = traverse_skew_tree_gen(args_list_node, 'expression')
+                for args in args_list:
+                    ret_val = self.gen_quad_list_in_expression_node(args)
+                    self._add_new_quad('args', ret_val)
+                self._add_new_quad('call', func_name, target)
+            return target
+```
+
+> 函数调用位于`expression`系列中，这是因为函数调用存在返回值，可以作为赋值语句的右端。基本思路和过程调用类似，区分处理了系统自带无参函数和其余有参函数。只不过在最后需要返回存储函数返回值的临时变量名。
+
+
+
+### 5.3  Assignment Statement
+
+&emsp;&emsp;这是比较简单的一部分，只需要分为几种不同的左值处理即可。
+
+#### 5.3.1  普通变量
+
+```python
+# ID ASSIGN expression
+```
+
+```python
+  if root_node.type == 'assign_stmt':
+      if len(children) == 2:
+          id_, maybe_expression_node = children
+          if not isinstance(maybe_expression_node, Node):
+              self._add_new_quad(None, id_, maybe_expression_node)
+           else:
+              val = self.gen_quad_list_in_expression_node(maybe_expression_node)
+              self._add_new_quad(None, id_, val)
+```
+
+> 此处直接通过`expression`处理函数，当然首先是保证右值不是常数而是结点的前提下。最后直接赋值即可。
+
+------
+
+
+
+#### 5.3.2  数组变量
+
+```python
+# ID LB expression RB assign expression
+```
+
+```python
+    elif root_node.type == 'assign_stmt-arr':
+        id_, index_expression_node, val_expression_node = children
+        index_val = self.gen_quad_list_in_expression_node(index_expression_node)
+        assign_val = self.gen_quad_list_in_expression_node(val_expression_node)
+        self._add_new_quad(None, f'{id_}[{index_val}]', assign_val)
+```
+
+> 此处也是直接进行两次`expression`调用获取索引值和右端值，按照教材写法，这里直接使用数组写法作为三段码输出即可。
+
+------
+
+#### 
+
+#### 5.3.3  结构体变量
+
+```python
+# assign_stmt : ID  DOT  ID  ASSIGN  expression
+```
+
+```python
+          else:
+              record_name, field_name, val_expression = root_node.children
+              address_var = self.new_tmp_var
+              self._add_new_quad('address', address_var, record_name, field_name)
+              ret_val = self.gen_quad_list_in_expression_node(val_expression)
+              self._add_new_quad(None, '*' + address_var, ret_val)
+```
+
+> 此处唯一要讲的是按照教材关于结构体成员取值的写法：
+>
+> ​	t = &x + field_offset(x, field_name)
+
+------
+
+
+
+### 5.4  Control Statement
+
+&emsp;&emsp;这一部分算是生成代码比较核心的一部分，主要贯穿着与汇编基本相同的写法，处理情况较多，Pascal包含了很多种循环体结构语句。但一旦厘清顺序和逻辑，本身并不复杂，由于这部分主要是控制语句，下面不会贴上代码，因为冗杂而不易理解，只展示控制流。
+
+#### 5.4.1  if statement
+
+```python
+# if_stmt :  kIF  expression  kTHEN  stmt  else_clause
+# else_clause :  kELSE stmt
+#             |  empty
+```
+
+```
+t <- if_expression
+if_false t goto else_label
+
+{if_stmt part}
+
+goto exit_label
+else_label
+
+{else_stmt part}?(if exist)
+
+exit_label
+```
+
+------
+
+#### 5.4.2  repeat statement
+
+```python
+# repeat_stmt :  kREPEAT  stmt_list  kUNTIL  expression
+# stmt_list :  stmt_list  stmt  SEMICON
+#           |  empty
+```
+
+```
+enter_label
+
+{repeat_stmt}
+
+t <- repeat_expression
+if_false t goto exit_label
+goto enter_label
+exit_label
+```
+
+------
+
+#### 5.4.3  while statement
+
+```python
+# while_stmt :  kWHILE  expression  kDO stmt
+```
+
+```
+judge_label
+t <- while_expression
+if_false t goto exit_label
+
+{while_stmt}
+
+goto judge_label
+exit_label
+```
+
+------
+
+#### 5.4.4  for statement
+
+```python
+# for_stmt :  kFOR  ID  ASSIGN  expression  direction  expression  kDO stmt
+# direction :  kTO 
+#            | kDOWNTO
+```
+
+```
+ID <- start_value_expression
+bound_var <- end_value_expression
+
+judge_label
+
+*'to': t <- ID <= bound_var
+*'downto': t <- ID >= bound_var
+
+if_false t goto exit_label
+
+{for_stmt}
+
+*'to': ID <- ID + 1
+*'downto': ID <- ID - 1
+
+goto judge_label
+exit_label
+```
+
+------
+
+#### 5.4.5  case statement
+
+```python
+# case_stmt : kCASE expression kOF case_expr_list kEND
+# case_expr_list :  case_expr_list  case_expr
+#                |  case_expr
+# case_expr :  const_value  COLON  stmt  SEMICON
+#           |  ID  COLON  stmt  SEMICON
+#           |  kELSE  COLON  stmt  SEMICON
+```
+
+```
+choose_var <- case_expression
+case_list <- flatten the case_expr_list tree
+for case_expr in case_list
+
+{judge_value <- case_expr.children[0]
+ next_label <- new_label
+ t <- choose_var == judge_value
+ if_false t goto next_label
+ {case_expr_stmt}
+ goto exit_label
+ next_label}
+ 
+ exit_label
+```
+
+#### 5.4.6  goto statement
+
+> 我们没有支持`goto`指令，因为这对语义分析带来了麻烦。
+
+------
+
+
+
+### 5.5  Expression Statement
+
+&emsp;&emsp;这部分也是非常重要的部分，涉及到所有的算术运算，也是非常基本的分析部分。这块内容主要包含两个函数
+
+- **def gen_quad_list_in_expression_node(self, expression_node)**
+- **def gen_quad_list_from_expression_node(self, expression_node)**
+
+#### 5.5.1  expression node
+
+​	这个函数是专门针对expression结点进行的，由于yacc中我们要求expression必须有结点，因此这里本质是算术运算的入口。
+
+```python
+# expression :  expression  GE  expr
+#            |  expression  GT  expr
+#            |  expression  LE  expr
+#            |  expression  LT  expr
+#            |  expression  EQUAL  expr
+#            |  expression  UNEQUAL  expr
+#            |  expr
+```
+
+```python
+def gen_quad_list_in_expression_node(self, expression_node):
+  if not isinstance(expression_node, Node):
+      return expression_node
+  if len(expression_node.children) == 1:
+      return self.gen_quad_list_from_expression_node(expression_node.children[0])
+  else:
+ left_val = self.gen_quad_list_in_expression_node(expression_node.children[0])
+ right_val = self.gen_quad_list_from_expression_node(expression_node.children[2])
+      target = self.new_tmp_var
+      op = expression_node.children[1]
+      if op == '=':
+          self._add_new_quad('==', target, left_val, right_val)
+      elif op == '<>':
+          self._add_new_quad('!=', target, left_val, right_val)
+      else:
+          self._add_new_quad(op, target, left_val, right_val)
+      return target
+```
+
+> 此处只区分了是否含有一个以上的孩子结点，若没有，则根据是否为结点直接返回相应值或者临时变量；若有，则递归调用自己或者处理后部分的函数，得到后做判断即可。
+
+------
+
+#### 5.5.2  expr/term/factor node
+
+​	这里分为四大部分，分别为`internal expression node`、`factor node`、`expr-OR/term-AND node`、`left node`。
+
+**internal expression node**
+
+```python
+# factor : LP  expression  RP
+```
+
+```python
+            if expression_node.type == 'expression':
+                return self.gen_quad_list_in_expression_node(expression_node)
+```
+
+> 这是一种特殊情况，虽然实际应用中，这个内部的expression node会直接接在外层的expression node下，但为了保险起见，还是在这里加一句。
+
+------
+
+**factor node**
+
+​	这里又分为几种不同的右值情况，与`assignment statement`左值情况类似。
+
+```python
+# kNOT factor
+# SUBSTRACT factor
+```
+
+```python
+            elif expression_node.type == 'factor':
+                children = expression_node.children
+                unary_op, right_child = children
+                right_val = self.gen_quad_list_from_expression_node(right_child)
+                target = self.new_tmp_var
+                self._add_new_quad(unary_op, target, right_val)
+                return target
+```
+
+> 这是单操作符（not, -）运算。
+
+
+
+```python
+# factor  : ID  LB  expression  RB
+```
+
+```python
+        elif expression_node.type == 'factor-arr':
+            arr_id, right_child_node = expression_node.children
+            index_val = self.gen_quad_list_from_expression_node(right_child_node)
+            target = self.new_tmp_var
+            self._add_new_quad(None, target, f'{arr_id}[{index_val}]')
+            return target
+```
+
+> 这是数组元素取值。
+
+
+
+```python
+# factor : ID  DOT  ID
+```
+
+```python
+            elif expression_node.type == 'factor-member':
+                record_name, field_name = expression_node.children
+                target = self.new_tmp_var
+                self._add_new_quad('address', target, record_name, field_name)
+                return '*' + target
+```
+
+> 这是结构体取成员变量。
+
+
+
+> `factor-func`见函数调用部分。
+
+------
+
+**expr-OR/term-AND node**
+
+​	这里要这么区分的原因在于，`and/or`操作连续出现时，我们必须按顺序从左往右逐一判断，对于`and`操作而言，本质是连续满足条件，一旦有一个条件不满足就需要直接结束判断，这是因为后续条件很可能需要这个前序条件成立。当然，这也是一种优化，我们不必一定要从头判断到尾，只要中间有一个打破或者满足条件了，就能离开或者进入。
+
+```python
+# expr :  expr  kOR  term
+```
+
+```python
+      if expression_node.type == 'expr-OR':
+          bool_list = traverse_skew_tree_bool(expression_node, 'term', 'expr-OR')
+          jump_label = self.new_label
+          for or_node in bool_list:
+              condition_value = self.gen_quad_list_from_expression_node(or_node)
+              self._add_new_quad('goto', jump_label, 'if', condition_value)
+          target = self.new_tmp_var
+          self._add_new_quad(None, target, 0)
+          exit_label = self.new_label
+          self._add_new_quad('goto', exit_label)
+          self._add_new_quad(jump_label, None)
+          self._add_new_quad(None, target, 1)
+          self._add_new_quad(exit_label, None)
+          return target
+```
+
+> 这里最关键的就是
+>
+> - **def traverse_skew_tree_bool(node, stop_node_type, target_node_type)**
+>
+> 这个函数功能在`overview`部分已经有介绍，目的是根据连续的`and/or`结点将表达式打断，形成一条长串，然后按照之前说的情形进行判断。
+>
+> `term-AND`类似不再赘述。
+
+
+
+&#9888; 这里有一个语法本身的问题出现。
+
+```pascal
+if (a = 1 and a = 2 and a = 3) then
+```
+
+&emsp;&emsp;在这个语句里，我们的语法图中为
+
+![CG_00](imgs/CG_00.png)
+
+​	我们可以看到，在我们的语法中，`expression`的优先级高于`term`，因此产生`shitf-reduce`冲突时，优先进行`shift`操作，比如栈中出现`$a=1`时，这里有两个选择，一个是规约产生`expression`，一个是继续移入再规约产生`term`，由于默认移入，因此右值就被`term`结点抢走了，没有达到我们的要求，我们应当优先规约。
+
+​	但我们可以换一种写法，即每一个判断式都加上括号
+
+```pascal
+if ((a = 1) and (a = 2) and (a = 3)) then
+```
+
+​	这样就会导致始终按照`(factor)`规约，保证`expression`的产生。
+
+------
+
+**left node**
+
+​	这里指的是剩余的结点操作可以统一起来
+
+```python
+# expr :  expr  ADD  term
+#      |  expr  SUBTRACT  term
+#      |  term
+# term :  term  MUL  factor
+#      |  term  kDIV factor
+#      |  term  DIV  factor
+#      |  term  kMOD  factor
+#      |  factor
+```
+
+```python
+else:
+   if len(expression_node.children) == 1:
+      return self.gen_quad_list_from_expression_node(expression_node.children[0])
+   left_child, right_child = expression_node.children
+   left_val, right_val = self.gen_quad_list_from_expression_node(left_child), \
+                         self.gen_quad_list_from_expression_node(right_child)
+        
+   bin_op = type_to_bin_op[expression_node.type]
+   target = self.new_tmp_var
+   self._add_new_quad(bin_op, target, left_val, right_val)
+   return target
+```
+
+> 此处处理很基本，不再赘述。
+
+------
+
+
+
+#### 5.6  Optimization
+
+
+
+## 6、测试案例
+
+测试部分案例较多，在此不作赘述，
 
 
 
