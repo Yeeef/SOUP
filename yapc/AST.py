@@ -110,21 +110,17 @@ def parse_range_from_range_node(Node):
 
     left_range_node, right_range_node = Node.children
     left_type, right_type = left_range_node.type, right_range_node.type
+    left_val, *_ = left_range_node.children
+    right_val, *_ = right_range_node.children
     # semantic error
     if left_type != right_type:
         SemanticLogger.error(left_range_node.lineno,
                              'left range type: `{}`, right range type: `{}`'.format(left_type, right_type))
-        # raise Exception('left range type: `{}`, right range type: `{}`'.format(left_type, right_type))
-
-    if left_type not in ['integer', 'char']:
+    elif left_type not in ['integer', 'char']:
         SemanticLogger.error(left_range_node.lineno,
                              'arr only supprt integer / char indices, not {}'.format(left_type))
-        # raise Exception('arr only supprt integer / char indices, not {}'.format(left_type))
 
-    left_val, *_ = left_range_node.children
-    right_val, *_ = right_range_node.children
-
-    if left_val > right_val:
+    elif left_val > right_val:
         SemanticLogger.error(left_range_node.lineno,
                              'left range val `{}` > right range val `{}`'.format(left_val, right_val))
         # raise Exception('left range val `{}` > right range val `{}`'.format(left_val, right_val))
@@ -278,9 +274,8 @@ def parse_var_decl_from_node(var_decl_node, symbol_table):
         ret_val = symbol_table.chain_look_up(alias_type)
         if not ret_val:
             SemanticLogger.error(var_decl_node.lineno,
-                                 'alias type {} used before defined'.format(alias_type))
+                                 'alias type: `{}` used before defined'.format(alias_type))
             symb_tab_item = None
-            # raise Exception('alias type {} used before defined'.format(alias_type))
         else:
             symb_tab_item = SymbolTableItem('var', {'var_type': ret_val.value})
 
@@ -517,7 +512,7 @@ def parse_const_node(ast_node, symb_tab_node):
         is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
         if is_conflict:
             SemanticLogger.error(const_val_node.lineno,
-                                 f'constant {id_} already in the symbol table with value {ret_val}')
+                                 f'constant `{id_}` is already declared')
             # raise ConflictIDError(id_, ret_val)
 
 
@@ -571,7 +566,7 @@ def parse_type_part_node(ast_node, symb_tab_node):
 
             if is_conflict:
                 SemanticLogger.error(child.lineno,
-                                 f"constant {id_} already in the symbol table with value {ret_val.value['const_val']}")
+                                 f"type declare `{id_}` is duplicated")
 
 
 def parse_var_part_node(ast_node, symb_tab_node):
@@ -587,7 +582,7 @@ def parse_var_part_node(ast_node, symb_tab_node):
             is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
             if is_conflict:
                 SemanticLogger.error(ast_node.lineno,
-                        f'constant {id_} already in the symbol table with value {symb_tab_item}')
+                        f'variable `{id_}` is already declared')
                 # raise ConflictIDError(id_, symb_tab_item)
     else:
         # flatten var_decl
@@ -602,7 +597,7 @@ def parse_var_part_node(ast_node, symb_tab_node):
                 is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
                 if is_conflict:
                     SemanticLogger.error(child.lineno,
-                                         f'constant {id_} already in the symbol table with value {symb_tab_item}')
+                                         f'variable `{id_}` is already declared')
                     # raise ConflictIDError(id_, symb_tab_item)
 
 

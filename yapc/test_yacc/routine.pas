@@ -10,7 +10,7 @@ procedure add(var s: real; x, y: integer);
 var a,b,c: real;
 procedure add_add(var kkk: real_arr);
     begin
-        kkk[1] := 2 + aa + bb;
+        kkk[3] := 2 + aa + bb;
     end;
 
 begin

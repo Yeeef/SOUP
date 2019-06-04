@@ -4,7 +4,6 @@
 # semantic 在做的事情其实就是生成 symbol table, 我们之前有生成一个简单的初始 symbol table
 from AST import *
 from SymbolTable import *
-import copy
 
 
 class SemanticAnalyzer(object):
