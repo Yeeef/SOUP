@@ -16,10 +16,10 @@ from CodeGenerator import CodeGenerator
 from ErrorHandler import SemanticLogger
 
 # test_file = 'test_yacc/simple.pas'
-test_file = 'demo_test_cases/assign_demo.pas'
+test_file = '/Users/yee/Downloads/while.pas'
 out_file = './soup.out'
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument('--input', help='input pascal file', default=test_file, required=True)
+arg_parser.add_argument('--input', help='input pascal file', default=test_file)
 arg_parser.add_argument('--output', help='output intermediate code path', default=out_file)
 arg_parser.add_argument('--visualize', help='visualization base dir')
 

@@ -501,6 +501,9 @@ def parse_const_node(ast_node, symb_tab_node):
         if const_type == 'sys_con':
             const_type = 'boolean'
         const_val, *_ = const_val_node.children
+        # if const_type == 'boolean':
+        #     const_val = True if const_val == 'true' else False
+        # else:
         const_val = CONST_TYPE_TO_FUNC[const_type](const_val)
         symb_tab_item = SymbolTableItem('const', {'const_val': const_val, 'const_type': const_type})
         is_conflict, ret_val = symb_tab_node.insert(id_, symb_tab_item)
@@ -1237,6 +1240,8 @@ def parse_factor_node(ast_node, symb_table):
     elif ast_node.type in CONST_VALUE_TYPE:  # const value / true / false / maxint
         const_val, = ast_node.children
         const_type = 'boolean' if ast_node.type == 'sys_con' else ast_node.type
+        if const_type == 'boolean':
+            const_val = True if const_val == 'true' else False
         return const_val, const_type
         # return ConstantFoldItem(const_val, ast_node.type)
     elif ast_node.type.startswith('factor'):
