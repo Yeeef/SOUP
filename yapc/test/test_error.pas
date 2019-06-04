@@ -10,7 +10,7 @@ type
     	State: string;
     	Zip: Integer;
   	end;
-var i,a,b,k,x,y sum,testfunc : integer;
+var i,a,b,k,x,y,sum,testfunc : integer;
     aa:arr;
 function fib(x:integer):integer;
 begin
@@ -24,7 +24,6 @@ function gao(x:integer):integer;
 begin
   gao:=7;
 end;
-
 begin
  i=10;
  a=fib(10);

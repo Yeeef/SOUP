@@ -814,7 +814,7 @@ def parse_proc_stmt_node(ast_node, symb_tab_node):
             # proc_stmt: ID  LP  args_list  RP
             # 检查 proc_id 是否定义过, chain_look_up
             ret_val = symb_tab_node.chain_look_up(proc_id)
-            if ret_val is None:
+            if ret_val is None or ret_val.type != 'procedure':
                 SemanticLogger.error(right_child.lineno,
                                      "procedure `{}` used before declared".format(proc_id))
                 # raise Exception("procedure `{}` used before declared".format(proc_id))
@@ -1321,7 +1321,10 @@ def parse_factor_func_node(ast_node, symb_tab_node):
             # 检查函数是否定义过，参数是否给对（参数个数，参数类型）
             func_id = id_or_sys_func
             ret_val = symb_tab_node.chain_look_up(func_id)
-            if ret_val is None or ret_val.type != 'function':
+            # 函数这里比较特殊，因为符号表里有一个变量名和函数同名
+            if ret_val.type == 'var':
+                ret_val = symb_tab_node.parent.chain_look_up(func_id)
+            if ret_val is None or (ret_val.type != 'function'):
                 SemanticLogger.error(ast_node.lineno, "func `{}` used before declared".format(func_id))
                 return None, 'real'
                 # raise Exception("func `{}` used before declared")

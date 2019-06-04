@@ -16,23 +16,32 @@ class SemanticLogger(object):
 
     n_warn = 0
     n_error = 0
+    last_lineno = 1
 
     @staticmethod
     def info(lineno, message):
         if lineno is None:
             print(TGREEN + f'[INFO] ' + ENDC + message)
         else:
+            SemanticLogger.last_lineno = lineno
             print(TGREEN + f'[line {lineno} INFO] ' + ENDC + message)
 
     @staticmethod
     def warn(lineno, message):
+        if lineno is None:
+            lineno = SemanticLogger.last_lineno
         print(TYELLOW + f'[line {lineno} WARN] ' + ENDC + message)
         SemanticLogger.n_warn += 1
+        SemanticLogger.last_lineno = lineno
 
     @staticmethod
     def error(lineno, message):
+        if lineno is None:
+            lineno = SemanticLogger.last_lineno
         print(TRED + f'[line {lineno} ERROR] ' + ENDC + message)
         SemanticLogger.n_error += 1
+        SemanticLogger.last_lineno = lineno
+
 
     # def info(self, lineno, message):
     #     print(TGREEN + f'[{self.file_name} line {lineno} INFO]' + ENDC + message)

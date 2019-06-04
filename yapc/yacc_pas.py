@@ -1,7 +1,6 @@
 from ply import yacc, lex
-from AST import *
+from AST import Node
 from lex_pas import tokens
-import lex_pas
 
 from ErrorHandler import SemanticLogger
 import logging
@@ -66,10 +65,12 @@ def p_const_expr(p):
     """
     p[0] = Node('const_expr', p.lexer.lineno, p[1], p[3])
 
+
 #常量定义出错
 def p_const_expr_error(p):
     'const_expr :  error  SEMICON'
-    print("Syntax error in const expression.")
+    SemanticLogger.error(p[1].lineno,
+                f"Syntax error at token `{p[1].value}`in const expression.")
 
 
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
@@ -124,7 +125,8 @@ def p_type_definition(p):
 #type定义出错
 def p_type_definition_error(p):
     'type_definition :  ID  EQUAL  error  SEMICON'
-    print("Syntax error in type definition.")
+    SemanticLogger.error(p[3].lineno,
+                        f"Syntax error at token `{p[3].value}` in type definition.")
 
 
 def p_type_decl(p):
@@ -176,7 +178,8 @@ def p_record_type_decl(p):
 #record定义出错
 def p_record_type_decl_error(p):
     'record_type_decl :  kRECORD  error  kEND'
-    print("Syntax error in record definition.")
+    SemanticLogger.error(p[2].lineno,
+                        f"Syntax error at token `{p[2].value}` in record definition.")
 
 def p_field_decl_list(p):
     '''field_decl_list :  field_decl_list  field_decl  
@@ -194,7 +197,8 @@ def p_field_decl(p):
 #record的成员变量定义出错
 def p_field_decl_error(p):
     'field_decl :  error  SEMICON'
-    print("Syntax error in record member definition.")
+    SemanticLogger.error(p[1].lineno,
+                        f"Syntax error at token `{p[1].value}` in record member definition.")
 
 def p_name_list(p):
     '''name_list :  name_list  COMMA  ID  
@@ -230,7 +234,8 @@ def p_var_decl(p):
 #var定义出错
 def p_var_decl_error(p):
     'var_decl :  error  SEMICON'
-    print("Syntax error in var definition.")
+    SemanticLogger.error(p[1].lineno,
+                         f"Syntax error at token `{p[1].value}` in var definition.")
 
 
 # routine part
@@ -263,7 +268,8 @@ def p_function_decl_error(p):
     """
     function_decl : function_head  SEMICON  error  SEMICON
     """
-    print("Syntax error in function definition.")
+    SemanticLogger.error(p[3].lineno,
+                         f"Syntax error at token `{p[3].value}` in function definition.")
 
 def p_function_head(p):
     'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl'
@@ -277,7 +283,8 @@ def p_procedure_decl(p):
 #procedure体出错
 def p_procedure_decl_error(p):
     'procedure_decl :  procedure_head  SEMICON  error  SEMICON'
-    print("Syntax error in procedure definition.")
+    SemanticLogger.error(p[3].lineno,
+                         f"Syntax error at token `{p[3].value}` in procedure definition.")
 
 
 def p_procedure_head(p):
@@ -333,7 +340,8 @@ def p_compound_stmt(p):
 #普通语句出错
 def p_compound_stmt_error(p):
     'compound_stmt :  kBEGIN  error  kEND'
-    print("Syntax error in statement. Bad expression")
+    SemanticLogger.error(p[2].lineno,
+                         f"Syntax error at token `{p[2].value}` in statement. Bad expression")
 
 
 def p_stmt_list(p):
@@ -346,7 +354,8 @@ def p_stmt_list(p):
 #statement list出错
 def p_stmt_list_error(p):
     'stmt_list :  stmt_list  error  SEMICON'
-    print("Syntax error in statement list.")
+    SemanticLogger.error(p[2].lineno,
+                         f"Syntax error at token `{p[2].value}` in statement list.")
 
 
 def p_stmt(p):
@@ -608,14 +617,14 @@ def p_empty(p):
 
 # TODO: error handling should be more sophisticated
 # panic mode
-def p_error(p):
-    if p:
-        SemanticLogger.error(p.lineno,
-                             "syntax error at token {}".format(p.value))
-        # Just discard the token and tell the parser it's okay.
-        parser.errok()
-    else:
-        print("Syntax error at EOF")
+# def p_error(p):
+#     if p:
+#         SemanticLogger.error(p.lineno,
+#                              "syntax error at token {}".format(p.value))
+#         # Just discard the token and tell the parser it's okay.
+#         parser.errok()
+#     else:
+#         print("Syntax error at EOF")
 
 
 logging.basicConfig(
@@ -628,31 +637,9 @@ logging.basicConfig(
 
 log = logging.getLogger()
 
-parser = yacc.yacc(debug=True, debuglog=log)
+parser = yacc.yacc(debug=1, debuglog=log)
 
 
 if __name__ == '__main__':
-    pass
-    # logging.basicConfig(
-    #     level=logging.DEBUG,
-    #     filename="parselog.txt",
-    #     filemode="w",
-    #     format="%(filename)10s:%(lineno)4d:%(message)s"
-    # )
-    # log = logging.getLogger()
-    #parser = yacc.yacc(debug=True)
-    #test_file = 'test/test_error.pas'
-    #with open(test_file, 'r') as infile:
-    #    data = infile.read()
-    #parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
-    #graph(parse_tree_root, "graph")
-    # semantic_logger = SemanticLogger(path.basename(test_file))
-    # static_semantic_analyzer = SemanticAnalyzer(parse_tree_root, semantic_logger)
-    # static_semantic_analyzer.analyze()
-    # static_semantic_analyzer.symbol_table.to_graph("symb_tab.png")
-    # # code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
-    # # code_generator.gen_three_address_code()
-    #
-    # # _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
-    #
-    # graph(parse_tree_root, "new_graph")
+    raise NotImplementedError("{} is just a module".format(__file__))
+
