@@ -637,7 +637,7 @@ logging.basicConfig(
 
 log = logging.getLogger()
 
-parser = yacc.yacc(debug=1, debuglog=log)
+parser = yacc.yacc(debug=yacc.NullLogger(), debuglog=log)
 
 
 if __name__ == '__main__':

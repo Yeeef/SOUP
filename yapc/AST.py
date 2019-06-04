@@ -923,7 +923,7 @@ def parse_assign_stmt_node(ast_node, symb_tab_node):
     elif ast_node.type == 'assign_stmt-arr':  # ID LB expression RB ASSIGN expression
         id_, index_expression_node, expression_node = children
         ret_val = symb_tab_node.lookup(id_)
-        if ret_val is None:
+        if ret_val is None or ret_val.type != 'var':
             SemanticLogger.error(ast_node.lineno, 'var {} assigned before declared'.format(id_))
             return
             # raise Exception('var {} assigned before declared'.format(id_))
@@ -1166,7 +1166,7 @@ def parse_term_node(ast_node, symb_table):
         elif ast_node.type == 'term-INTDIV' or ast_node.type == 'term-MOD':
             # 返回值一定是整数，且要求两个数字都是整数
             if term_type != 'integer' or factor_type != 'integer':
-                SemanticLogger.error(left_term_child.lineno,
+                SemanticLogger.error(ast_node.lineno,
                                      "div and mod expect 2 integer, but got `{}` and `{}`"
                                      .format(term_type, factor_type))
                 return None, 'integer'
