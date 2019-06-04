@@ -66,11 +66,11 @@ def p_const_expr(p):
     p[0] = Node('const_expr', p.lexer.lineno, p[1], p[3])
 
 
-#常量定义出错
+# 常量定义出错
 def p_const_expr_error(p):
     'const_expr :  error  SEMICON'
     SemanticLogger.error(p[1].lineno,
-                f"Syntax error at token `{p[1].value}`in const expression.")
+                         f"Syntax error at token `{p[1].value}`in const expression.")
 
 
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
@@ -122,11 +122,11 @@ def p_type_definition(p):
     p[0] = Node("type_definition", p.lexer.lineno, p[1], p[3])
 
 
-#type定义出错
+# type定义出错
 def p_type_definition_error(p):
     'type_definition :  ID  EQUAL  error  SEMICON'
     SemanticLogger.error(p[3].lineno,
-                        f"Syntax error at token `{p[3].value}` in type definition.")
+                         f"Syntax error at token `{p[3].value}` in type definition.")
 
 
 def p_type_decl(p):
@@ -175,11 +175,13 @@ def p_record_type_decl(p):
     'record_type_decl :  kRECORD  field_decl_list  kEND'
     p[0] = Node("record", p.lexer.lineno, p[2])
 
-#record定义出错
+
+# record定义出错
 def p_record_type_decl_error(p):
     'record_type_decl :  kRECORD  error  kEND'
     SemanticLogger.error(p[2].lineno,
-                        f"Syntax error at token `{p[2].value}` in record definition.")
+                         f"Syntax error at token `{p[2].value}` in record definition.")
+
 
 def p_field_decl_list(p):
     '''field_decl_list :  field_decl_list  field_decl  
@@ -194,11 +196,13 @@ def p_field_decl(p):
     'field_decl :  name_list  COLON  type_decl  SEMICON'
     p[0] = Node("field_decl", p.lexer.lineno, p[1], p[3])
 
-#record的成员变量定义出错
+
+# record的成员变量定义出错
 def p_field_decl_error(p):
     'field_decl :  error  SEMICON'
     SemanticLogger.error(p[1].lineno,
-                        f"Syntax error at token `{p[1].value}` in record member definition.")
+                         f"Syntax error at token `{p[1].value}` in record member definition.")
+
 
 def p_name_list(p):
     '''name_list :  name_list  COMMA  ID  
@@ -231,7 +235,7 @@ def p_var_decl(p):
     p[0] = Node("var_decl", p.lexer.lineno, p[1], p[3])
 
 
-#var定义出错
+# var定义出错
 def p_var_decl_error(p):
     'var_decl :  error  SEMICON'
     SemanticLogger.error(p[1].lineno,
@@ -263,13 +267,14 @@ def p_function_decl(p):
     p[0] = Node("function_decl", p.lexer.lineno, p[1], p[3])
 
 
-#函数体出错
+# 函数体出错
 def p_function_decl_error(p):
     """
     function_decl : function_head  SEMICON  error  SEMICON
     """
     SemanticLogger.error(p[3].lineno,
                          f"Syntax error at token `{p[3].value}` in function definition.")
+
 
 def p_function_head(p):
     'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl'
@@ -280,7 +285,8 @@ def p_procedure_decl(p):
     'procedure_decl :  procedure_head  SEMICON  sub_routine  SEMICON'
     p[0] = Node("procedure_decl", p.lexer.lineno, p[1], p[3])
 
-#procedure体出错
+
+# procedure体出错
 def p_procedure_decl_error(p):
     'procedure_decl :  procedure_head  SEMICON  error  SEMICON'
     SemanticLogger.error(p[3].lineno,
@@ -355,7 +361,7 @@ def p_stmt_list(p):
         p[0] = Node("stmt_list", p.lexer.lineno, p[1], p[2])
 
 
-#statement list出错
+# statement list出错
 def p_stmt_list_error(p):
     'stmt_list :  stmt_list  error  SEMICON'
     SemanticLogger.error(p[2].lineno,
@@ -628,29 +634,26 @@ def p_empty(p):
 
 # TODO: error handling should be more sophisticated
 # panic mode
-# def p_error(p):
-#     if p:
-#         SemanticLogger.error(p.lineno,
-#                              "syntax error at token {}".format(p.value))
-#         # Just discard the token and tell the parser it's okay.
-#         parser.errok()
-#     else:
-#         print("Syntax error at EOF")
+#def p_error(p):
+#    if p:
+#        SemanticLogger.error(p.lineno,
+#                             "syntax error at token {}".format(p.value))
+        # Just discard the token and tell the parser it's okay.
+#        parser.errok()
+#    else:
+#        print("Syntax error at EOF")
 
 
 logging.basicConfig(
-        level=logging.DEBUG,
-        filename="parselog.txt",
-        filemode="w",
-        format="%(filename)10s:%(lineno)4d:%(message)s"
-    )
-
+    level=logging.DEBUG,
+    filename="parselog.txt",
+    filemode="w",
+    format="%(filename)10s:%(lineno)4d:%(message)s"
+)
 
 log = logging.getLogger()
 
 parser = yacc.yacc(debug=yacc.NullLogger(), debuglog=log)
 
-
 if __name__ == '__main__':
     raise NotImplementedError("{} is just a module".format(__file__))
-
