@@ -1,6 +1,6 @@
 from ply import yacc, lex
 from AST import Node
-from lex_pas import tokens
+from Lexer import tokens
 
 from ErrorHandler import SemanticLogger
 import logging

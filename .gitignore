@@ -7,8 +7,5 @@ ref_codes
 *.idea
 *graphs
 *parselog.txt
-<<<<<<< HEAD
 *Presentation.pptx
-=======
 *.out
->>>>>>> a64e985461e13675c483f01a2787f46475ddc61e
