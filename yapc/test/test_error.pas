@@ -1,9 +1,9 @@
 program test_1;
 const a = 2; b = 3.4; c = 'l';
 type
-    arr = array [0..50] of integer;
+    arr = array [050] of integer;
   	MailingListRecord = record
-    	FirstName: strig;
+    	FirstName: string;
     	LastName: string;
     	Address: string;
     	City: string;
@@ -25,9 +25,9 @@ begin
   gao:=7;
 end;
 begin
- i=10;
- a=fib(10);
- b:=123456
+ i:=10;
+ a:=fib(10);
+ b:=123456;
  writeln(b);
 
  aa[3]:=10; 

@@ -628,14 +628,14 @@ def p_empty(p):
 
 # TODO: error handling should be more sophisticated
 # panic mode
-# def p_error(p):
-#     if p:
-#         SemanticLogger.error(p.lineno,
-#                              "syntax error at token {}".format(p.value))
-#         # Just discard the token and tell the parser it's okay.
-#         parser.errok()
-#     else:
-#         print("Syntax error at EOF")
+#def p_error(p):
+#    if p:
+#        SemanticLogger.error(p.lineno,
+#                             "syntax error at token {}".format(p.value))
+        # Just discard the token and tell the parser it's okay.
+#        parser.errok()
+#    else:
+#        print("Syntax error at EOF")
 
 
 logging.basicConfig(

@@ -460,27 +460,71 @@ precedence = (
 )
 ~~~
 
-#### 2.2.4 错误处理
 
-我们采用的错误处理方式是根据 error 规则恢复和再同步，在语法规则中包含 error 标记，例如：
+
+###   2.3 错误处理 
+
+对于文法规则部分出现的错误，一般而言，最简单的处理方式就是在遇到错误的时候就抛出异常并终止。但我们希望它能报告错误并尽可能的恢复并继续分析。
+
+#### 2.3.1 panic mode
+
+一种处理方式是panic mode，该模式下，开始放弃剩余的标记，直到能够达到一个合适的恢复机会。我们一开始实现的panic mode如下，它会简单的抛弃错误的标记，并告知分析器错误被接受了。
 
 ~~~python
-def p_const_expr(p):
-    'const_expr : ID EQUAL const_value SEMICON'
-    p[0] = Node('const_expr', p.lexer.lineno, p[1], p[3])
-    
-#常量定义出错
-def p_const_expr_error(p):
-    'const_expr :  error  SEMICON'
-    SemanticLogger.error(p[1].lineno,
-                f"Syntax error at token `{p[1].value}`in const expression.")
+def p_error(p):
+    if p:
+        SemanticLogger.error(p.lineno,
+                             "syntax error at token {}".format(p.value))
+        # Just discard the token and tell the parser it's okay.
+        parser.errok()
+    else:
+        print("Syntax error at EOF")
 ~~~
 
-当常量i当以出错时，error 标记会匹配任意多个分号之前的标记（分号是`SEMI`指代的字符）。一旦找到分号，规则将被匹配，这样 error 标记就被归约了。
+#### 2.3.2 resynchronization
 
-我们针对不同的文法规则添加了类似的error标记，优化错误处理
+优化后采用的错误处理方式是根据 error 规则恢复和再同步，通过在语法规则中包含 error 标记来实现，例如：
+
+~~~python
+def p_type_definition(p):
+    '''type_definition :  ID  EQUAL  type_decl  SEMICON'''
+    p[0] = Node("type_definition", p.lexer.lineno, p[1], p[3])
+
+#type定义出错
+def p_type_definition_error(p):
+    'type_definition :  ID  EQUAL  error  SEMICON'
+    SemanticLogger.error(p[3].lineno,
+                        f"Syntax error at token `{p[3].value}` in type definition.")
+~~~
+
+当type中有内容出错时，error 标记会匹配任意多个分号之前的标记（分号是`SEMI`指代的字符）。一旦找到分号，规则将被匹配，这样 error 标记就被归约了。我们针对不同的文法规则添加了类似的error标记，优化错误处理。
+
+#### 2.3.3 错误处理实例
+
+通过下面这个例子可以看到我们的错误处理方式resynchronization的优势：
+
+~~~pascal
+type
+    arr = array [050] of integer;
+  	MailingListRecord = record
+    	FirstName: string;
+    	LastName: string;
+    	Address: string;
+~~~
+
+对于上面的内容，type中的arr定义出错，但后面的record定义完全正确。
+
+如果是panic mode处理模式，出现的结果是从出错位置一直到最后的程序都会被标记错误，最终无法建立分析树。因为程序始终无法找到合理的同步点，导致丢弃了大量的输入：
+
+![panicmode](imgs/panicmode.PNG)
 
 
+
+然而，当采用resynchronization错误恢复模式时，只要从出错位置开始匹配到下一个分号，我们就能将error规约并继续分析输入，语法树也将成功建立，唯一的不同只是少了出错的arr：
+
+![resyne](imgs/resyne.PNG)
+
+![resyn](imgs/resyn.PNG)
 
 
 
