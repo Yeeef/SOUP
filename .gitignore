@@ -7,3 +7,4 @@ ref_codes
 *.idea
 *graphs
 *parselog.txt
+*.out
