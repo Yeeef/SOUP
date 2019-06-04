@@ -1,5 +1,5 @@
 program Arithmetic;
-const a = 2; b = 3.4; c = 'l'; flag=true;
+const a = 2; flag=true;
 type
     int=integer;
     people=record
@@ -7,7 +7,7 @@ type
         sex: char;
     end;
     people_arr=array [1..3] of people;
-var x, y, z: integer; q:boolean; newton: people; peoples: people_arr;
+var x: boolean; q:boolean; newton: people; peoples: people_arr;
 begin
     q := true and true and true and not flag;
     x := (a + 13) div 5 mod 1;
