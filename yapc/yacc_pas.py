@@ -337,16 +337,20 @@ def p_compound_stmt(p):
     'compound_stmt :  kBEGIN  stmt_list  kEND'
     p[0] = p[2]
 
-#普通语句出错
-def p_compound_stmt_error(p):
-    'compound_stmt :  kBEGIN  error  kEND'
+
+def p_compound_stmt_error(p):  # 普通语句出错
+    """
+    compound_stmt :  kBEGIN  error  kEND
+    """
     SemanticLogger.error(p[2].lineno,
                          f"Syntax error at token `{p[2].value}` in statement. Bad expression")
 
 
 def p_stmt_list(p):
-    '''stmt_list :  stmt_list  stmt  SEMICON
-                    |  empty'''
+    """
+    stmt_list :  stmt_list  stmt  SEMICON
+              |  empty
+    """
     if len(p) == 4:
         p[0] = Node("stmt_list", p.lexer.lineno, p[1], p[2])
 

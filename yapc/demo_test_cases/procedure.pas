@@ -12,6 +12,5 @@ begin
 end;
 begin
 print(a, true, false);
-print(a, true, false, b, b * b, a div 2);
-{print(a, b, b * b, true, flag, not flag);}
+print(b, a, a * a, true, flag, not flag);
 end.
