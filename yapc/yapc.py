@@ -16,9 +16,10 @@ from ErrorHandler import SemanticLogger
 
 # test_file = 'test_yacc/simple.pas'
 test_file = 'demo_test_cases/assign_demo.pas'
+out_file = './yapc.out'
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('--input', help='input pascal file', default=test_file)
-arg_parser.add_argument('--output', help='output intermediate code path', default='./yapc.out')
+arg_parser.add_argument('--output', help='output intermediate code path', default=out_file)
 args = arg_parser.parse_args()
 start = time.clock()
 
@@ -41,7 +42,11 @@ if parse_tree_root:
         SemanticLogger.info(None, 'producing three address code')
         code_generator = CodeGenerator(parse_tree_root, static_semantic_analyzer.symbol_table)
         code_generator.gen_three_address_code()
-        _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
+        if args.output:
+            out_file = args.output
+            code_generator.write_file(out_file)
+        else:
+            _ = [print(quadruple) for quadruple in code_generator.quadruple_list]
         SemanticLogger.info(None, 'done')
 
 end = time.clock()

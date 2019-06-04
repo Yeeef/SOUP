@@ -69,6 +69,11 @@ class CodeGenerator(object):
         self._next_tmp_var = 0
         self._routine_stack = []
 
+    def write_file(self, file_path):
+        out = open(file_path, 'w')
+        out.writelines([str(quad) + '\n' for quad in self._quad_list])
+        out.close()
+
     @property
     def abstract_syntax_tree(self):
         return self._ast
@@ -134,7 +139,7 @@ class CodeGenerator(object):
                 children = root_node.children
                 if root_node.type == 'assign_stmt':
                     # ID ASSIGN expression
-                    if len(children) == 2:  # ID ASSIGN expression
+                    if len(children) == 2:
                         # maybe_expression_node, because it may have been a constant folding result
                         id_, maybe_expression_node = children
                         if not isinstance(maybe_expression_node, Node):
