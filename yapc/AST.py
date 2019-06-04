@@ -746,7 +746,7 @@ def parse_stmt_node(ast_node, symb_tab_node):
             expression_node, case_expr_list_node = ast_node.children
             const_fold_ret,  const_fold_type = parse_expression_node(expression_node, symb_tab_node)
             if const_fold_ret is not None:
-                ast_node._children = (bool(const_fold_ret), case_expr_list_node)
+                ast_node._children = (const_fold_ret, case_expr_list_node)
         elif ast_node.type == 'stmt_list':
             parse_stmt_list_node(ast_node, symb_tab_node)
         else:
