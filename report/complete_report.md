@@ -141,7 +141,7 @@ def t_eof(t):
 
 我们对pascal定义了一个语法子集，下面是主要的文法规则：
 
-#### 程序整体框架
+#### 2.1.1 程序整体框架
 
 ```
 program ： program_head  routine  DOT
@@ -165,7 +165,7 @@ begin
 end.
 ```
 
-#### 常量 const_part
+#### 2.1.2 常量 const_part
 
 ```
 const_part ： CONST  const_expr_list  |  ε
@@ -182,7 +182,7 @@ const
     maxn=10000;
 ```
 
-#### 类型 type_part
+#### 2.1.3 类型 type_part
 
 ```
 type_part ： TYPE type_decl_list  |  ε
@@ -206,7 +206,7 @@ type
 
 ```
 
-#### 变量 var_part
+#### 2.1.4 变量 var_part
 
 ```
 var_part ： VAR  var_decl_list  |  ε
@@ -224,7 +224,7 @@ var
 
 ```
 
-#### 函数和过程 routine_part
+#### 2.1.5 函数和过程 routine_part
 
 ```
 routine_part:  routine_part  function_decl  |  routine_part  procedure_decl
@@ -266,7 +266,7 @@ end;
 
 ```
 
-#### 语句
+#### 2.1.6 语句
 
 语句是一种执行一串操作但是没有返回值的语法元素。我们的语言中，语句包含这几类：条件语句，while语句，repeat语句，for语句，赋值语句，case语句，goto语句。
 
@@ -368,7 +368,7 @@ end;
 
 ```
 
-#### 表达式
+#### 2.1.7 表达式
 
 表达式list由一系列的表达式构成
 
@@ -416,6 +416,8 @@ SYS_FUNCT  LP  args_list  RP  |  const_value  |  LP  expression  RP
 
 默认情况下，yacc.py 依赖 lex.py 产生的标记，默认的分析方法是 LALR，在 yacc 中的第一条规则是起始语法规则（在我们的程序中是program规则）。一旦起始规则被分析器归约，而且再无其他输入，分析器终止，最后的值将返回（这个值将是起始规则的p[0]）。
 
+#### 2.2.1 语法树结点
+
 为了构建语法树，我们创建了一个通用的树节点结构：
 
 ```python
@@ -427,7 +429,7 @@ class Node(object):
 
 ```
 
-
+#### 2.2.2 文法实现
 
 每个语法规则被定义为一个python的方法，方法的文档字符串描述了相应的上下文无关文法，方法的语句实现了对应规则的语义行为。每个方法接受一个单独的 p 参数，p 是一个包含有当前匹配语法的符号的序列，p[i] 与语法符号一一对应。其中，p[i] 的值相当于词法分析模块中对 p.value 属性赋的值，对于非终结符的值，将在归约时由 p[0] 的赋值决定。如下，我们就建立了一个'program'的Node。
 
@@ -472,7 +474,7 @@ def p_term(p):
 
 ```
 
-
+#### 2.2.3 二义性
 
 如果在 yacc.py 中存在二义文法，会输出"移进归约冲突"或者"归约归约冲突"。在分析器无法确定是将下一个符号移进栈还是将当前栈中的符号归约时会产生移进归约冲突。为了解决二义文法，尤其是对表达式文法，yacc.py 允许为标记单独指定优先级和结合性。我们像下面这样增加一个 precedence 变量，这样的定义说明 ADD/SUBTRACT 标记具有相同的优先级和左结合性，MUL/DIV/kDIV/kMOD 具有相同的优先级和左结合性。在 precedence 声明中，标记的优先级从低到高。因此，这个声明表明 MUL/DIV/kDIV/kMOD（他们较晚加入 precedence）的优先级高于 ADD/SUBTRACT，这样就解决了算术运算中的二义性问题。
 
@@ -483,6 +485,27 @@ precedence = (
 )
 
 ```
+
+#### 2.2.4 错误处理
+
+我们采用的错误处理方式是根据 error 规则恢复和再同步，在语法规则中包含 error 标记，例如：
+
+```python
+def p_const_expr(p):
+    'const_expr : ID EQUAL const_value SEMICON'
+    p[0] = Node('const_expr', p.lexer.lineno, p[1], p[3])
+    
+#常量定义出错
+def p_const_expr_error(p):
+    'const_expr :  error  SEMICON'
+    SemanticLogger.error(p[1].lineno,
+                f"Syntax error at token `{p[1].value}`in const expression.")
+
+```
+
+当常量i当以出错时，error 标记会匹配任意多个分号之前的标记（分号是`SEMI`指代的字符）。一旦找到分号，规则将被匹配，这样 error 标记就被归约了。
+
+我们针对不同的文法规则添加了类似的error标记，优化错误处理
 
 
 
