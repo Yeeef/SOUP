@@ -2,7 +2,7 @@ program switch;
 var week: char;
 begin
    week := '7';
-   case ( week) of
+   case ('7') of
       '1' : writeln('M');
       '2' : writeln('T');
       '3' : writeln('W');

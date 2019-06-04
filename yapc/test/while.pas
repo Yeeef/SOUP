@@ -12,4 +12,16 @@ begin
 	  		z := z + y;
 	  	x := x + y;
 	end;
+
+	while true do
+	begin
+	    z := z + y;
+	    z := z + y;
+	end;
+
+	while false do
+	begin
+	    z := z - y;
+	    z := z - y;
+	end;
 end.

@@ -7,15 +7,16 @@ var
 		begin
 		A := 10; 
 		writeln(A) ;
+		ScopeInner;
 	end; 
 
 	function Summation(num : integer) : integer;
 	begin
-		if num = 1 then 
-			Summation := 1 
+		if num = 1 then
+			Summation := 1
 		else 
 			Summation := 2;
-	end; 
+	end;
 
 begin 
 	A := 20; 
