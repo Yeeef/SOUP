@@ -1,6 +1,7 @@
 from ply import yacc, lex
-from AST import Node
+from AST import *
 from lex_pas import tokens
+import lex_pas
 
 from ErrorHandler import SemanticLogger
 import logging
@@ -65,6 +66,11 @@ def p_const_expr(p):
     """
     p[0] = Node('const_expr', p.lexer.lineno, p[1], p[3])
 
+#常量定义出错
+def p_const_expr_error(p):
+    'const_expr :  error  SEMICON'
+    print("Syntax error in const expression.")
+
 
 # const_value : INTEGER    |    REAL    |    CHAR    |    STRING    |    SYS_CON
 def p_const_value_1(p):
@@ -115,6 +121,12 @@ def p_type_definition(p):
     p[0] = Node("type_definition", p.lexer.lineno, p[1], p[3])
 
 
+#type定义出错
+def p_type_definition_error(p):
+    'type_definition :  ID  EQUAL  error  SEMICON'
+    print("Syntax error in type definition.")
+
+
 def p_type_decl(p):
     '''type_decl :  simple_type_decl  
                     |  array_type_decl  
@@ -161,6 +173,10 @@ def p_record_type_decl(p):
     'record_type_decl :  kRECORD  field_decl_list  kEND'
     p[0] = Node("record", p.lexer.lineno, p[2])
 
+#record定义出错
+def p_record_type_decl_error(p):
+    'record_type_decl :  kRECORD  error  kEND'
+    print("Syntax error in record definition.")
 
 def p_field_decl_list(p):
     '''field_decl_list :  field_decl_list  field_decl  
@@ -175,6 +191,10 @@ def p_field_decl(p):
     'field_decl :  name_list  COLON  type_decl  SEMICON'
     p[0] = Node("field_decl", p.lexer.lineno, p[1], p[3])
 
+#record的成员变量定义出错
+def p_field_decl_error(p):
+    'field_decl :  error  SEMICON'
+    print("Syntax error in record member definition.")
 
 def p_name_list(p):
     '''name_list :  name_list  COMMA  ID  
@@ -207,6 +227,12 @@ def p_var_decl(p):
     p[0] = Node("var_decl", p.lexer.lineno, p[1], p[3])
 
 
+#var定义出错
+def p_var_decl_error(p):
+    'var_decl :  error  SEMICON'
+    print("Syntax error in var definition.")
+
+
 # routine part
 def p_routine_part(p):
     '''routine_part :  routine_part  function_decl  
@@ -232,6 +258,13 @@ def p_function_decl(p):
     p[0] = Node("function_decl", p.lexer.lineno, p[1], p[3])
 
 
+#函数体出错
+def p_function_decl_error(p):
+    """
+    function_decl : function_head  SEMICON  error  SEMICON
+    """
+    print("Syntax error in function definition.")
+
 def p_function_head(p):
     'function_head :  kFUNCTION  ID  parameters  COLON  simple_type_decl'
     p[0] = Node("function_head", p.lexer.lineno, p[2], p[3], p[5])
@@ -240,6 +273,11 @@ def p_function_head(p):
 def p_procedure_decl(p):
     'procedure_decl :  procedure_head  SEMICON  sub_routine  SEMICON'
     p[0] = Node("procedure_decl", p.lexer.lineno, p[1], p[3])
+
+#procedure体出错
+def p_procedure_decl_error(p):
+    'procedure_decl :  procedure_head  SEMICON  error  SEMICON'
+    print("Syntax error in procedure definition.")
 
 
 def p_procedure_head(p):
@@ -292,12 +330,23 @@ def p_compound_stmt(p):
     'compound_stmt :  kBEGIN  stmt_list  kEND'
     p[0] = p[2]
 
+#普通语句出错
+def p_compound_stmt_error(p):
+    'compound_stmt :  kBEGIN  error  kEND'
+    print("Syntax error in statement. Bad expression")
+
 
 def p_stmt_list(p):
     '''stmt_list :  stmt_list  stmt  SEMICON
                     |  empty'''
     if len(p) == 4:
         p[0] = Node("stmt_list", p.lexer.lineno, p[1], p[2])
+
+
+#statement list出错
+def p_stmt_list_error(p):
+    'stmt_list :  stmt_list  error  SEMICON'
+    print("Syntax error in statement list.")
 
 
 def p_stmt(p):
@@ -591,12 +640,12 @@ if __name__ == '__main__':
     #     format="%(filename)10s:%(lineno)4d:%(message)s"
     # )
     # log = logging.getLogger()
-    # parser = yacc.yacc(debug=True, debuglog=log)
-    # test_file = 'test_yacc/simple_arithmetic.pas'
-    # with open(test_file, 'r') as infile:
-    #     data = infile.read()
-    # parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
-    # graph(parse_tree_root, "graph")
+    #parser = yacc.yacc(debug=True)
+    #test_file = 'test/test_error.pas'
+    #with open(test_file, 'r') as infile:
+    #    data = infile.read()
+    #parse_tree_root = parser.parse(data, lexer=lex.lex(module=lex_pas, debug=0), debug=log)
+    #graph(parse_tree_root, "graph")
     # semantic_logger = SemanticLogger(path.basename(test_file))
     # static_semantic_analyzer = SemanticAnalyzer(parse_tree_root, semantic_logger)
     # static_semantic_analyzer.analyze()
