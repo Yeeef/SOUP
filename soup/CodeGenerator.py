@@ -118,9 +118,16 @@ class CodeGenerator(object):
             if root_node.type == 'routine':
                 # routine : routine_head routine_body
                 self._traverse_ast_gen_code(root_node.children[0])
+                enter_label = self.new_label
+                pos = len(self._quad_list)
                 self._traverse_ast_gen_code(root_node.children[1])
                 if len(self._routine_stack) > 0:
-                    if self._routine_stack[-1][1]:
+                    tail = self._quad_list[-1]
+                    if tail.op == 'call' and tail.target == self._routine_stack[-1][0]:
+                        self._quad_list.pop()
+                        self._quad_list.insert(pos, Quadruple(enter_label, None))
+                        self._add_new_quad('goto', enter_label)
+                    elif self._routine_stack[-1][1]:
                         self._add_new_quad('return', self._routine_stack[-1][0])
                     self._add_new_quad('end_define', self._routine_stack[-1][0])
                     self._routine_stack.pop()
@@ -197,6 +204,15 @@ class CodeGenerator(object):
                 if_expression, if_stmt, else_part = root_node.children
                 else_flag = False
                 condition_value = self.gen_quad_list_in_expression_node(if_expression)
+                if condition_value is True:
+                    self._traverse_ast_gen_code(if_stmt)
+                    return
+                elif condition_value is False:
+                    if isinstance(else_part, Node):
+                        self._traverse_ast_gen_code(else_part)
+                        return
+                    else:
+                        return
                 jump_if_label = self.new_label
                 jump_else_label = ""
                 self._add_new_quad('goto', jump_if_label, 'if_false', condition_value)
@@ -213,11 +229,15 @@ class CodeGenerator(object):
             elif root_node.type == 'while_stmt':
                 # while_stmt :  kWHILE  expression  kDO stmt
                 while_expression, while_stmt = root_node.children
-                enter_loop_label = self.new_label
-                self._add_new_quad(enter_loop_label, None)
+                pos = len(self._quad_list)
                 condition_value = self.gen_quad_list_in_expression_node(while_expression)
+                if condition_value is False:
+                    return
+                enter_loop_label = self.new_label
+                self._quad_list.insert(pos, Quadruple(enter_loop_label, None))
                 jump_loop_label = self.new_label
-                self._add_new_quad('goto', jump_loop_label, 'if_false', condition_value)
+                if condition_value is not True:
+                    self._add_new_quad('goto', jump_loop_label, 'if_false', condition_value)
                 self._traverse_ast_gen_code(while_stmt)
                 self._add_new_quad('goto', enter_loop_label)
                 self._add_new_quad(jump_loop_label, None)
@@ -229,8 +249,11 @@ class CodeGenerator(object):
                 self._add_new_quad(enter_loop_label, None)
                 self._traverse_ast_gen_code(stmt_list)
                 condition_value = self.gen_quad_list_in_expression_node(rep_expression)
+                if condition_value is False:
+                    return
                 jump_loop_label = self.new_label
-                self._add_new_quad('goto', jump_loop_label, 'if_false', condition_value)
+                if condition_value is not True:
+                    self._add_new_quad('goto', jump_loop_label, 'if_false', condition_value)
                 self._add_new_quad('goto', enter_loop_label)
                 self._add_new_quad(jump_loop_label, None)
 
@@ -239,10 +262,15 @@ class CodeGenerator(object):
                 # TODO: add ID type checking in for loop in semantic
                 id_, start_expression, op, stop_expression, for_stmt = root_node.children
                 start_val = self.gen_quad_list_in_expression_node(start_expression)
+                stop_val = self.gen_quad_list_in_expression_node(stop_expression)
+                if not isinstance(start_val, str) and not isinstance(stop_val, str):
+                    if op == 'to' and start_val > stop_val:
+                        return
+                    elif op == 'downto' and start_val < stop_val:
+                        return
                 self._add_new_quad(None, id_, start_val)
                 stop_tmp_var = self.new_tmp_var
                 tmp_var = self.new_tmp_var
-                stop_val = self.gen_quad_list_in_expression_node(stop_expression)
                 self._add_new_quad(None, stop_tmp_var, stop_val)
                 judge_label = self.new_label
                 self._add_new_quad(judge_label, None)
@@ -271,26 +299,38 @@ class CodeGenerator(object):
                 # case_expr :  const_value  COLON  stmt  SEMICON
                 #           |  ID  COLON  stmt  SEMICON
                 #           |  kELSE  COLON  stmt  SEMICON
+                const_flag = False
                 ret_val = self.gen_quad_list_in_expression_node(case_expression)
+                if not isinstance(ret_val, str) or len(ret_val) == 1:
+                    const_flag = True
                 exit_label = self.new_label
                 tmp_var = self.new_tmp_var
+                next_entry_label = ""
                 for case_expr in case_list:
-                    if case_list[-1] == case_expr:
-                        next_entry_label = exit_label
-                    else:
-                        next_entry_label = self.new_label
                     judge_val, entry_stmt = case_expr.children
                     if isinstance(judge_val, Node):
                         judge_val = judge_val.children[0]
+                    if const_flag and type(ret_val) == type(judge_val):
+                        if ret_val == judge_val:
+                            if next_entry_label != "":
+                                self._add_new_quad(next_entry_label, None)
+                            self._traverse_ast_gen_code(entry_stmt)
+                            return
+                        else:
+                            continue
                     if judge_val == 'else':
                         self._traverse_ast_gen_code(entry_stmt)
                         self._add_new_quad(exit_label, None)
                         return
+                    if next_entry_label == "":
+                        next_entry_label = self.new_label
+                    else:
+                        self._add_new_quad(next_entry_label, None)
+                        next_entry_label = self.new_label
                     self._add_new_quad('==', tmp_var, ret_val, judge_val)
                     self._add_new_quad('goto', next_entry_label, 'if_false', tmp_var)
                     self._traverse_ast_gen_code(entry_stmt)
-                    self._add_new_quad('goto', exit_label)
-                    self._add_new_quad(next_entry_label, None)
+                self._add_new_quad(exit_label, None)
 
             # TODO: not support goto-stmt
             else:
