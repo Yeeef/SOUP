@@ -31,3 +31,9 @@ python test_script.py --test_dir test
 ```
 
 我们报告中涉及的所有测试文件均在 `test` 文件夹下
+
+## contributors
+
+- [Yeeef](https://github.com/Yeeef)
+- [ahaWDY](https://github.com/ahaWDY)
+- [MrNobodyCali](https://github.com/MrNobodyCali)
