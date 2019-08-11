@@ -1,57 +1,33 @@
 # README
 
-zju compiler project, yet another pascal compiler
+> SOUP: Simple, Ordinary, Ugly Pascal compiler
 
-## requirments
+## folder organization
 
-- 用 lex 写出一个 tiger 语言或者类 C 或者类 PASCAL 某个语言的词法分析器
-- 用 YACC 的 分析方法完成语法分析，并生成语法树和中间代码
-- 如果生成目标代码, 可加分
+- soup
+- notes:
+	- pascal grammar: some useful sources and notes on pascal grammar
+	- ply: some demo codes and notes on [ply](http://www.dabeaz.com/ply/ply.html)
+	- theory notes: some necessary theories
 
-## what we will do
+## usage
 
-### overview
+进入 `soup` 文件夹后，可以通过如下语句运行 SOUP, 其中
 
-类 pascal 语言的 compiler, 只做到中间代码这一部分（ *.asm )
+- `input` 参数提供 pascal 文件路径
+- `output` 参数（可选）提供三地址码输出路径
+- `visualize` 参数（可选）提供可视化图片输出路径，将在该路径下输出 Parser 输出的 abstract syntax tree `original_ast.png`，经过 Semantic 缩减后的 abstract syntax tree `final_ast.png`，以及 SymbolTable 的可视化图片 `symb_tab.png`, 在 *visualization* 文件夹下有三种图片示例；**需要提前安装 pydot 库**
 
-lex -> parse -> semantic analyze -> code generation
+```
+python soup.py --input input_file [--output output_file] [--visualize visualize_output_dir]
+```
 
-我们要实现的 pascal 语法子集见 `pascal_grammar/pascal 语法子集.doc`
+## test
 
-### methods 
+提供 `test_script.py` 进行批量测试，三段码文件将在 `test_dir` 指定的目录下生成：
 
-- [ply: python lex and yacc](https://github.com/dabeaz/ply)
-- [ply tutorial, 写的非常好](http://www.dabeaz.com/ply/ply.html)
+```
+python test_script.py --test_dir test
+```
 
-简单的 ply tutorial, ply demo 见 `ply_notes`
-
-### refs
-
-- [pascal compiler written in ply 🌟 * 5](https://github.com/alcides/pascal-in-python)
-- [another pascal compiler 更加靠谱 🌟](https://github.com/NewtonPascalCompiler/NewtonPascalCompiler) 完整 pascal 语言的一个 compiler, 最后生成 *.asm 文件
-- [pascal 语言 tutorial 🌟](http://www.kwongtai.edu.mo/download/resource/computer/pascal/Pascal.pdf)
-- [ply: python lex and yacc 🌟](https://github.com/dabeaz/ply)
-- [miniscript 利用 ply](https://github.com/yao-zou/MiniScript)
-
-## Q&A
-
-- [x] 什么是编译器生成的中间代码？
-  - [中间代码与语义分析](https://blog.csdn.net/yongchaocsdn/article/details/79056504)
-  - [x] 我们的项目里转换成 *.asm 可以吗？
-    - 可以
-- [x] 我们做完 syntax analysis, 生成的是 parse tree 而非 syntax tree?
-  - no. 我们构造的就是 abstract syntax tree
-- [x] 什么时候要构建一个节点，什么时候又不需要？这个必须从书中获得答案
-  - 其实不用，这件事有点像艺术，但是并没有那么艺术
-- [x] 是否需要区分 NAME 和 ID?
-	- 不需要，在 `pascal 语法子集.doc` 中 ID 包括了所有的 identifier + reserved word, NAME 实际上是 identifier
-	- 在我们的 lex 中，ID 就是 identifier, reserved word 有他们自己的 type
-- [x] 与 `Pascal.pdf` 中讲的不同，`pascal 语法子集.doc` 不需要一个特别的声明部分 （对于 function, procedure) 而言，我觉得这很合理；
-	- 想错了，routine 中就包含了这个声明部分
-- [ ] 在 `pascal 语法子集.doc` 中 subroutine 和 routine 语法重复，可以直接写成 `subroutine: routine` 吗？
-- [x] else 的最近匹配规则是怎么实现的来着？
-  - parse 直接实现好了
-- [ ] 突然觉得 parse tree 需要构建的纯粹一点，能建节点的都尽量建
-- [ ] 如何更加有效的利用 ply 的 debug 机制
-- [x] 需要注意的一个点，token 读进去的 char 实际上是 `'l'`, 我们在做运算的时候，要用的是 `l`
-    - 修改了 lex, 解决
+我们报告中涉及的所有测试文件均在 `test` 文件夹下
